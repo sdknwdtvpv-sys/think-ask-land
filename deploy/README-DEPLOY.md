@@ -85,5 +85,6 @@ git checkout . 2>/dev/null || true   # 若已用 git 管理
 | 404 字体/字库 | 确认 `fonts/`、`data/` 已上传（脚本默认包含） |
 | 连接超时 | 腾讯云安全组需放行 **80/443**（当前已放行 80、443、22；8080 等未放行） |
 | 想换端口 | nginx 改 `listen 8080;` 并安全组放行 8080；本项目另有 `nginx-hanzi-kids.conf` 通用模板 |
+| **网站目录出现 `.git`**（可被公网读取） | 接入 git 后若部署脚本未排除，`.git` 会被同步到网站根目录（体积从 1.1M 涨到 5M+，且 `https://域名/.git/config` 可读）。排查：`ssh 服务器 'ls -a /var/www/hanzi-kids \| grep git'`；处置：删掉远端 `.git`，并确认 `deploy.sh` 有 `--exclude '.git/'`、中转目录已清空。当前脚本已内置三重防护与部署后自检 |
 | ssh 报 `invalid quotes` | 工作区路径含撇号：用 `deploy-tencent.sh`（内部已复制密钥到 `/tmp`）或手动 `-i /tmp/hzdeploy/id_ed25519` |
 
