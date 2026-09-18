@@ -31,11 +31,12 @@ for o in "${SSH_OPTS[@]}"; do SSH_CMD="$SSH_CMD '$o'"; done
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 echo "▶ 本地目录: $SRC"
 echo "▶ 目标: $DEST:$REMOTE_DIR (端口 $PORT)"
-echo "▶ 排除: .build/ deploy/ node_modules/ .npmcache/ .DS_Store"
+echo "▶ 排除: .build/ deploy/ node_modules/ .npmcache/ .git/ .DS_Store"
 
 RSYNC_ARGS=(-avz --delete
   --exclude '.build/' --exclude 'deploy/' --exclude 'node_modules/'
   --exclude '.npmcache/' --exclude '.DS_Store' --exclude '*.log'
+  --exclude '.git/' --exclude '.gitignore' --exclude '*.swp'
   -e "$SSH_CMD")
 [ -n "${DRY:-}" ] && RSYNC_ARGS+=(--dry-run)
 

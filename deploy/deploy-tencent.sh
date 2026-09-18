@@ -24,7 +24,8 @@ touch "$KEYDIR/known_hosts"
 
 SSH="ssh -i $KEYDIR/id_ed25519 -o UserKnownHostsFile=$KEYDIR/known_hosts -o StrictHostKeyChecking=accept-new -o BatchMode=yes"
 
-# 2) 同步到服务器临时目录
+# 2) 同步到服务器临时目录(先清空中转目录,避免旧残留被二次带上)
+$SSH "$HOST" "rm -rf '$STAGE'"
 cd "$(dirname "$0")/.."
 KEY="$KEYDIR/id_ed25519" KNOWN_HOSTS="$KEYDIR/known_hosts" \
   ./deploy/deploy.sh "$HOST" "$STAGE" 22
@@ -32,7 +33,8 @@ KEY="$KEYDIR/id_ed25519" KNOWN_HOSTS="$KEYDIR/known_hosts" \
 # 3) 安装到网站目录(sudo)
 $SSH "$HOST" "set -e
 sudo mkdir -p '$WEBROOT'
-if command -v rsync >/dev/null; then sudo rsync -a --delete '$STAGE/' '$WEBROOT/'; else sudo cp -a '$STAGE/.' '$WEBROOT/'; fi
+if command -v rsync >/dev/null; then sudo rsync -a --delete --exclude '.git/' --exclude '.gitignore' '$STAGE/' '$WEBROOT/'; else sudo cp -a '$STAGE/.' '$WEBROOT/'; fi
+sudo rm -rf '$WEBROOT/.git' '$WEBROOT/.gitignore'   # 兜底:确保版本库与忽略文件绝不进网站目录
 sudo chown -R root:root '$WEBROOT'
 sudo find '$WEBROOT' -type d -exec chmod 755 {} \;
 sudo find '$WEBROOT' -type f -exec chmod 644 {} \;
@@ -46,5 +48,12 @@ fi
 
 IP="${HOST#*@}"
 echo
+# 5) 部署后自检:版本库绝不能出现在网站目录
+if $SSH "$HOST" "test -e '$WEBROOT/.git'"; then
+  echo "❌ 部署自检失败:网站目录出现 .git,请立即排查(可能被公网访问到)"
+  exit 1
+fi
+echo "✅ 部署自检通过:网站目录无 .git / .gitignore"
+
 echo "🌐 访问地址: https://$DOMAIN/"
 echo "   本地验证(绕过 DNS 缓存): curl -s -o /dev/null -w '%{http_code}\\n' --resolve $DOMAIN:80:$IP http://$DOMAIN/"
