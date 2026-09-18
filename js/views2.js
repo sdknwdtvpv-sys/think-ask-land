@@ -590,6 +590,7 @@
         }
         html += "</div>";
 
+        var VER = (document.querySelector('meta[name="app-version"]') || {}).content || "dev";
         html +=
           '<div class="panel"><h4>' + Icons.svg("refresh") + '复习机制说明</h4><p class="parent-note">本应用采用简化版<b>艾宾浩斯间隔重复</b>:孩子标记"我会了"后,字会在 10 分钟后首次回到复习队列;每答对一次,下次复习间隔加倍延长(10分钟 → 1天 → 2天 → 4天 → 7天);答错则重新开始。连续答对 4 次(box≥4)即视为进入长期记忆。所有数据仅保存在本设备浏览器中。</p></div>' +
           '<div class="panel"><h4>' + Icons.svg("sparkle") + '显示设置</h4>' +
@@ -597,6 +598,7 @@
         '</div>' +
         '<div class="panel danger-zone"><h4>' + Icons.svg("lock") + '数据管理</h4>' +
           '<button class="btn btn-danger" id="btn-reset">清空全部学习记录</button></div>' +
+          '<p class="parent-note" style="text-align:center;margin-top:2px">思问岛 v' + VER + ' · 数据保存在本机浏览器</p>' +
         "</div>";
         v.innerHTML = html;
 
