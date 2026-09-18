@@ -92,7 +92,6 @@ printf "  · 线上标题: %s\n" "${TITLE:-（取不到）}"
 MISMATCH=0; CHECKED=0
 for f in index.html manifest.json js/app.js js/views2.js css/v2.css css/style2.css data/chars-1.js data/chars-5.js fonts/kuaile-subset.woff2; do
   [ -f "$f" ] || continue
-  BEFORE="$(git show "HEAD:$f" 2>/dev/null | shasum -a 256 | cut -c1-16)"
   LOCAL="$(shasum -a 256 "$f" | cut -c1-16)"
   REMOTE="$(curl -s --max-time 20 --resolve "$DOMAIN:443:$IP" "https://$DOMAIN/$f" | shasum -a 256 | cut -c1-16)"
   CHECKED=$((CHECKED+1))
