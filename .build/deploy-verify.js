@@ -18,6 +18,10 @@ function check(name, cond, extra) {
       "--no-sandbox",
       "--user-data-dir=" + __dirname + "/.pptr-remote",
       "--host-resolver-rules=MAP " + HOST + " " + IP,
+      // 关闭 Chrome 的加密 DNS(DoH):它不走 --host-resolver-rules,且在国内网络常被阻断,
+      // 会导致 ERR_CONNECTION_CLOSED 之类的假故障;配合上面的解析规则可稳定复现本地 DNS 未刷新的场景
+      "--disable-features=DnsOverHttps,AsyncDns",
+      "--dns-over-https-mode=off",
     ],
   });
   const page = await browser.newPage();
