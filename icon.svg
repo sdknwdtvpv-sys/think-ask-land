@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- 思问岛 · 应用图标：天空 + 小岛 + 问号（问 = 好奇，岛 = 探索） -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8ec9f0"/>
+      <stop offset="1" stop-color="#d9f0ff"/>
+    </linearGradient>
+    <linearGradient id="isle" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8ceccb"/>
+      <stop offset="1" stop-color="#43c99b"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="128" height="128" rx="30" fill="url(#sky)"/>
+
+  <!-- 太阳 -->
+  <circle cx="99" cy="27" r="11" fill="#ffd166"/>
+
+  <!-- 小岛 -->
+  <path d="M24 96c10-17 70-17 80 0z" fill="url(#isle)"/>
+  <!-- 水面 -->
+  <path d="M16 104h96" stroke="#4aa8f0" stroke-opacity=".45" stroke-width="5" stroke-linecap="round"/>
+  <path d="M34 112h18M74 112h20" stroke="#4aa8f0" stroke-opacity=".28" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- 问号 -->
+  <path d="M51 43a13 13 0 1 1 13 13v8" fill="none" stroke="#ff7a3d" stroke-width="9"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="64" cy="77" r="6" fill="#ff7a3d"/>
+</svg>

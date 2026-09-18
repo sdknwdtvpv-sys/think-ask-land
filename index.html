@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>思问岛 · 幼儿识字启蒙</title>
+<meta name="description" content="思问岛 · 专为 3-6 岁小朋友设计的幼儿识字 H5 应用:字卡学习、笔顺描红、趣味练习、间隔复习与奖励系统。陪着孩子,一起把问题变成答案。">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="思问岛">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#8ec9f0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<script>/* 启动即应用减少动效偏好,避免动画闪烁 */try{if(localStorage.getItem("hanziKids.reduceMotion")==="1")document.documentElement.className+=" reduce-motion";}catch(e){}</script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style2.css">
+<link rel="stylesheet" href="css/v2.css">
+</head>
+<body>
+<div id="scene" aria-hidden="true">
+  <div class="sc-sun"></div>
+  <div class="sc-cloud c1"></div>
+  <div class="sc-cloud c2"></div>
+  <div class="sc-cloud c3"></div>
+  <div class="sc-hill h1"></div>
+  <div class="sc-hill h2"></div>
+  <div class="sc-hill h3"></div>
+</div>
+<div id="app">
+  <header id="topbar">
+    <button id="btn-back" class="icon-btn" aria-label="返回">‹</button>
+    <div id="page-title">思问岛</div>
+    <div id="star-pill" class="star-pill"><span class="star-icon">⭐</span><span id="star-count">0</span></div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<canvas id="confetti"></canvas>
+<div id="fx-layer"></div>
+<div id="toast" class="toast"></div>
+<div id="modal-root"></div>
+
+<script src="vendor/hanzi-writer.min.js"></script>
+<script src="data/chars-1.js"></script>
+<script src="data/chars-2.js"></script>
+<script src="data/chars-3.js"></script>
+<script src="data/chars-4.js"></script>
+<script src="data/chars-5.js"></script>
+<script src="data/chars.js"></script>
+<script src="data/strokes.js"></script>
+<script src="js/speech.js"></script>
+<script src="js/store.js"></script>
+<script src="js/mascot.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/writer.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/games.js"></script>
+<script src="js/app.js"></script>
+<script src="js/views2.js"></script>
+</body>
+</html>

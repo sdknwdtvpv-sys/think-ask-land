@@ -1,0 +1,14 @@
+# ===== 开发缓存与工具产物（体积大，无需版本化）=====
+.build/node_modules/
+.build/.npmcache/
+.build/.pptr-cache/
+.build/.pptr-*/
+.build/backup-p0/
+.build/*.png
+.build/*.log
+.build/*.out
+
+# ===== 系统与编辑器 =====
+.DS_Store
+*.swp
+*.log

@@ -1,0 +1,13 @@
+{
+  "name": "思问岛 · 幼儿识字启蒙",
+  "short_name": "思问岛",
+  "description": "思问岛 · 陪 3-6 岁孩子把问题变成答案:字卡学习、笔顺描红、趣味练习、间隔复习与奖励。",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#d9f0ff",
+  "theme_color": "#8ec9f0",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
