@@ -36,7 +36,10 @@ echo "   密钥: $KEY  ← 由 $KEY_SRC 复制"
 
 # 3) 测试连接
 echo "▶ 测试 GitHub 连接..."
-if ssh -i "$KEY" -o UserKnownHostsFile="$KNOWN" -o StrictHostKeyChecking=accept-new -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+# 注意:ssh -T 成功认证时仍返回非零退出码,配合 set -o pipefail 会误判,
+# 因此先取值再判断(|| true 吞掉 ssh 的预期非零退出码)
+AUTH_OUT="$(ssh -i "$KEY" -o UserKnownHostsFile="$KNOWN" -o StrictHostKeyChecking=accept-new -T git@github.com 2>&1 || true)"
+if printf '%s' "$AUTH_OUT" | grep -q "successfully authenticated"; then
   echo "✅ SSH 认证成功"
 else
   echo "⚠️ 尚未认证成功：请确认公钥已添加到 GitHub（Settings → SSH and GPG keys）"
