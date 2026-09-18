@@ -16,7 +16,7 @@ KEY_SRC="$REPO/../.deploy/github_ed25519"     # 私钥的永久位置（在项�
 KEY_DIR=/tmp/hzdeploy
 KEY="$KEY_DIR/github_ed25519"
 KNOWN="$KEY_DIR/gh_known_hosts"
-REMOTE="${GITHUB_REMOTE:-git@github.com:sdknwdtvpv-sys/siwendao.git}"
+REMOTE="${GITHUB_REMOTE:-git@github.com:sdknwdtvpv-sys/think-ask-land.git}"
 
 # 1) 准备干净路径的私钥
 mkdir -p "$KEY_DIR" && chmod 700 "$KEY_DIR"
