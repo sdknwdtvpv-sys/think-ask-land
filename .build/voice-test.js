@@ -94,12 +94,18 @@ function check(name, cond, extra) {
 
   // ---- 5. 发音参数合理(不再有 0.55 超慢速 / 1.15 电子音高) ----
   const prosody = await page.evaluate(async () => {
+    /* 本项验证的是"浏览器 TTS 的发音参数是否自然"。
+       v1.1.0 起预置音频优先,有音频时不会走 TTS —— 这里临时让预置音频全部未命中,
+       以强制走 TTS 分支,才能真正验证 TTS 参数。 */
+    if (window.AudioPack) window.__apOrig = window.AudioPack.play;
+    if (window.AudioPack) window.AudioPack.play = function () { return false; };
     window.__p = [];
     const orig = window.speechSynthesis.speak.bind(window.speechSynthesis);
     window.speechSynthesis.speak = function (u) { window.__p.push({ rate: u.rate, pitch: u.pitch, lang: u.lang }); };
     location.hash = "#/card?g=0&i=0";
     await new Promise(r => setTimeout(r, 1200)); // 字卡自动朗读
     window.speechSynthesis.speak = orig;
+    if (window.__apOrig) window.AudioPack.play = window.__apOrig;
     return window.__p;
   });
   const bad = prosody.filter(p => p.rate < 0.6 || p.pitch > 1.1);

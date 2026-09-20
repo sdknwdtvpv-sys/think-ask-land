@@ -18,6 +18,13 @@
   "use strict";
 
   var CONFIG_URL = "audio/config.json";
+  /* 资源版本戳:与 index.html 的 app-version 一致,避免缓存导致读到旧配置/旧索引
+     (mp3 文件名本身带内容哈希,所以音频文件不需要版本参数) */
+  function withVersion(url) {
+    var m = document.querySelector('meta[name="app-version"]');
+    var v = (m && m.content) || "0";
+    return url + (url.indexOf("?") > -1 ? "&" : "?") + "v=" + encodeURIComponent(v);
+  }
   var IDLE = 0, LOADING = 1, OK = 2, OFF = -1;
   var state = IDLE, config = null, activeVoice = "", index = null;
   var explicitVoice = false;   // 是否被显式指定过音色(家长选择 / 调用方 setVoice)
@@ -46,31 +53,38 @@
     var v = config && config.voices && config.voices[key];
     return (v && v.dir) || key;
   }
-  function indexUrl(key) { return "audio/" + dirOf(key) + "/index.json"; }
+  function indexUrl(key) { return withVersion("audio/" + dirOf(key) + "/index.json"); }
 
+  var inflight = {};                 // 在途请求去重:同一音色并发只请求一次
   function loadVoice(key) {
-    return fetchJson(indexUrl(key)).then(function (j) {
+    if (inflight[key]) return inflight[key];
+    inflight[key] = fetchJson(indexUrl(key)).then(function (j) {
       cache[key] = (j && typeof j === "object") ? j : {};
       return cache[key];
-    });
+    }).catch(function () {
+      cache[key] = null;      /* 标记为不可用:后续不再重试,调用方自动回退 TTS */
+      return null;
+    }).then(function (r) { delete inflight[key]; return r; });
   }
 
   function load() {
     if (state !== IDLE) return;
     state = LOADING;
     try {
-      fetchJson(CONFIG_URL).then(function (cfg) {
+      fetchJson(withVersion(CONFIG_URL)).then(function (cfg) {
         if (!cfg || !cfg.voices || !cfg.default || !cfg.voices[cfg.default]) throw new Error("config 无效");
         config = cfg;
         return loadVoice(cfg.default).then(function (idx) {
           activeVoice = cfg.default;
           index = idx;
           state = OK;
-          /* 预取角色音色,这样接 IP 后第一次点读就能命中 */
+          /* 预取角色音色,这样接 IP 后第一次点读就能命中
+             注意:这是 fire-and-forget,必须接住失败 —— 否则某个音色目录缺失时
+             会产生未捕获的 Promise rejection(在 jsdom / 严格环境下会直接报错) */
           var roles = cfg.roles || {};
           Object.keys(roles).forEach(function (r) {
             var k = roles[r];
-            if (k && !cache[k]) loadVoice(k);
+            if (k && cache[k] === undefined) loadVoice(k);   // loadVoice 内部已做在途去重
           });
         });
       }).catch(function () { config = null; index = null; state = OFF; });

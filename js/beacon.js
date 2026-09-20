@@ -87,7 +87,11 @@
       "&s=" + encodeURIComponent(sid());
     try {
       if (navigator.sendBeacon) { navigator.sendBeacon(url); return true; }
-      if (window.fetch) { fetch(url, { keepalive: true, mode: "no-cors" }); return true; }
+      if (window.fetch) {
+        /* 必须接住失败:埋点端点未部署/无网/jsdom 环境下,未处理的 rejection 会污染错误上报 */
+        fetch(url, { keepalive: true, mode: "no-cors" }).catch(function () {});
+        return true;
+      }
     } catch (e) { /* 埋点失败绝不影响使用 */ }
     return false;
   }

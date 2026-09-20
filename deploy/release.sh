@@ -41,6 +41,10 @@ echo
 # ---------- 1. 提交（可选） ----------
 if [ "$DEPLOY_ONLY" = "0" ]; then
   echo "▶ [1/5] 提交到本地仓库"
+  # 给静态资源打版本戳(与 app-version 一致),避免发版后用户拿到旧 JS/字库
+  if [ -f .build/stamp-assets.js ] && command -v node >/dev/null 2>&1; then
+    node .build/stamp-assets.js | sed 's/^/  /'
+  fi
   if [ -z "$(git status --porcelain)" ]; then
     echo "  · 无文件改动，跳过提交"
   else
