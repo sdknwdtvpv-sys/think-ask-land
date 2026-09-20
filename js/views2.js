@@ -358,7 +358,7 @@
           var hm = view.querySelector(".hud-count .mascot");
           if (hm) hm.outerHTML = Mascot.render("happy", 26);
           if (window.SFX) SFX.flip();
-          App.after(400, function () { window.Speech.speak(ch.c + "," + ch.w[0], 0.8); });
+          App.after(400, function () { window.Speech.speakSeq([ch.c, ch.w[0]], 0.8); });
         });
         view.querySelector("#btn-forgot").addEventListener("click", function () { answer(false); });
         view.querySelector("#btn-knew").addEventListener("click", function () { answer(true); });
@@ -379,7 +379,7 @@
           } else {
             if (window.SFX) SFX.wrong();
             window.UI.toast("没关系,多看几遍就记住啦 💪");
-            window.Speech.speak(ch.c + "," + ch.w[0] + "," + ch.s, 0.8);
+            window.Speech.speakSeq([ch.c, ch.w[0], ch.s], 0.8);
           }
           App.after(ok ? 900 : 1600, function () { idx++; renderCard(); });
         }

@@ -33,6 +33,15 @@
 - 补齐 **`think`**（歪头 + 问号气泡）与 **`sleep`**（闭眼 + Zzz）：复习回想与低分结算用 think，深夜首页用 sleep
 - 至此 README 声明的 5 种情绪（idle / happy / cheer / think / sleep）全部可用
 
+### 新增 · 预置朗读音频（离线优先）
+- 新增 `js/audio.js`：按文本查 `audio/index.json`，命中就播本地 mp3；未命中或播放失败自动回退浏览器 TTS；索引不存在时全程静默，行为与从前一致
+- 新增 `.build/gen-audio.py`：一次性生成 316 单字 + 632 组词 + 316 例句；支持 edge-tts（试听用）与腾讯云 TTS（正式用，支持拼音音素锁多音字）；`--trim` 去首尾静音
+- 实测全量 1264 条约 **5.8MB**（去静音后）、按需加载；单字「一」仅 1.8KB / 0.26s
+- 多音字：6 个字（只/长/兴/假/发/谁）的单字读音与词典默认读音不一致，前四个以同音字替代合成，发/谁 暂由 TTS 兜底
+- `Speech` 新增 `speakSeq()`，复习页"字→词→句"改为逐条连读，保证每条都能命中预置音频
+- 修复集成时引入的回归：`stop()` 之后已排队的 TTS 延迟发声仍会念出来
+- 新增 `.build/audio-test.js`（10 项）
+
 ### 清理
 - 移除死代码：`celebrateUnlocks`、`Games.makeQuestion` 导出、`Speech.hasZh`、`Mascot.NAME`、`Writing` 的 `raw` / `loop` / `show`、未使用的 `left` / `clock` 两个图标
 

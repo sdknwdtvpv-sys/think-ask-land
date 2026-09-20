@@ -12,3 +12,5 @@
 .DS_Store
 *.swp
 *.log
+# ===== 预置朗读音频(由 .build/gen-audio.py 生成,体积大;是否入库见 README) =====
+audio/

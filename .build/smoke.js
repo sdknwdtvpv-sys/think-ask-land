@@ -7,6 +7,7 @@ const BENIGN = [
   "Not implemented: Window's scrollTo",
   "Not implemented: window.scrollTo",
   "Not implemented: navigation",
+  "Not implemented: HTMLMediaElement",
 ];
 
 (async () => {

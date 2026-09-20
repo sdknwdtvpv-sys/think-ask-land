@@ -64,12 +64,37 @@
     return String((v && (v.voiceURI || v.name)) || "");
   }
 
+  /* ---------- 浏览器 TTS 通道(预置音频未命中时的兜底) ---------- */
+  function ttsSay(sp, text, rate, pitch, onDone, isCurrent) {
+    if (!sp.supported) { onDone(); return; }
+    try {
+      if (!sp.voice) sp.autoPick();          // 音色表迟到时兜底
+      var synth = window.speechSynthesis;
+      synth.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      /* 语言必须跟随所选音色,否则引擎可能换成另一个音色 */
+      u.lang = (sp.voice && sp.voice.lang) || "zh-CN";
+      u.rate = Math.max(0.5, Math.min(1.4, rate || 0.86));  // 0.5~1.4,机械感最强的超慢速被排除
+      u.pitch = Math.max(0.6, Math.min(1.4, pitch || 1.04)); // 1.15 → 1.04:去掉"电子娃娃音"
+      u.volume = 1;
+      if (sp.voice) u.voice = sp.voice;
+      u.onend = u.onerror = onDone;
+      /* Chrome 在 cancel() 之后立刻 speak() 有概率把这一句吞掉:
+         放到下一个事件循环再念,保证第一声一定发得出来 */
+      setTimeout(function () {
+        if (isCurrent && !isCurrent()) return;   // 期间已被 stop()/新发声取代
+        try { synth.speak(u); } catch (e) { onDone(); }
+      }, 0);
+    } catch (e) { onDone(); }
+  }
+
   var Speech = {
     supported: typeof window !== "undefined" && "speechSynthesis" in window,
     voice: null,
     _voicesLoaded: false,
     _tries: 0,
     _gen: 0,             // 发声代号:stop() 或新的 speak() 会 +1,用来作废在途回调
+    _seq: 0,             // 连读序列代号:stop() 会 +1,用来中断"字→词→句"
 
     /* 全部中文音色,按"自然好听"排序 */
     listVoices: function () {
@@ -156,6 +181,8 @@
 
     stop: function () {
       this._gen++;   // 作废所有在途回调,避免"停止之后又把下一句念出来"
+      this._seq++;   // 同时中断"字→词→句"连读序列
+      if (window.AudioPack) window.AudioPack.stop();
       if (!this.supported) return;
       try { window.speechSynthesis.cancel(); } catch (e) { /* 忽略 */ }
     },
@@ -163,7 +190,7 @@
     /* 发声:rate 为语速(0.5~1.4,越小越慢;幼儿建议 0.8~0.9)
        兼容两种调用:speak(text, rate, onend) / speak(text, { rate, pitch, onend }) */
     speak: function (text, rate, onend) {
-      if (!this.supported || !text) { if (onend) onend(); return; }
+      if (!text) { if (onend) onend(); return; }
       var pitch = 1.04;
       if (rate && typeof rate === "object") {
         var o = rate;
@@ -173,35 +200,36 @@
       }
       var self = this;
       /* 本次发声的代号:之后任何一次 stop() 或新的 speak() 都会让它作废 ——
-         既避免"上一句的回调把下一句念出来",也避免 onend/onerror 双触发导致回调跑两次 */
+         既避免"上一句的回调把下一句念出来",也避免两个通道双触发导致回调跑两次 */
       var gen = ++this._gen;
-      try {
-        if (!this.voice) this.autoPick();      // 音色表迟到时兜底
-        var synth = window.speechSynthesis;
-        synth.cancel();
-        var u = new SpeechSynthesisUtterance(text);
-        /* 语言必须跟随所选音色,否则引擎可能换成另一个音色 */
-        u.lang = (this.voice && this.voice.lang) || "zh-CN";
-        u.rate = Math.max(0.5, Math.min(1.4, rate || 0.86));  // 0.5~1.4,机械感最强的超慢速被排除
-        u.pitch = Math.max(0.6, Math.min(1.4, pitch));        // 1.15 → 1.04:去掉"电子娃娃音"
-        u.volume = 1;
-        if (this.voice) u.voice = this.voice;
-        var done = false;
-        var finish = function () {
-          if (done || gen !== self._gen) return;   // 已完成,或已被 stop()/新发声取代
-          done = true;
-          if (onend) { try { onend(); } catch (e) { /* 忽略 */ } }
-        };
-        u.onend = finish;
-        /* 合成失败/被打断同样要回调:否则调用方的连读链(字→词)会永远卡住 */
-        u.onerror = finish;
-        /* Chrome 在 cancel() 之后立刻 speak() 有概率把这一句吞掉:
-           放到下一个事件循环再念,保证第一声一定发得出来 */
-        setTimeout(function () {
-          if (gen !== self._gen) return;
-          try { synth.speak(u); } catch (e) { finish(); }
-        }, 0);
-      } catch (e) { if (onend) onend(); }
+      var fired = false;
+      var once = function () {
+        if (fired || gen !== self._gen) return;
+        fired = true;
+        if (onend) { try { onend(); } catch (e) { /* 忽略 */ } }
+      };
+      /* 通道一:预置音频(离线、音质全平台一致、多音字可控) */
+      var isCurrent = function () { return gen === self._gen; };
+      if (window.AudioPack && window.AudioPack.play(text, function () {
+        if (!isCurrent()) return;             // 期间已被 stop()/新发声取代
+        ttsSay(self, text, rate, pitch, once, isCurrent);
+      }, once)) return;
+      /* 通道二:浏览器 TTS 兜底 */
+      ttsSay(self, text, rate, pitch, once, isCurrent);
+    },
+
+    /* 依次朗读多段(如"字 → 词 → 句"),两段之间留一点呼吸;stop() 可整体中断 */
+    speakSeq: function (list, rate) {
+      if (!list || !list.length) return;
+      var self = this;
+      var my = ++this._seq;
+      var i = 0;
+      var next = function () {
+        if (my !== self._seq || i >= list.length) return;
+        var text = list[i++];
+        self.speak(text, rate, function () { setTimeout(next, 320); });
+      };
+      next();
     }
   };
 

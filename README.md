@@ -44,7 +44,40 @@ python3 -m http.server 8023
 > 🔊 朗读使用浏览器内置语音合成（Web Speech API），Mac/iOS/Edge/Chrome 自带中文音色，
 > 无需任何音频文件；首次使用请点一下屏幕任意位置以解锁移动端音频。
 
+## 🔊 朗读方案：预置音频优先（推荐）
+
+浏览器 Web Speech 的音色**取决于设备**：很多安卓 / Windows 机器只装了老式拼接引擎，机械感很强；
+而且规范里没有 SSML 与音素，**多音字无法纠正**（本站 316 字里有 6 个字属于这种情况）。
+
+所以朗读是**两条通道**：
+
+1. **预置音频（优先）**：`.build/gen-audio.py` 一次性把 316 单字 + 632 组词 + 316 例句合成为本地
+   mp3，`audio/index.json` 以**文本**为键；命中就播本地文件 —— 音质全平台一致、离线可用、多音字可控。
+   单条 1.8~14KB，全量约 **5.8MB**（已去首尾静音），**按需加载**，不会一次性下载。
+2. **浏览器 TTS（兜底）**：索引缺失、条目未命中或播放失败时自动回退，行为与从前完全一致。
+
+```bash
+# 试听用（免密钥；edge-tts 是非官方接口，只适合快速验证）
+pip install edge-tts imageio-ffmpeg
+python3 .build/gen-audio.py --engine edge --voice zh-CN-XiaoyiNeural --trim
+
+# 正式生成（推荐腾讯云：官方允许商用，免费额度覆盖这点量，且支持拼音音素锁多音字）
+python3 .build/gen-audio.py --engine tencent --voice 402000 \
+    --secret-id "$TENCENT_SECRET_ID" --secret-key "$TENCENT_SECRET_KEY" --trim
+```
+
+常用参数：`--limit N` / `--group N` 先做小样，`--dry-run` 只看清单，`--trim` 去首尾静音。
+
+> **多音字**：单字音频是孤立音节，TTS 会按常用读音念。实测 6 个字与本站教的读音不一致
+> （只 / 长 / 兴 / 假 / 发 / 谁），脚本已对前四个用同音字替代合成；发、谁 暂由浏览器 TTS 兜底，
+> 等切到腾讯云后用 `<phoneme alphabet="py">` 精确锁定。
+>
+> `audio/` **默认不入库**（见 `.gitignore`）：它属于生成产物，部署前跑一次即可，`deploy.sh` 会一并同步。
+> 未生成时应用照常可用，只是朗读走浏览器 TTS。
+
 ## 🗣️ 换一个更好听的朗读声音
+
+> 这一节针对**兜底通道**。若已生成 `audio/` 音频包，点读会优先播本地音频，与设备音色无关。
 
 内置的"婷婷(Tingting)"这类老式紧凑音色机械感较强。应用会自动优先挑选**自然度最高的音色**，
 家长也可以手动指定：
@@ -82,7 +115,8 @@ hanzi-kids/
 ├── fonts/
 │   └── kuaile-subset.woff2  # 标题字体子集(站酷快乐体,70KB,离线)
 ├── js/
-│   ├── speech.js         # 中文朗读(TTS) + 合成音效(WebAudio)
+│   ├── speech.js         # 中文朗读(预置音频优先 + TTS 兜底) + 合成音效(WebAudio)
+│   ├── audio.js          # 预置音频播放与索引查找(索引缺失时静默回退 TTS)
 │   ├── store.js          # 学习记录:星星/贴纸/勋章/记忆曲线/打卡
 │   ├── mascot.js         # 🐼 角色 IP 模块(占位形象,可整体替换)
 │   ├── icons.js          # 线性矢量图标库(内联 SVG)
@@ -95,6 +129,7 @@ hanzi-kids/
 │   ├── chars-1.js ~ chars-5.js   # 字库数据(10 组 316 字)
 │   ├── chars.js                  # 字库合并入口
 │   └── strokes.js                # 316 字笔顺数据(本地打包,离线可用)
+├── audio/                    # 由 .build/gen-audio.py 生成(默认不入库):单字/组词/例句 mp3 + index.json
 └── vendor/
     └── hanzi-writer.min.js       # 笔顺引擎 v3.7.2 (MIT)
 ```
@@ -103,9 +138,10 @@ hanzi-kids/
 > jsdom 冒烟 `smoke.js`、jsdom UX 回归 `ux-regression.js`（返回键/浏览器历史、resize、弹窗 Esc、描红手势）、
 > jsdom 存档健壮性 `store-test.js`（存档迁移、脏数据修复、写盘失败降级）、
 > jsdom 朗读行为 `speech-test.js`（注入模拟语音引擎:发声竞态、onend/onerror、stop 作废在途回调）、
+> jsdom 预置音频 `audio-test.js`（索引命中走本地音频、未命中回退 TTS、stop 暂停）、
 > 真实浏览器验收 `browser-test3.js` / `p0-visual-test.js` / `p1-visual-test.js` / `p2-visual-test.js` / `p3-visual-test.js` / `voice-test.js`），
 > 与应用运行无关（**已纳入版本库**，部署时被 rsync 排除）；回归时在该目录 `npm i puppeteer jsdom` 后运行对应脚本，
-> 其中 `smoke.js` / `ux-regression.js` / `store-test.js` / `speech-test.js` 需要先启动静态服务器（`node serve.js 8023`）。
+> 其中 `smoke.js` / `ux-regression.js` / `store-test.js` / `speech-test.js` / `audio-test.js` 需要先启动静态服务器（`node serve.js 8023`）。
 
 ## ♿ 无障碍与舒适度
 
