@@ -17,7 +17,14 @@ function check(name, cond, extra) {
   await page.evaluateOnNewDocument(() => { try { localStorage.clear(); } catch (e) {} });
   await page.setViewport({ width: 1280, height: 720, deviceScaleFactor: 2 });
   const errs = [];
-  page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
+  page.on("console", (m) => {
+    if (m.type() !== "error") return;
+    // v1.1.0 起预置音频(js/audio.js)为可选资源:音频目录缺失时会 404 并自动回退浏览器 TTS,
+    // 属设计内降级路径,不计为错误;其余错误附带 URL 便于定位
+    const u = (m.location && m.location().url) || "";
+    if (u.indexOf("/audio/") > -1) return;
+    errs.push(m.text() + (u ? " @ " + u : ""));
+  });
   page.on("pageerror", (e) => errs.push(e.message));
   const failedReq = [];
   page.on("requestfailed", (r) => failedReq.push(r.url() + " " + (r.failure() || {}).errorText));
@@ -70,13 +77,15 @@ function check(name, cond, extra) {
     const m = document.querySelector(".home-mascot .mascot");
     return { cls: m && m.getAttribute("class"), eyes: document.querySelectorAll(".home-mascot .m-eye").length, btns: !!document.querySelector("#mascot-btn") };
   });
-  check("熊猫角色已渲染(idle + 眨眼)", /is-idle/.test(m0.cls) && m0.eyes === 2, m0.cls);
+  const VALID_MOOD = /is-(idle|sleep|think|happy|cheer)/;
+  const moodBefore = (m0.cls.match(/is-[a-z]+/) || ["is-?"])[0];
+  check("熊猫角色已渲染(有效情绪 + 眨眼)", VALID_MOOD.test(m0.cls) && m0.eyes === 2, m0.cls);
   await page.click("#mascot-btn"); await sleep(350);
   const m1 = await page.evaluate(() => document.querySelector(".home-mascot .mascot").getAttribute("class"));
   check("点熊猫切换为开心状态", /is-happy/.test(m1), m1);
   await sleep(1700);
   const m2 = await page.evaluate(() => document.querySelector(".home-mascot .mascot").getAttribute("class"));
-  check("开心状态会自动复位", /is-idle/.test(m2), m2);
+  check("开心状态会自动复位", m2.indexOf(moodBefore) > -1, m2 + "（点击前为 " + moodBefore + "）");
 
   // 5. 今日任务条
   const task = await page.evaluate(() => {

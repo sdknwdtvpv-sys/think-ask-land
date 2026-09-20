@@ -17,7 +17,14 @@ function check(name, cond, extra) {
   await page.evaluateOnNewDocument(() => { try { localStorage.clear(); } catch (e) {} });
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const errs = [];
-  page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
+  page.on("console", (m) => {
+    if (m.type() !== "error") return;
+    // v1.1.0 起预置音频(js/audio.js)为可选资源:音频目录缺失时会 404 并自动回退浏览器 TTS,
+    // 属设计内降级路径,不计为错误;其余错误附带 URL 便于定位
+    const u = (m.location && m.location().url) || "";
+    if (u.indexOf("/audio/") > -1) return;
+    errs.push(m.text() + (u ? " @ " + u : ""));
+  });
   page.on("pageerror", (e) => errs.push(e.message));
   await page.goto("http://127.0.0.1:8023/", { waitUntil: "networkidle0" });
   await sleep(900);

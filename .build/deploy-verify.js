@@ -27,7 +27,14 @@ function check(name, cond, extra) {
   const page = await browser.newPage();
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const errs = [], failed = [];
-  page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
+  page.on("console", (m) => {
+    if (m.type() !== "error") return;
+    // v1.1.0 起预置音频(js/audio.js)为可选资源:音频目录缺失时会 404 并自动回退浏览器 TTS,
+    // 属设计内降级路径,不计为错误;其余错误附带 URL 便于定位
+    const u = (m.location && m.location().url) || "";
+    if (u.indexOf("/audio/") > -1) return;
+    errs.push(m.text() + (u ? " @ " + u : ""));
+  });
   page.on("pageerror", (e) => errs.push("pageerror: " + e.message));
   page.on("requestfailed", (r) => failed.push(r.url().replace(SCHEME + "://" + HOST, "") + " → " + (r.failure() || {}).errorText));
 
