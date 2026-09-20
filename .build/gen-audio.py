@@ -353,6 +353,7 @@ def main():
     ap.add_argument("--check", action="store_true", help="只检查现有音频是否覆盖当前字库(内容改动后会出现缺口)")
     ap.add_argument("--set-default", default="", metavar="音色", help="即时切换默认音色(只改 config.json,不重新生成)")
     ap.add_argument("--list", action="store_true", help="列出已生成的音色与当前默认")
+    ap.add_argument("--rebuild-config", action="store_true", help="按磁盘上的音频目录重建 config.json")
     ap.add_argument("--selftest-sign", action="store_true", help="用官方示例向量自检腾讯云签名实现")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
@@ -381,6 +382,51 @@ def main():
 
     if args.selftest_sign:
         sys.exit(selftest_sign())
+
+    if args.rebuild_config:
+        cfg_path = os.path.join(OUT, "config.json")
+        old = {}
+        if os.path.exists(cfg_path):
+            try:
+                with open(cfg_path, encoding="utf-8") as fh:
+                    old = json.load(fh)
+            except Exception:
+                old = {}
+        reg = {}
+        for d in sorted(glob.glob(os.path.join(OUT, "*"))):
+            if not os.path.isdir(d):
+                continue
+            key = os.path.basename(d)
+            ip = os.path.join(d, "index.json")
+            if not os.path.exists(ip):
+                continue
+            try:
+                with open(ip, encoding="utf-8") as fh:
+                    idx = json.load(fh)
+            except Exception:
+                continue
+            if not idx:
+                continue
+            meta = {}
+            mp = os.path.join(d, "meta.json")
+            if os.path.exists(mp):
+                try:
+                    with open(mp, encoding="utf-8") as fh:
+                        meta = json.load(fh)
+                except Exception:
+                    meta = {}
+            reg[key] = {"label": meta.get("label", key), "engine": meta.get("engine", "?"),
+                        "voice": meta.get("voice", "?"), "count": len(idx), "dir": key}
+        default = old.get("default") if old.get("default") in reg else (sorted(reg)[0] if reg else "")
+        roles = {r: k for r, k in (old.get("roles") or {}).items() if k in reg}
+        with open(cfg_path, "w", encoding="utf-8") as fh:
+            json.dump({"default": default, "voices": reg, "roles": roles}, fh,
+                      ensure_ascii=False, indent=2, sort_keys=True)
+        print("注册表已重建，共 %d 个音色：" % len(reg))
+        for k in sorted(reg):
+            mark = "★ 当前默认" if k == default else "  "
+            print("  %s %-18s %-10s %-24s %d 条" % (mark, k, reg[k]["label"], reg[k]["voice"], reg[k]["count"]))
+        sys.exit(0)
 
     if args.list or args.set_default:
         cfg_file = os.path.join(OUT, "config.json")
@@ -554,8 +600,22 @@ def main():
                 if done[0] % 200 == 0 or done[0] == len(uniq):
                     print("   进度 %d/%d" % (done[0], len(uniq)))
 
-        with open(os.path.join(vdir, "index.json"), "w", encoding="utf-8") as fh:
+        idx_path = os.path.join(vdir, "index.json")
+        if only and os.path.exists(idx_path):
+            # --only 是部分更新：只补这几条，不能把已有的上千条索引覆盖掉
+            try:
+                with open(idx_path, encoding="utf-8") as fh:
+                    merged = json.load(fh)
+                merged.update(index)
+                index = merged
+            except Exception:
+                pass
+        with open(idx_path, "w", encoding="utf-8") as fh:
             json.dump(index, fh, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        # 音色元信息单独存一份，config.json 丢了也能重建
+        with open(os.path.join(vdir, "meta.json"), "w", encoding="utf-8") as fh:
+            json.dump({"label": voice["label"], "engine": args.engine, "voice": voice["id"],
+                       "count": len(index)}, fh, ensure_ascii=False, indent=2, sort_keys=True)
 
         reg[vkey] = {
             "label": voice["label"], "engine": args.engine, "voice": voice["id"],
@@ -566,17 +626,50 @@ def main():
         if warn_trim:
             print("   ℹ️ %d 条未能去静音（已保留原文件）: %s" % (len(warn_trim), "、".join(warn_trim[:4])))
 
-    config = {
-        "default": default_key,
-        "voices": reg,
-        "roles": {},          # 接入 IP 后填：{"char":"xiaoyi","sentence":"yunxia", ...}
-    }
-    with open(os.path.join(OUT, "config.json"), "w", encoding="utf-8") as fh:
-        json.dump(config, fh, ensure_ascii=False, indent=2, sort_keys=True)
+    # config 必须"合并"而不是覆盖：否则只生成一个音色就会把其它音色的注册信息抹掉
+    cfg_path = os.path.join(OUT, "config.json")
+    cfg = {}
+    if os.path.exists(cfg_path):
+        try:
+            with open(cfg_path, encoding="utf-8") as fh:
+                cfg = json.load(fh)
+        except Exception:
+            cfg = {}
+    cfg.setdefault("voices", {})
+    cfg.setdefault("roles", {})
+
+    for k, v in reg.items():
+        if v["count"] > 0:
+            cfg["voices"][k] = v
+        else:
+            print("   ⚠️ %s 没有产出任何音频（检查额度/密钥），不登记到 config.json" % k)
+
+    # 清理磁盘上已经不存在的音色
+    for k in list(cfg["voices"].keys()):
+        sub = cfg["voices"][k].get("dir", k)
+        ip = os.path.join(OUT, sub, "index.json")
+        ok = os.path.exists(ip)
+        if ok:
+            try:
+                with open(ip, encoding="utf-8") as fh:
+                    ok = len(json.load(fh)) > 0
+            except Exception:
+                ok = False
+        if not ok:
+            print("   ℹ️ 音色 %s 的音频不存在或是空的，从注册表移除" % k)
+            del cfg["voices"][k]
+
+    if cfg.get("default") not in cfg["voices"]:
+        cfg["default"] = sorted(cfg["voices"].keys())[0] if cfg["voices"] else ""
+    cfg["roles"] = {r: k for r, k in (cfg.get("roles") or {}).items() if k in cfg["voices"]}
+
+    with open(cfg_path, "w", encoding="utf-8") as fh:
+        json.dump(cfg, fh, ensure_ascii=False, indent=2, sort_keys=True)
 
     size = sum(os.path.getsize(os.path.join(dp, f))
                for dp, _, fs in os.walk(OUT) for f in fs)
-    print("\n完成：%d 个音色，config.json 已写入；audio/ 合计 %.1f MB" % (len(reg), size / 1048576))
+    print("\n完成：本次生成 %d 个音色，注册表共 %d 个；audio/ 合计 %.1f MB" % (len(reg), len(cfg["voices"]), size / 1048576))
+    print("   当前默认音色: %s（切换: python3 .build/gen-audio.py --set-default <音色>）" % (cfg["default"] or "（无）"))
 
 
 if __name__ == "__main__":
