@@ -6,6 +6,9 @@
      来自 data/hanzi-parts.js(由 .build/gen-hanzi-parts.py 依据 Unicode Unihan + cjkvi-ids 生成),
      不是手写内容 —— 教给孩子的部首/部件必须可追溯、可复现。 */
   var HP = window.HANZI_PARTS || {};
+  /* 补充配图:字库自带的优先,其次才是补充表(见 data/emoji-extra.js) */
+  var EMOJI_EXTRA = window.CHAR_EMOJI_EXTRA || {};
+  function emojiOf(ch) { return ch.e || EMOJI_EXTRA[ch.c] || ""; }
   function partsOf(ch) {
     var h = HP[ch];
     return (h && h.p && h.p.length >= 2) ? h.p.slice() : null;
@@ -25,7 +28,7 @@
     g.chars.forEach(function (ch, i) {
       /* rad 优先用字理数据的权威部首;lvl/str 字库里可能缺,统一带上便于各题型复用 */
       ALL.push({
-        c: ch.c, p: ch.p, w: ch.w, s: ch.s, e: ch.e,
+        c: ch.c, p: ch.p, w: ch.w, s: ch.s, e: emojiOf(ch),
         rad: radOf(ch.c) || ch.rad || "", lvl: ch.lvl || 0, str: ch.str || "",
         gi: gi, i: i, gn: g.name
       });
@@ -314,7 +317,7 @@
 
   window.CharDB = {
     ALL: ALL, BY_CHAR: BY_CHAR, GROUPS: window.CHAR_GROUPS || [],
-    PART_POOL: PART_POOL, partsOf: partsOf, radOf: radOf, radNameOf: radNameOf,
+    PART_POOL: PART_POOL, partsOf: partsOf, radOf: radOf, radNameOf: radNameOf, emojiOf: emojiOf,
     hasParts: function (c) { return !!partsOf(c); },
     wordForListen: wordForListen, shuffle: shuffle,
     groupPool: function (gi) { return ALL.filter(function (c) { return c.gi === gi; }); },

@@ -451,6 +451,11 @@
 
       var st = window.Store.state;
       var isLearned = st.chars[ch.c] && st.chars[ch.c].learned;
+      /* 配图统一从 CharDB 取:它会合并字库自带与补充配图 */
+      var emojiOf = function (c) {
+        var rec = window.CharDB.BY_CHAR[c];
+        return (rec && rec.e) || "";
+      };
 
       /* 字理:部首 + 部件。
          数据来自 Unicode Unihan + cjkvi-ids(见 .build/gen-hanzi-parts.py),不手写杜撰;
@@ -479,7 +484,7 @@
             '<button class="mini-speak" id="py-speak" aria-label="读拼音">' + Icons.svg("speak", "ico-solo") + "</button></div>" +
           '<div class="writer-box" id="writer-box">' +
             '<div id="writer-target"></div>' +
-            (ch.e ? '<span class="card-emoji">' + ch.e + "</span>" : "") +
+            (emojiOf(ch.c) ? '<span class="card-emoji">' + emojiOf(ch.c) + "</span>" : "") +
             '<div class="writer-tip" id="w-tip"></div>' +
           "</div>" +
           '<div class="quiz-done-tip" id="q-tip"></div>' +
