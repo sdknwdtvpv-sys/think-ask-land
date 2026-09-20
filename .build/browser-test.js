@@ -1,9 +1,10 @@
 /* 真实 Chromium 复现:命中测试 + 真实鼠标点击首页卡片 */
 "use strict";
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 
 (async () => {
-  const browser = await puppeteer.launch({
+  const browser = await BROWSER.launch({
     headless: "new",
     args: ["--no-sandbox", "--disable-gpu", "--user-data-dir=" + __dirname + "/.pptr-profile"],
   });
@@ -22,7 +23,7 @@ const puppeteer = require("puppeteer");
   if (hasModal) { await page.click("#modal-root .modal-mask #modal-ok"); await new Promise((r) => setTimeout(r, 400)); }
   console.log("欢迎弹窗:", hasModal ? "已真实点击关闭" : "未出现");
 
-  await page.screenshot({ path: "shot-home.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-home.png" });
 
   // 每张首页卡片: 中心点命中测试 + 真实点击
   const cards = ["#/groups", "#/practice", "#/review", "#/rewards", "#/parent"];

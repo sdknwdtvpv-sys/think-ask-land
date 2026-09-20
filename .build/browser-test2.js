@@ -1,10 +1,11 @@
 /* 桌面视口全流程真实点击走查 */
 "use strict";
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 (async () => {
-  const browser = await puppeteer.launch({
+  const browser = await BROWSER.launch({
     headless: "new",
     args: ["--no-sandbox", "--disable-gpu", "--user-data-dir=" + __dirname + "/.pptr-profile2"],
   });
@@ -95,7 +96,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   await page.click("#gate-ok"); await sleep(500);
   console.log("家长报表 →", await page.evaluate(() => !!document.querySelector(".stats-grid")));
 
-  await page.screenshot({ path: "shot-desktop-parent.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-desktop-parent.png" });
   console.log("\n浏览器错误:", errs.length ? errs : "无");
   await browser.close();
 })();

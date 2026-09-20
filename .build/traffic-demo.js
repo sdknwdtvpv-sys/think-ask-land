@@ -1,10 +1,11 @@
 /* 在线上站点跑一次真实操作路径,产生埋点事件(用于验证整条数据链路) */
 "use strict";
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 const HOST = "hanzi.elliotli.work", IP = "118.25.45.88";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 (async () => {
-  const b = await puppeteer.launch({
+  const b = await BROWSER.launch({
     headless: "new",
     args: ["--no-sandbox", "--user-data-dir=" + __dirname + "/.pptr-traffic",
       "--host-resolver-rules=MAP " + HOST + " " + IP,

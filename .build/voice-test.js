@@ -1,6 +1,7 @@
 /* 语音功能验收:音色列表 / 选择器 / 试听 / 持久化 / 默认选到高音质 */
 "use strict";
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 function check(name, cond, extra) {
@@ -9,7 +10,7 @@ function check(name, cond, extra) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch({
+  const browser = await BROWSER.launch({
     headless: "new",
     args: ["--no-sandbox", "--user-data-dir=" + __dirname + "/.pptr-voice2"],
   });

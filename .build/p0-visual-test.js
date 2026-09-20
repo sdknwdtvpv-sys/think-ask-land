@@ -1,6 +1,7 @@
 /* P0 视觉底座自检:字体 / 场景 / 图标 / 角色 / 材质 / 田字格 + 出图 */
 "use strict";
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 function check(name, cond, extra) {
@@ -9,7 +10,7 @@ function check(name, cond, extra) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch({
+  const browser = await BROWSER.launch({
     headless: "new",
     args: ["--no-sandbox", "--user-data-dir=" + __dirname + "/.pptr-p0"],
   });
@@ -120,15 +121,15 @@ function check(name, cond, extra) {
 
   // 8. 出图
   await page.evaluate(() => { location.hash = "#/home"; }); await sleep(600);
-  await page.screenshot({ path: "shot-p0-home.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-p0-home.png" });
   await page.evaluate(() => { location.hash = "#/card?g=0&i=0"; }); await sleep(1000);
-  await page.screenshot({ path: "shot-p0-card.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-p0-card.png" });
   const m = await browser.newPage();
   await m.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   await m.goto("http://127.0.0.1:8023/", { waitUntil: "networkidle0" });
   await sleep(900);
   if (await m.$("#modal-ok")) { await m.click("#modal-ok"); await sleep(300); }
-  await m.screenshot({ path: "shot-p0-mobile.png" });
+  await m.screenshot({ path: __dirname + "/shots/shot-p0-mobile.png" });
 
   check("无失败请求", failedReq.length === 0, failedReq.join("; ") || "全部 200");
   console.log("\n浏览器错误:", errs.length ? errs : "无");

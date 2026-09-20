@@ -1,9 +1,10 @@
 /* 字体生效检查:画布像素比对(比宽度可靠——中文 advance 宽度普遍相同)
    覆盖:A 类新文案(学习报告/匿名统计/字卡) 与 B/C 类新增界面用字 */
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 const STRINGS = ["思问岛", "学汉字", "本周学习报告", "发送匿名统计", "生成本周报告卡", "陪着孩子"];
 (async () => {
-  const b = await puppeteer.launch({ headless: "new", args: ["--no-sandbox", "--user-data-dir=" + __dirname + "/.pptr-font5"] });
+  const b = await BROWSER.launch({ headless: "new", args: ["--no-sandbox", "--user-data-dir=" + __dirname + "/.pptr-font5"] });
   const p = await b.newPage();
   const failed = [];
   p.on("requestfailed", (r) => { if (/woff2/.test(r.url())) failed.push(r.url()); });

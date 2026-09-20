@@ -1,6 +1,7 @@
 /* P2 自检:练习 HUD / 连击 / 判定反馈 / 结算评级 / 复习卡背 / 贴纸册 */
 "use strict";
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 function check(name, cond, extra) {
@@ -9,7 +10,7 @@ function check(name, cond, extra) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch({
+  const browser = await BROWSER.launch({
     headless: "new",
     args: ["--no-sandbox", "--user-data-dir=" + __dirname + "/.pptr-p2"],
   });
@@ -98,7 +99,7 @@ function check(name, cond, extra) {
   });
   check("连对 3 题:连击徽章出现", comboState.shown && comboState.n === "3", "连对 " + comboState.n);
   check("刻度累计 + 进度条推进", comboState.okTicks === 3, "ok 刻度 " + comboState.okTicks + " 条,填充 " + comboState.fill);
-  await page.screenshot({ path: "shot-p2-run.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-p2-run.png" });
 
   // ---- 答完剩余题目 ----
   for (let i = 4; i < qs.length; i++) await answerAt(i, true);
@@ -118,7 +119,7 @@ function check(name, cond, extra) {
   check("评级按正确率给出(9/10 → A)", end.letter === "A", end.score);
   check("星星逐颗跳出", end.stars > 0, end.stars + " 颗");
   check("结算角色为欢呼态", /is-cheer/.test(end.mascot), end.mascot);
-  await page.screenshot({ path: "shot-p2-end.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-p2-end.png" });
 
   // ---- 复习翻卡 ----
   await page.evaluate(() => {
@@ -143,7 +144,7 @@ function check(name, cond, extra) {
   check("复习:难度色按钮(忘了=暖橙)", rev.warm);
   check("复习:HUD 与图标就位", rev.ticks > 0 && rev.hint, rev.ticks + " 张刻度");
   await page.click(".flip-card"); await sleep(600);
-  await page.screenshot({ path: "shot-p2-review.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-p2-review.png" });
   await page.click("#btn-knew"); await sleep(1200);
   const knewAfter = await page.evaluate(() => {
     const el = document.querySelector("#knew-n");
@@ -173,7 +174,7 @@ function check(name, cond, extra) {
   check("贴纸轻旋转(手账感)", rew.rot);
   check("下一张贴纸进度轨", rew.track && /\d/.test(rew.trackNum), rew.nextEmoji + " " + rew.trackNum);
   check("勋章架 + 角色就位", rew.badgesGot > 0 && rew.mascot, rew.badgesGot + " 枚已得");
-  await page.screenshot({ path: "shot-p2-rewards.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-p2-rewards.png" });
 
   // ---- 首屏与遮挡回归 ----
   await page.evaluate(() => { location.hash = "#/home"; }); await sleep(600);

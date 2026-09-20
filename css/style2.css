@@ -28,6 +28,10 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px;
 }
 .prompt-label { font-size: 15px; font-weight: 800; color: var(--ink-light); }
+.prompt-hint { font-size: 13px; font-weight: 700; color: var(--ink-light); opacity: .8; }
+/* 「辨调」题:字与喇叭并排,省一屏高度 */
+.prompt-char-row { display: flex; align-items: center; justify-content: center; gap: 18px; }
+.speak-big.small { width: 76px; height: 76px; font-size: 36px; box-shadow: 0 5px 0 #3385c4, 0 9px 20px rgba(74, 168, 240, .35); }
 .prompt-char { font-size: 96px; font-weight: 700; line-height: 1.15; }
 .prompt-emoji { font-size: 88px; line-height: 1.2; }
 .prompt-py { font-size: 40px; font-weight: 800; color: var(--sky-deep); letter-spacing: 2px; }
@@ -57,6 +61,7 @@
 .feedback-line { text-align: center; min-height: 40px; margin-top: 16px; font-size: 21px; font-weight: 900; }
 .feedback-line.good { color: #2fae86; animation: bounceIn .4s; }
 .feedback-line.bad { color: #ff7d9c; animation: bounceIn .4s; }
+.feedback-line .fb-hint { display: block; margin-top: 4px; font-size: 15px; font-weight: 800; color: var(--ink-light); }
 
 /* ---------- 结算页 ---------- */
 .run-end { text-align: center; padding-top: 8px; }
@@ -141,6 +146,13 @@
 .weak-list { display: flex; flex-wrap: wrap; gap: 9px; }
 .weak-item { background: #fff3f5; border-radius: 14px; padding: 8px 13px; min-height: 52px; font-size: 21px; font-weight: 800; display: flex; align-items: center; gap: 7px; }
 .weak-item small { font-size: 11px; color: var(--ink-light); font-weight: 700; }
+/* 错因分析:家长端横向条形图 */
+.cause-list { display: flex; flex-direction: column; gap: 9px; margin-bottom: 4px; }
+.cause-row { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 800; }
+.cause-name { flex: 0 0 84px; color: var(--ink); }
+.cause-bar { flex: 1 1 auto; height: 12px; border-radius: 8px; background: rgba(74, 68, 88, .09); overflow: hidden; }
+.cause-bar > i { display: block; height: 100%; border-radius: 8px; background: linear-gradient(90deg, #8fd0ff, #4aa8f0); }
+.cause-n { flex: 0 0 auto; color: var(--ink-light); font-variant-numeric: tabular-nums; }
 .parent-note { font-size: 12.5px; color: var(--ink-light); line-height: 1.9; }
 /* 家长中心 · 朗读声音选择 */
 .voice-row { display: flex; gap: 10px; align-items: stretch; margin: 10px 0 4px; }

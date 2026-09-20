@@ -1,6 +1,7 @@
 /* P3 自检:对比度 / 键盘可达 / 动效开关 / Toast 位置 / 弹窗角色与 Esc / 家长看板 */
 "use strict";
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 function check(name, cond, extra) {
@@ -9,7 +10,7 @@ function check(name, cond, extra) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch({
+  const browser = await BROWSER.launch({
     headless: "new",
     args: ["--no-sandbox", "--user-data-dir=" + __dirname + "/.pptr-p3"],
   });
@@ -147,11 +148,11 @@ function check(name, cond, extra) {
 
   // ---- 出图 ----
   await page.evaluate(() => { location.hash = "#/parent"; }); await sleep(700);
-  await page.screenshot({ path: "shot-p3-parent.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-p3-parent.png" });
   await page.evaluate(() => { location.hash = "#/home"; }); await sleep(600);
   await page.evaluate(() => window.UI.toast("顶部胶囊提示"));
   await sleep(400);
-  await page.screenshot({ path: "shot-p3-toast.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-p3-toast.png" });
 
   console.log("\n浏览器错误:", errs.length ? errs : "无");
   if (errs.length) fails += errs.length;

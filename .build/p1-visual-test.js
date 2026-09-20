@@ -1,6 +1,7 @@
 /* P1 自检:小岛地图 + 字表田字格 + 吸底操作条 */
 "use strict";
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 function check(name, cond, extra) {
@@ -9,7 +10,7 @@ function check(name, cond, extra) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch({
+  const browser = await BROWSER.launch({
     headless: "new",
     args: ["--no-sandbox", "--user-data-dir=" + __dirname + "/.pptr-p1"],
   });
@@ -121,15 +122,15 @@ function check(name, cond, extra) {
 
   // ---- 出图 ----
   await page.evaluate(() => { location.hash = "#/groups"; }); await sleep(700);
-  await page.screenshot({ path: "shot-p1-islands.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-p1-islands.png" });
   await page.evaluate(() => { location.hash = "#/learn?g=0"; }); await sleep(700);
-  await page.screenshot({ path: "shot-p1-learn.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-p1-learn.png" });
   const d = await browser.newPage();
   await d.setViewport({ width: 1280, height: 720, deviceScaleFactor: 2 });
   await d.goto("http://127.0.0.1:8023/#/groups", { waitUntil: "networkidle0" });
   await sleep(1000);
   if (await d.$("#modal-ok")) { await d.click("#modal-ok"); await sleep(300); }
-  await d.screenshot({ path: "shot-p1-islands-desktop.png" });
+  await d.screenshot({ path: __dirname + "/shots/shot-p1-islands-desktop.png" });
 
   console.log("\n浏览器错误:", errs.length ? errs : "无");
   if (errs.length) fails += errs.length;

@@ -1,7 +1,8 @@
 "use strict";
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 (async () => {
-  const b = await puppeteer.launch({ headless: "new", args: ["--no-sandbox", "--user-data-dir=" + __dirname + "/.pptr-voice"] });
+  const b = await BROWSER.launch({ headless: "new", args: ["--no-sandbox", "--user-data-dir=" + __dirname + "/.pptr-voice"] });
   const p = await b.newPage();
   await p.goto("http://127.0.0.1:8023/", { waitUntil: "networkidle0" });
   await new Promise(r => setTimeout(r, 2500)); // 等音色表加载

@@ -2,6 +2,7 @@
    校验:数据汇总 / canvas 生成与像素 / 预览浮层 / 保存下载 / 无控制台错误 */
 "use strict";
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 function check(name, cond, extra) {
@@ -10,7 +11,7 @@ function check(name, cond, extra) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch({
+  const browser = await BROWSER.launch({
     headless: "new",
     args: ["--no-sandbox", "--user-data-dir=" + __dirname + "/.pptr-report"],
   });
@@ -87,7 +88,7 @@ function check(name, cond, extra) {
   check("预览浮层打开且含画布", pv.mask && pv.img);
   check("提供保存与分享两个动作", pv.btns.length === 2, pv.btns.join(" / "));
   check("面板标注了隐私说明(本地生成/不上传)", pv.privacy);
-  await page.screenshot({ path: "shot-report-preview.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-report-preview.png" });
 
   // ---- 4. 保存图片(确定性验证:拦截下载动作 + 直接量 PNG 体积) ----
   /* 注意:toBlob 是异步的,拦截要持续到下载真正发生之后再读记录 */

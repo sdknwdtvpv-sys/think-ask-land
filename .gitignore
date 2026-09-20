@@ -5,6 +5,8 @@
 .build/.pptr-*/
 .build/backup-p0/
 .build/*.png
+.build/shots/
+/shot-*.png
 .build/*.log
 .build/*.out
 

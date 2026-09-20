@@ -1,6 +1,7 @@
 /* 部署验收:用真实浏览器访问服务器上的站点(--host-resolver-rules 免 DNS) */
 "use strict";
 const puppeteer = require("puppeteer");
+const BROWSER = require("./browser");   /* 版本不匹配时自动回退本机 Chrome */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const HOST = process.env.TARGET_HOST || "hanzi.elliotli.work";
 const IP = process.env.TARGET_IP || "118.25.45.88";
@@ -12,7 +13,7 @@ function check(name, cond, extra) {
 }
 
 (async () => {
-  const browser = await puppeteer.launch({
+  const browser = await BROWSER.launch({
     headless: "new",
     args: [
       "--no-sandbox",
@@ -77,9 +78,9 @@ function check(name, cond, extra) {
   const card = await page.evaluate(() => ({ hash: location.hash, svg: !!document.querySelector("#writer-target svg"), know: !!document.querySelector("#btn-know") }));
   check("字表 30 格 + 字卡笔顺正常", tiles === 30 && card.svg && card.know, card.hash);
 
-  await page.screenshot({ path: "shot-deployed-card.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-deployed-card.png" });
   await page.evaluate(() => { location.hash = "#/home"; }); await sleep(700);
-  await page.screenshot({ path: "shot-deployed-home.png" });
+  await page.screenshot({ path: __dirname + "/shots/shot-deployed-home.png" });
 
   check("无失败的网络请求", failed.length === 0, failed.join("; ") || "全部 200");
   console.log("\n控制台错误:", errs.length ? errs : "无");

@@ -6,7 +6,7 @@
   /* 记忆盒子间隔(毫秒): box=1..5,复习答对升一盒,遗忘降回盒1 */
   var INT = { 1: 10 * 60 * 1000, 2: 24 * 3600e3, 3: 2 * 24 * 3600e3, 4: 4 * 24 * 3600e3, 5: 7 * 24 * 3600e3 };
 
-  var SCHEMA = 1;        // 存档结构版本:将来改结构时 +1,并在 migrate() 里加对应的升级分支
+  var SCHEMA = 2;        // 存档结构版本(2:每字增加 err 错因计数)
   var KEEP_DAYS = 60;    // 每日统计只保留最近 60 天(家长中心只看 7 天,长期累积只会白白撑大存档)
 
   /* 贴纸:每 STICKER_EVERY 颗星解锁一张 */
@@ -39,7 +39,7 @@
     return {
       v: SCHEMA,           // 存档结构版本(每次写盘都会带上,便于将来做增量迁移)
       stars: 0,            // 累计星星(=总获得,不消耗)
-      chars: {},           // 字 -> { learned:ts, box:1-5, next:ts, ok:n, bad:n, quizDone:bool }
+      chars: {},           // 字 -> { learned:ts, box:1-5, next:ts, ok:n, bad:n, quizDone:bool, err:{音近/形近/义混/声调/生疏} }
       badges: {},          // id -> ts
       strokeQuizzes: 0,
       perfectRounds: 0,
@@ -86,6 +86,21 @@
 
   /* 把任意来源(旧版本结构 / 被外部工具改坏)的存档规整成当前结构。
      原则:宁可丢掉一条坏记录,也不能让一处脏数据把整个应用打不开。 */
+  /* 错因分类:孩子答错时"为什么错",用于因材施教(见 games.js classify) */
+  var CAUSES = ["snd", "tone", "shp", "sem", "rcl"];
+  var CAUSE_NAME = {
+    snd: "音近混淆",   // 声母/韵母听混(如 b/p、an/ang)
+    tone: "声调没分清", // 同音节不同调(如 mā/mǎ)
+    shp: "字形看混",   // 部首或部件相似
+    sem: "意思记混",   // 同主题的词义串了
+    rcl: "还没记牢"    // 单纯想不起来:需要多看多听
+  };
+  function cleanErr(e) {
+    var out = {};
+    if (e && typeof e === "object") CAUSES.forEach(function (k) { if (num(e[k], 0) > 0) out[k] = Math.min(9999, Math.round(num(e[k], 0))); });
+    return out;
+  }
+
   function migrate(obj) {
     var def = defaultState();
     if (!obj || typeof obj !== "object" || Object.prototype.toString.call(obj) === "[object Array]") return def;
@@ -116,7 +131,8 @@
           ok: nonNeg(r.ok, 0),
           bad: nonNeg(r.bad, 0),
           quizDone: !!r.quizDone,
-          seen: nonNeg(r.seen, 0)
+          seen: nonNeg(r.seen, 0),
+          err: cleanErr(r.err)
         };
       }
     }
@@ -244,7 +260,8 @@
   }
 
   function charRec(ch) {
-    if (!state.chars[ch]) state.chars[ch] = { learned: 0, box: 0, next: 0, ok: 0, bad: 0, quizDone: false };
+    if (!state.chars[ch]) state.chars[ch] = { learned: 0, box: 0, next: 0, ok: 0, bad: 0, quizDone: false, err: {} };
+    if (!state.chars[ch].err) state.chars[ch].err = {};
     return state.chars[ch];
   }
 
@@ -283,7 +300,7 @@
   }
 
   /* 练习答题结果 */
-  function quizResult(ch, correct) {
+  function quizResult(ch, correct, cause) {
     touchDay();
     var r = charRec(ch);
     if (correct) {
@@ -291,11 +308,46 @@
       if (r.learned) { r.box = Math.min(5, r.box + 1); r.next = Date.now() + INT[r.box]; }
     } else {
       state.quizBad += 1; r.bad += 1;
+      /* 错因计数:只认已知分类,家长端据此看到"错在哪" */
+      if (cause && CAUSES.indexOf(cause) > -1) r.err[cause] = Math.min(9999, (r.err[cause] || 0) + 1);
       if (r.learned) { r.box = 1; r.next = Date.now() + INT[1]; }
     }
     r.seen = Date.now();
     todayRec().quiz += 1;
     save();
+  }
+
+  /* ---------- 错因统计(家长端 / 能力地图 / 专项练习) ---------- */
+  /* 全库错因合计,按次数降序:[{k, name, n}] */
+  function errorSummary() {
+    var tot = {};
+    CAUSES.forEach(function (k) { tot[k] = 0; });
+    for (var c in state.chars) {
+      var e = state.chars[c].err || {};
+      CAUSES.forEach(function (k) { tot[k] += nonNeg(e[k], 0); });
+    }
+    return CAUSES.map(function (k) { return { k: k, name: CAUSE_NAME[k], n: tot[k] }; })
+      .sort(function (a, b) { return b.n - a.n; });
+  }
+
+  /* 某字最主要的错因(次数最多;并列按 CAUSES 顺序)→ "tone" / null */
+  function topCause(ch) {
+    var e = (state.chars[ch] && state.chars[ch].err) || {}, best = null, bn = 0;
+    CAUSES.forEach(function (k) {
+      var n = nonNeg(e[k], 0);
+      if (n > bn) { bn = n; best = k; }
+    });
+    return best;
+  }
+
+  /* 按错因取字表(专项练习用):cause 省略 → 所有犯过错字的字 */
+  function charsByCause(cause) {
+    var out = [];
+    for (var c in state.chars) {
+      var e = state.chars[c].err || {};
+      if (cause ? nonNeg(e[cause], 0) > 0 : Object.keys(e).length > 0) out.push(c);
+    }
+    return out;
   }
 
   function noteStrokeQuiz(ch) {
@@ -359,7 +411,9 @@
     addStars: addStars, counts: counts, stickerCount: stickerCount,
     markLearned: markLearned, reviewResult: reviewResult, quizResult: quizResult,
     noteStrokeQuiz: noteStrokeQuiz, dueChars: dueChars, learnedList: learnedList,
-    weakChars: weakChars, weekActivity: weekActivity, reset: reset
+    weakChars: weakChars, weekActivity: weekActivity, reset: reset,
+    CAUSES: CAUSES, CAUSE_NAME: CAUSE_NAME,
+    errorSummary: errorSummary, topCause: topCause, charsByCause: charsByCause
   };
   load();
 })();

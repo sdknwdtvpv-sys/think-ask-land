@@ -5,21 +5,37 @@
   var esc = window.escHtml;
   var DB = window.CharDB;
 
+  /* 答错时按错因给一句"怎么改"的提示(不出现"错"字,不吓孩子) */
+  var CAUSE_HINT = {
+    tone: "声调不一样哦,再听一次 🔊",
+    snd: "它们听起来很像,仔细听~",
+    shp: "这两个字长得像,看清楚哦",
+    sem: "意思记混啦,再看看图",
+    rcl: "多听几遍就记住啦"
+  };
+
   /* ================= 练习:范围选择 ================= */
   App.register("practice", {
     render: function (p, view) {
       App.setTopbar("趣味练习", true);
       var st = window.Store.state;
       var learned = DB.learnedPool();
+      /* 错题重练:孩子答错过的字单独成池,下一轮会针对各自的错因出题 */
+      var wrongs = DB.errorPool();
+      var wrongCard = '<button class="scope-card' + (wrongs.length < 4 ? " disabled" : "") + '" data-scope="wrong">' +
+        '<span class="scope-emoji">🎯</span><span><span class="scope-name">错题重练</span>' +
+        '<span class="scope-meta">' + (wrongs.length < 4 ? "攒够 4 个错过的字就能专项突破(已有 " + wrongs.length + " 个)" : "共 " + wrongs.length + " 个字,按错因重点练") + "</span></span>" +
+        '<span class="scope-go">›</span></button>';
       var html =
         '<div class="screen">' +
-          '<div class="practice-intro">🎮 每轮 10 道题:听词语选字、看字选图、看字选拼音、看拼音选字。答对 1 题得 1 颗星,全对还有奖励!</div>' +
+          '<div class="practice-intro">🎮 每轮 10 道题:听词语选字、听写单字、看字选图、看字选拼音、看拼音选字、听音辨调。答对 1 题得 1 颗星,全对还有奖励!</div>' +
           '<div class="section-title">📚 学过多少练多少</div>' +
           '<div class="scope-list">' +
           '<button class="scope-card' + (learned.length < 4 ? " disabled" : "") + '" data-scope="learned">' +
             '<span class="scope-emoji">🌟</span><span><span class="scope-name">我学过的字</span>' +
             '<span class="scope-meta">' + (learned.length < 4 ? "至少学会 4 个字才能开始哦(还差 " + (4 - learned.length) + " 个)" : "共 " + learned.length + " 个字,优先复习薄弱字") + "</span></span>" +
             '<span class="scope-go">›</span></button>' +
+          wrongCard +
           '<div class="section-title" style="margin-top:18px">🗺️ 按主题小岛练</div>';
       DB.GROUPS.forEach(function (g, gi) {
         var learnedN = g.chars.filter(function (ch) { return st.chars[ch.c] && st.chars[ch.c].learned; }).length;
@@ -43,6 +59,9 @@
   /* ================= 练习:答题 ================= */
   function poolOf(scope) {
     if (scope === "learned") return DB.learnedPool();
+    if (scope === "wrong") return DB.errorPool();
+    var mc = /^c:(\w+)$/.exec(scope || "");
+    if (mc) return DB.errorPool(mc[1]);
     var m = /^g(\d+)$/.exec(scope || "");
     if (m) return DB.groupPool(parseInt(m[1], 10));
     return [];
@@ -125,6 +144,16 @@
         prompt =
           '<div class="prompt-area"><div class="prompt-label">👂 听一听,是哪个字?</div>' +
           '<button class="speak-big" id="sp-btn">🔊</button></div>';
+      } else if (q.type === "dictation") {
+        prompt =
+          '<div class="prompt-area"><div class="prompt-label">👂 听写:听到的是哪个字?</div>' +
+          '<button class="speak-big" id="sp-btn">🔊</button>' +
+          '<div class="prompt-hint">仔细听声调哦</div></div>';
+      } else if (q.type === "tonePick") {
+        prompt =
+          '<div class="prompt-area"><div class="prompt-label">🎵 听一听,声调对吗?</div>' +
+          '<div class="prompt-char-row"><div class="prompt-char kai">' + esc(q.target.c) + "</div>" +
+          '<button class="speak-big small" id="sp-btn">🔊</button></div></div>';
       } else if (q.type === "charEmoji") {
         prompt = '<div class="prompt-area"><div class="prompt-label">这个字是哪幅图呢?</div><div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
       } else if (q.type === "emojiChar") {
@@ -145,11 +174,11 @@
       view.querySelector("#fb").textContent = "";
       view.querySelector("#fb").className = "feedback-line";
 
-      if (q.type === "listen") {
+      if (q.speak) {
         var spk = function () {
           var b = view.querySelector("#sp-btn");
           if (b) { b.classList.remove("pulse"); void b.offsetWidth; b.classList.add("pulse"); }
-          window.Speech.speak(q.speak, 0.75);
+          window.Speech.speak(q.speak, q.type === "listen" ? 0.75 : 0.7);
         };
         view.querySelector("#sp-btn").addEventListener("click", spk);
         App.after(350, spk);
@@ -196,14 +225,18 @@
         showCombo();
         btn.classList.add("wrong");
         if (tick) tick.classList.add("bad");
-        window.Store.quizResult(q.target.c, false);
+        /* 错因分类:孩子为什么选错 → 记进档案,家长端能看到,下一轮优先练对应题型 */
+        var chosenOpt = q.options[oi] || {};
+        var cause = (window.Games && Games.classify) ? Games.classify(q.target, chosenOpt.ref, q.type) : null;
+        window.Store.quizResult(q.target.c, false, cause);
         if (window.SFX) SFX.wrong();
         var right = area.querySelectorAll(".opt")[q.answerIdx];
         if (right) right.classList.add("correct");
+        var hint = cause && CAUSE_HINT[cause] ? '<span class="fb-hint">' + CAUSE_HINT[cause] + "</span>" : "";
         fb.innerHTML = Mascot.render("happy", 22, "baobaodou") +
-          '<span>没关系~ 它是「' + q.target.c + "」 " + q.target.p + "</span>";
+          '<span>没关系~ 它是「' + q.target.c + "」 " + q.target.p + "</span>" + hint;
         fb.classList.add("bad");
-        window.Speech.speak(q.type === "listen" ? q.speak : q.target.c, 0.75);
+        window.Speech.speak(q.speak || q.target.c, 0.75);
         App.after(2100, next);
       }
     }
@@ -566,6 +599,39 @@
         }
         html += "</div>";
 
+        /* ---- 错因分析:孩子到底"错在哪",并给一句可执行的建议 ---- */
+        var causes = window.Store.errorSummary().filter(function (x) { return x.n > 0; });
+        var causeAdvice = {
+          tone: "同一音节不同声调容易混(如 mā / mǎ)。建议用「听音辨调」多练,家长读的时候把声调夸张一点。",
+          snd: "声母或韵母听混(如 b/p、an/ang)。建议多听单字跟读,再玩「听写」。",
+          shp: "字形相近的字看混(如 木 / 本)。建议配合笔顺描红,边写边说出部件。",
+          sem: "主题相近的词义记混(比如动物类串了)。建议结合实物或图片一起认。",
+          rcl: "还没记牢,属于正常遗忘。按复习节奏多见面几次就会稳。"
+        };
+        var causeTotal = causes.reduce(function (a, x) { return a + x.n; }, 0);
+        var maxCause = causes.length ? causes[0].n : 1;
+        html += '<div class="panel"><h4>' + Icons.svg("chart") + "错在哪里(错因分析)</h4>";
+        if (!causeTotal) {
+          html += '<p class="parent-note">做过几轮练习后,这里会显示孩子容易错在哪一类:音近、声调、字形还是词义。</p>';
+        } else {
+          html += '<div class="cause-list">';
+          causes.forEach(function (x) {
+            html += '<div class="cause-row"><span class="cause-name">' + esc(x.name) + "</span>" +
+              '<span class="cause-bar"><i style="width:' + Math.max(6, Math.round(x.n / maxCause * 100)) + '%"></i></span>' +
+              '<span class="cause-n">' + x.n + " 次</span></div>";
+          });
+          html += "</div>";
+          var top = causes[0];
+          html += '<p class="parent-note">💡 主要在<b>' + esc(top.name) + "</b>上出错:" + causeAdvice[top.k] + "</p>";
+          var topPool = DB.errorPool(top.k);
+          if (topPool.length >= 4) {
+            html += '<button class="btn btn-sky" id="btn-drill" data-cause="' + top.k + '">🎯 针对「' + esc(top.name) + '」练一轮(' + topPool.length + " 字)</button>";
+          } else {
+            html += '<p class="parent-note">同类错的字还不到 4 个,先在「趣味练习 → 错题重练」里综合练。</p>';
+          }
+        }
+        html += "</div>";
+
         /* ---- 朗读声音:换更自然的音色 ---- */
         var voices = window.Speech.supported ? window.Speech.listVoices() : [];
         var curVoice = window.Speech.voice;
@@ -635,6 +701,14 @@
           v.querySelector("#voice-try").addEventListener("click", function () {
             if (window.SFX) SFX.click();
             window.Speech.speak("小宝贝,我们一起来认字吧", 0.88);
+          });
+        }
+
+        var drillBtn = v.querySelector("#btn-drill");
+        if (drillBtn) {
+          drillBtn.addEventListener("click", function () {
+            if (window.SFX) SFX.click();
+            App.navigate("#/run?scope=c:" + drillBtn.getAttribute("data-cause"));
           });
         }
 
