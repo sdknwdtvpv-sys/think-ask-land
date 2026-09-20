@@ -91,8 +91,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     } else {
       const n = win.AudioPack.count();
       ok("索引已加载且非空", n > 0, n + " 条");
-      const sample = win.AudioPack.has("一") ? "一" : Object.keys(win.AudioPack)[0];
-      ok("索引能按文本命中", win.AudioPack.has("一") || win.AudioPack.has(sample), "样例 " + sample);
+      ok("索引能按文本命中", win.AudioPack.has("一"), "样例 一");
+      const vs = win.AudioPack.voices();
+      ok("音色注册表可读", vs.length >= 1, JSON.stringify(vs));
+      ok("当前音色 = config.default", vs.indexOf(win.AudioPack.currentVoice()) > -1, win.AudioPack.currentVoice());
 
       /* 命中:走本地音频 */
       win.__played.length = 0;
@@ -101,7 +103,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       win.Speech.speak("一", 0.8, () => { ended = true; });
       await sleep(80);
       const played = win.__played[win.__played.length - 1] || "";
-      ok("命中的文本交给 <audio> 播放", /(^|\/)z\/yi1\.mp3$/.test(played), played || "(无)");
+      ok("命中的文本交给 <audio> 播放", /audio\/[^/]+\/z\/yi1(-[0-9a-f]{8})?\.mp3$/.test(played), played || "(无)");
       ok("命中时不再走 TTS", win.__said.indexOf("一") < 0, JSON.stringify(win.__said));
 
       const el = doc.querySelector("audio");
@@ -109,6 +111,22 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       if (el && el.onended) el.onended();
       await sleep(80);
       ok("音频播完触发回调(连读链不断)", ended);
+
+      /* 多音色:切换音色后应命中另一个目录 */
+      if (vs.length >= 2) {
+        const other = vs.filter((v) => v !== win.AudioPack.currentVoice())[0];
+        const before = win.AudioPack.currentVoice();
+        const switched = await win.AudioPack.setVoice(other);
+        ok("可切换到其它音色", switched === true, before + " → " + other);
+        win.__played.length = 0;
+        win.Speech.speak("一", 0.8);
+        await sleep(80);
+        const p2 = win.__played[win.__played.length - 1] || "";
+        ok("切换后从新音色目录播放", p2.indexOf("/" + other + "/") > -1, p2 || "(无)");
+        await win.AudioPack.setVoice(before);
+      } else {
+        console.log("⚠️ 只生成了一个音色,跳过切换断言（可 --voice A,B 生成多个）");
+      }
 
       /* 未命中:回退 TTS */
       win.__said.length = 0;

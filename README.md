@@ -52,19 +52,42 @@ python3 -m http.server 8023
 所以朗读是**两条通道**：
 
 1. **预置音频（优先）**：`.build/gen-audio.py` 一次性把 316 单字 + 632 组词 + 316 例句合成为本地
-   mp3，`audio/index.json` 以**文本**为键；命中就播本地文件 —— 音质全平台一致、离线可用、多音字可控。
-   单条 1.8~14KB，全量约 **5.8MB**（已去首尾静音），**按需加载**，不会一次性下载。
-2. **浏览器 TTS（兜底）**：索引缺失、条目未命中或播放失败时自动回退，行为与从前完全一致。
+   mp3，`audio/<音色>/index.json` 以**文本**为键；命中就播本地文件 —— 音质全平台一致、离线可用、
+   多音字可控。单条 1.8~14KB，**每个音色约 5.8MB**（已去首尾静音），**按需加载**，不会一次性下载。
+2. **浏览器 TTS（兜底）**：配置缺失、条目未命中或播放失败时自动回退，行为与从前完全一致。
 
 ```bash
-# 试听用（免密钥；edge-tts 是非官方接口，只适合快速验证）
+# 试听用（免密钥；edge-tts 是非官方接口，只适合快速验证）。多个音色用逗号分隔
 pip install edge-tts imageio-ffmpeg
-python3 .build/gen-audio.py --engine edge --voice zh-CN-XiaoyiNeural --trim
+python3 .build/gen-audio.py --engine edge --voice zh-CN-YunxiaNeural,zh-CN-XiaoyiNeural --trim
 
 # 正式生成（推荐腾讯云：官方允许商用，免费额度覆盖这点量，且支持拼音音素锁多音字）
-python3 .build/gen-audio.py --engine tencent --voice 402000 \
+python3 .build/gen-audio.py --engine tencent --voice 402000,403000 \
     --secret-id "$TENCENT_SECRET_ID" --secret-key "$TENCENT_SECRET_KEY" --trim
 ```
+
+### 多音色与接入 IP
+
+`audio/config.json` 既是音色注册表，也是将来接 IP 的**接线板**：
+
+```json
+{
+  "default": "yunxia",
+  "voices": { "yunxia": { "label": "云夏" }, "xiaoyi": { "label": "晓伊" } },
+  "roles": {}
+}
+```
+
+- **现在**：`roles` 为空，全站都走 `default`（云夏）。
+- **接入 IP 后**：把角色填进 `roles` 就行，**不用改任何页面代码** —— 键就是内容类型：
+  `z` 单字 / `w` 组词 / `s` 例句
+  ```json
+  "roles": { "z": "xiaoyi", "w": "yunxia", "s": "yunxia" }
+  ```
+  上例表示单字由晓伊念、组词和例句由云夏念。播放时会自动从音频路径推断类型再挑音色。
+- 需要更细的区分（比如"首页问候"和"结算鼓励"用不同音色），给
+  `AudioPack.play(text, onFail, onEnd, "greet")` 显式传 role，并在 `roles` 里加同名键即可。
+- 生成过的音色**都会保留**在 `audio/` 下，换音色只是改一行配置，**不需要重新生成**。
 
 常用参数：`--limit N` / `--group N` 先做小样，`--dry-run` 只看清单，`--trim` 去首尾静音。
 
@@ -129,7 +152,7 @@ hanzi-kids/
 │   ├── chars-1.js ~ chars-5.js   # 字库数据(10 组 316 字)
 │   ├── chars.js                  # 字库合并入口
 │   └── strokes.js                # 316 字笔顺数据(本地打包,离线可用)
-├── audio/                    # 由 .build/gen-audio.py 生成(默认不入库):单字/组词/例句 mp3 + index.json
+├── audio/                    # 由 .build/gen-audio.py 生成(默认不入库):config.json + 各音色的 mp3
 └── vendor/
     └── hanzi-writer.min.js       # 笔顺引擎 v3.7.2 (MIT)
 ```
