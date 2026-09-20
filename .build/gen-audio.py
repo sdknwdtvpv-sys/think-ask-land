@@ -346,6 +346,8 @@ def main():
     ap.add_argument("--default-voice", default="", help="哪个音色作为 config.default（默认取第一个）")
     ap.add_argument("--retrim", action="store_true", help="只对已生成的音频重新去静音,不重新合成")
     ap.add_argument("--check", action="store_true", help="只检查现有音频是否覆盖当前字库(内容改动后会出现缺口)")
+    ap.add_argument("--set-default", default="", metavar="音色", help="即时切换默认音色(只改 config.json,不重新生成)")
+    ap.add_argument("--list", action="store_true", help="列出已生成的音色与当前默认")
     ap.add_argument("--selftest-sign", action="store_true", help="用官方示例向量自检腾讯云签名实现")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
@@ -374,6 +376,38 @@ def main():
 
     if args.selftest_sign:
         sys.exit(selftest_sign())
+
+    if args.list or args.set_default:
+        cfg_file = os.path.join(OUT, "config.json")
+        if not os.path.exists(cfg_file):
+            sys.exit("没有 audio/config.json —— 先跑一次生成（试试 --dry-run 看看会生成什么）")
+        with open(cfg_file, encoding="utf-8") as fh:
+            cfg = json.load(fh)
+        reg = cfg.get("voices", {})
+
+        if args.list:
+            print("已生成的音色（audio/config.json）:")
+            for k in sorted(reg):
+                mark = "★ 当前默认" if k == cfg.get("default") else "  "
+                v = reg[k]
+                print("  %s %-18s %-10s %-22s %d 条" % (mark, k, v.get("label", ""), v.get("voice", ""), v.get("count", 0)))
+            if cfg.get("roles"):
+                print("角色映射 roles:", json.dumps(cfg["roles"], ensure_ascii=False))
+            else:
+                print("角色映射 roles: 空（全站走默认音色）")
+            print("\n切换: python3 .build/gen-audio.py --set-default <音色>")
+            sys.exit(0)
+
+        key = args.set_default.strip()
+        if key not in reg:
+            sys.exit("音色 %s 不在 config.json 里。现有: %s" % (key, "、".join(sorted(reg)) or "（无）"))
+        old = cfg.get("default")
+        cfg["default"] = key
+        with open(cfg_file, "w", encoding="utf-8") as fh:
+            json.dump(cfg, fh, ensure_ascii=False, indent=2, sort_keys=True)
+        print("默认音色: %s → %s（%s / %s）" % (old, key, reg[key].get("label", ""), reg[key].get("voice", "")))
+        print("已即时生效：前端读的就是 config.json，刷新页面即可；两套音频都还在 audio/ 下，随时可以切回来。")
+        sys.exit(0)
 
     if args.check:
         chars_all = load_chars()

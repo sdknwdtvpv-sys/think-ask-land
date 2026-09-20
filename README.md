@@ -116,6 +116,22 @@ python3 .build/gen-audio.py --selftest-sign    # 用腾讯云官方示例向量�
   `AudioPack.play(text, onFail, onEnd, "greet")` 显式传 role，并在 `roles` 里加同名键即可。
 - 生成过的音色**都会保留**在 `audio/` 下，换音色只是改一行配置，**不需要重新生成**。
 
+### 切换朗读音色（即时，无需重新生成）
+
+多套音色可以**同时留在** `audio/` 下，切换只改 `config.json` 的 `default`：
+
+```bash
+python3 .build/gen-audio.py --list                          # 看已生成哪些音色、当前默认是谁
+python3 .build/gen-audio.py --set-default yunxia            # 切到微软/Azure 音色（云夏）
+python3 .build/gen-audio.py --set-default tc-402000         # 切到腾讯云音色（云晓芙）
+```
+
+刷新页面即生效（前端读的就是 `config.json`），**不会重新生成任何音频**，随时可以切回来。
+想让不同内容用不同音色，改上一节的 `roles` 即可。
+
+> 约定：音频目录按「音色来源」分开命名——`yunxia` / `xiaoyi` 是微软（Azure）音色，
+> `tc-<音色ID>` 是腾讯云音色。两套并存，互不覆盖。
+
 常用参数：`--limit N` / `--group N` 先做小样，`--dry-run` 只看清单，`--trim` 去首尾静音。
 
 > **多音字**：单字音频是孤立音节，TTS 会按常用读音念。实测 6 个字与本站教的读音不一致
