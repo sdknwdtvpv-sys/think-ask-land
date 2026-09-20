@@ -63,9 +63,9 @@ const BENIGN = [
     /* 1. 资源加载 */
     await until(() => win.App && win.CharDB && win.Store, 15000, "应用脚本加载");
     ok("脚本全部加载", true);
-    ok("字库 10 组 316 字", win.CharDB.GROUPS.length === 10 && win.CharDB.ALL.length === 316,
+    ok("字库 13 组 400 字", win.CharDB.GROUPS.length === 13 && win.CharDB.ALL.length === 400,
       win.CharDB.ALL.length + " 字");
-    ok("笔顺数据 316 字", Object.keys(win.STROKE_DATA).length === 316);
+    ok("笔顺数据 400 字", Object.keys(win.STROKE_DATA).length === 400);
 
     /* 2. 首页 + 欢迎弹窗 */
     await until(() => q("#view .home-title"), 8000, "首页渲染");
@@ -75,8 +75,8 @@ const BENIGN = [
 
     /* 3. 选关页 */
     win.location.hash = "#/groups";
-    await until(() => qa(".group-card").length === 10, 5000, "分组列表");
-    ok("选关页 10 个小岛", qa(".group-card").length === 10);
+    await until(() => qa(".group-card").length === 13, 5000, "分组列表");
+    ok("选关页 13 个小岛", qa(".group-card").length === 13);
 
     /* 4. 字表页 */
     win.location.hash = "#/learn?g=0";
@@ -171,7 +171,7 @@ const BENIGN = [
     q("#gate-in").value = String(parseInt(m[1]) * parseInt(m[2]));
     click(q("#gate-ok"));
     await until(() => q(".stats-grid"), 5000, "家长报表");
-    ok("家长报表渲染", q(".stat-num").textContent.includes("12 / 316"), q(".stat-num").textContent);
+    ok("家长报表渲染", q(".stat-num").textContent.includes("12 / 400"), q(".stat-num").textContent);
     ok("7天柱状图", qa(".wbar").length === 7);
     ok("易错字面板", qa(".panel").length >= 3);
 

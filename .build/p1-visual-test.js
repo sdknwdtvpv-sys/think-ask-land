@@ -55,7 +55,7 @@ function check(name, cond, extra) {
       offset0: rings[0] ? rings[0].getAttribute("stroke-dashoffset") : null,
     };
   });
-  check("10 座小岛渲染完整", map.n === 10 && map.rings === 10, map.first);
+  check("13 座小岛渲染完整", map.n === 13 && map.rings === 13, map.first);
   check("小径连线已按实际布局绘制", !!(map.pathD && map.pathD.includes("C")), (map.pathD || "").slice(0, 42) + "…");
   check("小径为虚点线", /px/.test(map.dash || "") || /\d/.test(map.dash || ""), "dash=" + map.dash + " width=" + map.stroke);
   check("小岛 S 形错落排布", map.stagger);

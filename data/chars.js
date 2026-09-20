@@ -17,4 +17,5 @@ window.CHAR_GROUPS = []
   .concat(window.CHAR_GROUPS_P2 || [])
   .concat(window.CHAR_GROUPS_P3 || [])
   .concat(window.CHAR_GROUPS_P4 || [])
-  .concat(window.CHAR_GROUPS_P5 || []);
+  .concat(window.CHAR_GROUPS_P5 || [],
+  (window.CHAR_GROUPS_P6 || []));
