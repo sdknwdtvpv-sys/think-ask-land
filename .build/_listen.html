@@ -1,81 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""生成音色试听页 audio/_listen.html
-
-扫描 audio/<音色>/index.json，把已采样到的片段整理成一张对比表：
-  · 每行一个音色，可单独试听「单字 / 多音字 / 组词 / 例句」
-  · 顶部可一键让全部音色依次念同一段内容，方便横向 A/B
-
-页面放在 .build/ 下（该目录既不入库产物也不参与部署），用本地静态服务器打开：
-  node .build/serve.js 8023    →    http://127.0.0.1:8023/.build/_listen.html
-"""
-import glob, json, os
-
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "audio")
-
-# 展示顺序与文案（文本 → 列标题）
-CLIPS = [
-    ("单字「日」", "日"),
-    ("多音字「长」", "长"),
-    ("多音字「发」", "发"),
-    ("组词「日出」", "日出"),
-    ("例句", "今天是快乐的日子。"),
-]
-# 音色展示名（缺失时用 meta.json 的 label）
-NICE = {
-    "yunxia": "云夏 · 微软", "xiaoyi": "晓伊 · 微软",
-    "tc-402000": "云晓芙 · 超自然", "tc-403000": "云小朵 · 超自然(女童)",
-    "tc-502001": "智小柔 · 超自然", "tc-603000": "懂事少年 · 超自然(男)",
-    "tc-403001": "云小和 · 超自然", "tc-603001": "潇湘妹妹 · 超自然",
-    "tc-603004": "温柔小柠 · 超自然", "tc-603007": "邻家女孩 · 超自然",
-    "tc-502007": "智小虎 · 超自然(童)", "tc-603002": "软萌心心 · 超自然(男童)",
-    "tc-101001": "智瑜 · 精品", "tc-101003": "智美 · 精品",
-}
-
-rows = []
-for d in sorted(glob.glob(os.path.join(OUT, "*"))):
-    if not os.path.isdir(d):
-        continue
-    key = os.path.basename(d)
-    ip = os.path.join(d, "index.json")
-    if not os.path.exists(ip):
-        continue
-    try:
-        with open(ip, encoding="utf-8") as fh:
-            idx = json.load(fh)
-    except Exception:
-        continue
-    clips = []
-    for title, text in CLIPS:
-        rel = idx.get(text)
-        if rel and os.path.exists(os.path.join(d, rel)):
-            clips.append({"title": title, "src": "../audio/%s/%s" % (key, rel)})
-    if not clips:
-        continue
-    label = NICE.get(key)
-    if not label:
-        meta = {}
-        mp = os.path.join(d, "meta.json")
-        if os.path.exists(mp):
-            try:
-                with open(mp, encoding="utf-8") as fh:
-                    meta = json.load(fh)
-            except Exception:
-                meta = {}
-        label = "%s · %s" % (meta.get("label", key), meta.get("engine", "?"))
-    rows.append({"key": key, "label": label, "clips": clips})
-
-# 当前默认音色排最前
-cfg = {}
-cp = os.path.join(OUT, "config.json")
-if os.path.exists(cp):
-    with open(cp, encoding="utf-8") as fh:
-        cfg = json.load(fh)
-default = cfg.get("default", "")
-rows.sort(key=lambda r: (r["key"] != default, r["key"]))
-
-html = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>思问岛 · 音色试听对比</title>
@@ -105,7 +28,7 @@ html = """<!DOCTYPE html>
 <table><thead><tr><th>音色</th><th>操作</th><th>单条试听</th></tr></thead><tbody id="tb"></tbody></table>
 <div id="status">就绪</div>
 <script>
-const ROWS = __ROWS__;
+const ROWS = [{"key": "tc-502007", "label": "智小虎 · 超自然(童)", "clips": [{"title": "单字「日」", "src": "../audio/tc-502007/z/ri4-15917f3b.mp3"}, {"title": "多音字「长」", "src": "../audio/tc-502007/z/chang2-d98a0a68.mp3"}, {"title": "多音字「发」", "src": "../audio/tc-502007/z/fa4-b089c8f1.mp3"}, {"title": "组词「日出」", "src": "../audio/tc-502007/w/ri4-1-7919c5af.mp3"}, {"title": "例句", "src": "../audio/tc-502007/s/ri4-22d7c096.mp3"}], "isDefault": true}, {"key": "tc-403000", "label": "云小朵 · 超自然(女童)", "clips": [{"title": "单字「日」", "src": "../audio/tc-403000/z/ri4-15917f3b.mp3"}, {"title": "多音字「长」", "src": "../audio/tc-403000/z/chang2-d98a0a68.mp3"}, {"title": "多音字「发」", "src": "../audio/tc-403000/z/fa4-b089c8f1.mp3"}, {"title": "组词「日出」", "src": "../audio/tc-403000/w/ri4-1-7919c5af.mp3"}, {"title": "例句", "src": "../audio/tc-403000/s/ri4-22d7c096.mp3"}], "isDefault": false}, {"key": "xiaoyi", "label": "晓伊 · 微软", "clips": [{"title": "单字「日」", "src": "../audio/xiaoyi/z/ri4-15917f3b.mp3"}, {"title": "多音字「长」", "src": "../audio/xiaoyi/z/chang2-d98a0a68.mp3"}, {"title": "组词「日出」", "src": "../audio/xiaoyi/w/ri4-1-7919c5af.mp3"}, {"title": "例句", "src": "../audio/xiaoyi/s/ri4-22d7c096.mp3"}], "isDefault": false}, {"key": "yunxia", "label": "云夏 · 微软", "clips": [{"title": "单字「日」", "src": "../audio/yunxia/z/ri4-15917f3b.mp3"}, {"title": "多音字「长」", "src": "../audio/yunxia/z/chang2-d98a0a68.mp3"}, {"title": "组词「日出」", "src": "../audio/yunxia/w/ri4-1-7919c5af.mp3"}, {"title": "例句", "src": "../audio/yunxia/s/ri4-22d7c096.mp3"}], "isDefault": false}];
 const tb = document.getElementById('tb'), bar = document.getElementById('bar'), status = document.getElementById('status');
 let queue = [], cur = null;
 function stop(){ if(cur){ cur.pause(); cur=null; } queue=[]; }
@@ -158,15 +81,3 @@ addAllBar('▶ 全部音色 · 单字「日」对比', function(r){ return r.cli
 addAllBar('▶ 全部音色 · 多音字「长」对比', function(r){ return r.clips.filter(function(c){ return c.title.indexOf('长')>-1; })[0]; });
 bar.appendChild(Object.assign(document.createElement('button'), {textContent:'⏹ 停止', onclick:function(){ stop(); status.textContent='已停止'; }}));
 </script></body></html>
-"""
-
-for r in rows:
-    r["isDefault"] = (r["key"] == default)
-
-page = os.path.join(ROOT, ".build", "_listen.html")
-with open(page, "w", encoding="utf-8") as fh:
-    fh.write(html.replace("__ROWS__", json.dumps(rows, ensure_ascii=False)))
-
-print("已生成 .build/_listen.html：%d 个音色" % len(rows))
-for r in rows:
-    print("   %-14s %-26s %d 条样本%s" % (r["key"], r["label"], len(r["clips"]), "  ★当前默认" if r["isDefault"] else ""))

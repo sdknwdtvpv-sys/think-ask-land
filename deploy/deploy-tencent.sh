@@ -30,15 +30,38 @@ cd "$(dirname "$0")/.."
 KEY="$KEYDIR/id_ed25519" KNOWN_HOSTS="$KEYDIR/known_hosts" \
   ./deploy/deploy.sh "$HOST" "$STAGE" 22
 
-# 3) 安装到网站目录(sudo)
-$SSH "$HOST" "set -e
+# 3) 安装到网站目录
+#    网站目录若是 root 所有(默认加固),需要免密 sudo;若已 chown 给部署用户则完全不需要 sudo。
+#    这里自动探测,两种服务器配置都能跑。
+if $SSH "$HOST" "test -w '$WEBROOT'"; then
+  echo "· 网站目录对 $(whoami) 可写，无需 sudo"
+  $SSH "$HOST" "set -e
+mkdir -p '$WEBROOT'
+if command -v rsync >/dev/null; then rsync -a --delete --exclude '.git/' --exclude '.gitignore' '$STAGE/' '$WEBROOT/'; else cp -a '$STAGE/.' '$WEBROOT/'; fi
+rm -rf '$WEBROOT/.git' '$WEBROOT/.gitignore'        # 兜底:确保版本库与忽略文件绝不进网站目录
+find '$WEBROOT' -type d -exec chmod 755 {} \;
+find '$WEBROOT' -type f -exec chmod 644 {} \;
+echo \"✅ 已更新: \$(du -sh '$WEBROOT' | cut -f1)\"" || {
+    echo "❌ 免 sudo 安装失败。若网站目录是 root 所有，请二选一："
+    echo "   A) sudo chown -R $(whoami):$(id -gn) $WEBROOT        # 之后部署不再需要 sudo（推荐）"
+    echo "   B) 给部署账号配置免密 sudo（见 README-DEPLOY.md 的说明）"
+    exit 1
+  }
+else
+  echo "· 网站目录属主为 root，使用 sudo"
+  $SSH "$HOST" "set -e
 sudo mkdir -p '$WEBROOT'
 if command -v rsync >/dev/null; then sudo rsync -a --delete --exclude '.git/' --exclude '.gitignore' '$STAGE/' '$WEBROOT/'; else sudo cp -a '$STAGE/.' '$WEBROOT/'; fi
-sudo rm -rf '$WEBROOT/.git' '$WEBROOT/.gitignore'   # 兜底:确保版本库与忽略文件绝不进网站目录
+sudo rm -rf '$WEBROOT/.git' '$WEBROOT/.gitignore'
 sudo chown -R root:root '$WEBROOT'
 sudo find '$WEBROOT' -type d -exec chmod 755 {} \;
 sudo find '$WEBROOT' -type f -exec chmod 644 {} \;
-echo \"✅ 已更新: \$(du -sh '$WEBROOT' | cut -f1)\""
+echo \"✅ 已更新: \$(sudo du -sh '$WEBROOT' | cut -f1)\"" || {
+    echo "❌ 需要免密 sudo 才能写入 root 所有的网站目录。推荐一次性执行："
+    echo "   ssh $HOST 'sudo chown -R $(whoami):$(id -gn) $WEBROOT && sudo chmod -R u=rwX,go=rX $WEBROOT'"
+    exit 1
+  }
+fi
 
 # 4) 可选:重新安装 nginx 配置
 if [ "${1:-}" = "config" ]; then

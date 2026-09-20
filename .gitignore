@@ -8,6 +8,8 @@
 .build/*.log
 .build/*.out
 
+build/_listen.html
+
 # ===== 系统与编辑器 =====
 .DS_Store
 *.swp
