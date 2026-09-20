@@ -37,6 +37,9 @@ ssh -t -i "$KEY" "${SSH_OPTS[@]}" "$HOST" '
   sudo systemctl reload nginx
   echo "✅ nginx 已重载"
   echo "▶ 自检:埋点端点"
-  curl -s -o /dev/null -w "   /api/beacon → HTTP:%{http_code} (期望 204)\n" "http://127.0.0.1/api/beacon?e=selftest&p=&v=1.2.0&s=selft01" -H "Host: hanzi.elliotli.work"
-  sudo tail -1 /var/log/nginx/hanzi-beacon.log 2>/dev/null | sed "s/^/   日志样例: /" || true
+  # 注意:80 端口已配 HTTPS 跳转,必须用 https 探测,否则会得到 301(不是故障)
+  code=$(curl -sk -o /dev/null -w "%{http_code}" "https://127.0.0.1/api/beacon?e=selftest&p=src%3Dinstall&v=1.2.0&s=selft01" -H "Host: hanzi.elliotli.work")
+  echo "   https /api/beacon → HTTP:$code (期望 204)"
+  [ "$code" = "204" ] && echo "   ✅ 埋点端点已生效" || echo "   ⚠️ 期望 204,请把上面结果发给开发者"
+  tail -1 /var/log/nginx/hanzi-beacon.log 2>/dev/null | sed "s/^/   日志样例: /" || true
 '
