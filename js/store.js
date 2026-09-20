@@ -3,6 +3,12 @@
   "use strict";
 
   var KEY = "hanziKids.v1";
+  /* 多孩档案:
+     - 第一个孩子(默认档案)的存档仍然存在 KEY 上 —— 老用户升级后数据原地不动,零迁移风险
+     - 其它孩子存在 KEY + "." + <id>
+     - KEY + ".profiles" 只放"有哪些孩子、当前是谁",不含学习数据 */
+  var PROF_KEY = KEY + ".profiles";
+  var DEFAULT_PROFILE = "default";
   /* 记忆盒子间隔(毫秒): box=1..5,复习答对升一盒,遗忘降回盒1 */
   var INT = { 1: 10 * 60 * 1000, 2: 24 * 3600e3, 3: 2 * 24 * 3600e3, 4: 4 * 24 * 3600e3, 5: 7 * 24 * 3600e3 };
 
@@ -155,17 +161,60 @@
   var listeners = [];
   var saveWarned = false;
 
+  /* ---------- 档案目录 ---------- */
+  var profileList = [{ id: DEFAULT_PROFILE, name: "宝贝", emoji: "🐻", created: 0 }];
+  var activeId = DEFAULT_PROFILE;
+  /* 放在声明之后:先确定"当前是哪个孩子",之后所有读写都落到他的键上 */
+  loadProfiles();
+
+  function stateKey(id) { return id === DEFAULT_PROFILE ? KEY : KEY + "." + id; }
+
+  function loadProfiles() {
+    var raw = null;
+    try { raw = localStorage.getItem(PROF_KEY); } catch (e) { raw = null; }
+    if (raw) {
+      try {
+        var o = JSON.parse(raw);
+        if (o && Array.isArray(o.list) && o.list.length) {
+          /* 清洗:只保留合法条目,保证一定存在默认档案 */
+          var list = o.list.filter(function (p) { return p && typeof p.id === "string" && p.id; })
+            .map(function (p) {
+              return { id: p.id, name: String(p.name || "宝贝").slice(0, 12), emoji: String(p.emoji || "🐻").slice(0, 4), created: num(p.created, 0) };
+            });
+          if (!list.some(function (p) { return p.id === DEFAULT_PROFILE; })) {
+            list.unshift({ id: DEFAULT_PROFILE, name: "宝贝", emoji: "🐻", created: 0 });
+          }
+          profileList = list;
+          activeId = list.some(function (p) { return p.id === o.active; }) ? o.active : DEFAULT_PROFILE;
+        }
+      } catch (e) { /* 坏了就用默认档案,不影响学习数据 */ }
+    }
+    return profileList;
+  }
+
+  function saveProfiles() {
+    try {
+      localStorage.setItem(PROF_KEY, JSON.stringify({ v: 1, active: activeId, list: profileList }));
+    } catch (e) { /* 隐私模式:忽略 */ }
+  }
+
+  function newProfileId() {
+    var i = 1;
+    while (profileList.some(function (p) { return p.id === "kid" + i; })) i++;
+    return "kid" + i;
+  }
+
   function load() {
     var raw = null;
-    try { raw = localStorage.getItem(KEY); } catch (e) { raw = null; }
+    try { raw = localStorage.getItem(stateKey(activeId)); } catch (e) { raw = null; }
     if (!raw) { state = defaultState(); return state; }
     try {
       state = migrate(JSON.parse(raw));
     } catch (e) {
       /* 存档损坏(半写入 / 被手动改过):留一份原始副本便于排查,再用默认值继续,
          保证应用一定能打开 —— 旧实现是静默重置,用户连"进度为什么没了"都无从查起 */
-      try { localStorage.setItem(KEY + ".broken", raw); } catch (e2) { /* 忽略 */ }
-      try { console.warn("思问岛:学习存档解析失败,已保留副本 " + KEY + ".broken 并重置", e); } catch (e2) { /* 忽略 */ }
+      try { localStorage.setItem(stateKey(activeId) + ".broken", raw); } catch (e2) { /* 忽略 */ }
+      try { console.warn("思问岛:学习存档解析失败,已保留副本 " + stateKey(activeId) + ".broken 并重置", e); } catch (e2) { /* 忽略 */ }
       state = defaultState();
     }
     return state;
@@ -178,14 +227,14 @@
     try { payload = JSON.stringify(state); } catch (e) { payload = null; }
     if (payload !== null) {
       try {
-        localStorage.setItem(KEY, payload);
+        localStorage.setItem(stateKey(activeId), payload);
         saveWarned = false;
       } catch (e) {
         var okSaved = false;
         try {
           /* 先裁掉较老的每日统计再试一次:它最占体积,又最不影响体验 */
           state.daily = pruneDaily(state.daily, 7);
-          localStorage.setItem(KEY, JSON.stringify(state));
+          localStorage.setItem(stateKey(activeId), JSON.stringify(state));
           okSaved = true;
           saveWarned = false;
         } catch (e2) { okSaved = false; }
@@ -403,6 +452,139 @@
     save();
   }
 
+  /* ================= 多孩档案(每个孩子一套独立进度与奖励) ================= */
+
+  function profiles() { return profileList.slice(); }
+  function activeProfile() {
+    return profileList.filter(function (p) { return p.id === activeId; })[0] || profileList[0];
+  }
+  /* 每个档案的简要进度:家长选孩子时一眼看出谁学到哪了 */
+  function profileSummary(id) {
+    var obj = null;
+    try { obj = JSON.parse(localStorage.getItem(stateKey(id)) || "null"); } catch (e) { obj = null; }
+    if (id === activeId) obj = state;               /* 当前档案以内存为准 */
+    if (!obj) return { learned: 0, mastered: 0, stars: 0, days: 0 };
+    var learned = 0, mastered = 0;
+    for (var c in obj.chars || {}) {
+      var r = obj.chars[c];
+      if (r && r.learned) { learned++; if (r.box >= 4) mastered++; }
+    }
+    return { learned: learned, mastered: mastered, stars: nonNeg(obj.stars, 0), days: Object.keys(obj.daily || {}).length };
+  }
+
+  var MAX_PROFILES = 6;
+
+  function addProfile(name, emoji) {
+    if (profileList.length >= MAX_PROFILES) return { ok: false, err: "最多 " + MAX_PROFILES + " 个孩子档案" };
+    name = String(name || "").trim().slice(0, 12) || ("宝贝" + (profileList.length + 1));
+    var p = { id: newProfileId(), name: name, emoji: String(emoji || "🐰").slice(0, 4), created: Date.now() };
+    profileList.push(p);
+    /* 先把当前进度落盘,再切到新档案(新档案从零开始) */
+    save();
+    activeId = p.id;
+    state = defaultState();
+    state.welcomed = false;
+    saveProfiles();
+    save();
+    return { ok: true, profile: p };
+  }
+
+  /* 切换档案:先存当前,再读目标 */
+  function switchProfile(id) {
+    if (id === activeId) return { ok: true, profile: activeProfile() };
+    if (!profileList.some(function (p) { return p.id === id; })) return { ok: false, err: "档案不存在" };
+    save();
+    activeId = id;
+    saveProfiles();
+    load();
+    return { ok: true, profile: activeProfile() };
+  }
+
+  function renameProfile(id, name, emoji) {
+    var p = profileList.filter(function (x) { return x.id === id; })[0];
+    if (!p) return { ok: false, err: "档案不存在" };
+    if (name != null) p.name = String(name).trim().slice(0, 12) || p.name;
+    if (emoji != null) p.emoji = String(emoji).slice(0, 4) || p.emoji;
+    saveProfiles();
+    return { ok: true, profile: p };
+  }
+
+  function removeProfile(id) {
+    if (profileList.length <= 1) return { ok: false, err: "至少要保留一个档案" };
+    if (!profileList.some(function (p) { return p.id === id; })) return { ok: false, err: "档案不存在" };
+    profileList = profileList.filter(function (p) { return p.id !== id; });
+    /* 删掉这个孩子的学习数据(不留垃圾键),并切到默认档案 */
+    try { localStorage.removeItem(stateKey(id)); } catch (e) { /* 忽略 */ }
+    if (activeId === id) { activeId = profileList[0].id; saveProfiles(); load(); }
+    else saveProfiles();
+    return { ok: true, active: activeProfile() };
+  }
+
+  /* ================= 存档导出 / 导入(换手机、防丢失、家长留底) ================= */
+
+  function exportData() {
+    var ver = "";
+    try { ver = (document.querySelector('meta[name="app-version"]') || {}).content || ""; } catch (e) { /* 忽略 */ }
+    return {
+      app: "siwendao",            // 应用标识:导入时校验,防止把别的数据灌进来
+      schema: SCHEMA,
+      version: ver,
+      exportedAt: new Date().toISOString(),
+      profile: { id: activeProfile().id, name: activeProfile().name, emoji: activeProfile().emoji },
+      state: state
+    };
+  }
+
+  /* 生成一个"一眼能看出是什么"的文件名 */
+  function exportFileName() {
+    var p = activeProfile();
+    var d = new Date();
+    var stamp = d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+    return "思问岛-" + p.name + "-" + stamp + ".json";
+  }
+
+  /* 导入前先校验,返回 {ok, err, data} —— 绝不把坏数据写进存档 */
+  function parseImport(text) {
+    var data;
+    try { data = JSON.parse(String(text || "").trim()); } catch (e) { return { ok: false, err: "这不是有效的存档内容(格式解析失败)" }; }
+    if (!data || typeof data !== "object") return { ok: false, err: "存档内容为空" };
+    if (data.app !== "siwendao") return { ok: false, err: "这不是思问岛的存档" };
+    if (!data.state || typeof data.state !== "object") return { ok: false, err: "存档里没有学习记录" };
+    if (num(data.schema, 0) > SCHEMA) return { ok: false, err: "存档来自更新的版本,请先升级应用" };
+    var st;
+    try { st = migrate(JSON.parse(JSON.stringify(data.state))); } catch (e) { return { ok: false, err: "存档内容已损坏" }; }
+    var learned = 0;
+    for (var c in st.chars) if (st.chars[c].learned) learned++;
+    return {
+      ok: true, data: data, state: st,
+      summary: { name: (data.profile && data.profile.name) || "未知", learned: learned, stars: st.stars, days: Object.keys(st.daily).length }
+    };
+  }
+
+  /* 覆盖式导入:导入前自动把当前进度另存一份,家长反悔还能找回来 */
+  function applyImport(text) {
+    var r = parseImport(text);
+    if (!r.ok) return r;
+    try { localStorage.setItem(stateKey(activeId) + ".before-import", JSON.stringify(state)); } catch (e) { /* 忽略 */ }
+    state = r.state;
+    state.welcomed = true;
+    save();
+    return { ok: true, summary: r.summary };
+  }
+
+  function hasImportBackup() {
+    try { return !!localStorage.getItem(stateKey(activeId) + ".before-import"); } catch (e) { return false; }
+  }
+  function undoImport() {
+    var raw = null;
+    try { raw = localStorage.getItem(stateKey(activeId) + ".before-import"); } catch (e) { raw = null; }
+    if (!raw) return { ok: false, err: "没有可恢复的备份" };
+    try { state = migrate(JSON.parse(raw)); } catch (e) { return { ok: false, err: "备份已损坏" }; }
+    save();
+    try { localStorage.removeItem(stateKey(activeId) + ".before-import"); } catch (e) { /* 忽略 */ }
+    return { ok: true };
+  }
+
   window.Store = {
     INT: INT, STICKERS: STICKERS, STICKER_EVERY: STICKER_EVERY, BADGES: BADGES,
     SCHEMA: SCHEMA, KEEP_DAYS: KEEP_DAYS,
@@ -413,7 +595,15 @@
     noteStrokeQuiz: noteStrokeQuiz, dueChars: dueChars, learnedList: learnedList,
     weakChars: weakChars, weekActivity: weekActivity, reset: reset,
     CAUSES: CAUSES, CAUSE_NAME: CAUSE_NAME,
-    errorSummary: errorSummary, topCause: topCause, charsByCause: charsByCause
+    errorSummary: errorSummary, topCause: topCause, charsByCause: charsByCause,
+    /* 多孩档案 */
+    MAX_PROFILES: MAX_PROFILES,
+    profiles: profiles, activeProfile: activeProfile, profileSummary: profileSummary,
+    addProfile: addProfile, switchProfile: switchProfile, renameProfile: renameProfile, removeProfile: removeProfile,
+    /* 存档导出/导入 */
+    exportData: exportData, exportFileName: exportFileName,
+    parseImport: parseImport, applyImport: applyImport,
+    hasImportBackup: hasImportBackup, undoImport: undoImport
   };
   load();
 })();

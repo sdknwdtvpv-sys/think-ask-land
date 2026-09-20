@@ -557,6 +557,59 @@
         var week = window.Store.weekActivity();
         var maxStar = Math.max(4, Math.max.apply(null, week.map(function (d) { return d.stars; })));
 
+        /* ---- 孩子档案:一台设备上给每个孩子独立进度 ---- */
+        var kidPanel = function () {
+          var list = window.Store.profiles();
+          var active = window.Store.activeProfile().id;
+          var rows = list.map(function (p) {
+            var s2 = window.Store.profileSummary(p.id);
+            var isCur = p.id === active;
+            return '<div class="kid-row' + (isCur ? " active" : "") + '" data-id="' + esc(p.id) + '">' +
+              '<button class="kid-face" data-act="switch" aria-label="切换到' + esc(p.name) + '">' + esc(p.emoji) + "</button>" +
+              '<span class="kid-info"><span class="kid-name">' + esc(p.name) +
+                (isCur ? '<span class="kid-badge">当前</span>' : "") + "</span>" +
+                '<small>' + s2.learned + " 字 · " + s2.mastered + " 熟练 · " + s2.stars + " ⭐</small></span>" +
+              '<span class="kid-ops">' +
+                (isCur ? "" : '<button class="mini-btn" data-act="switch">切换</button>') +
+                '<button class="mini-btn" data-act="rename">改名</button>' +
+                (list.length > 1 ? '<button class="mini-btn danger" data-act="del">删除</button>' : "") +
+              "</span></div>";
+          }).join("");
+          return '<div class="panel" id="panel-kids"><h4>' + Icons.svg("users") + "孩子档案</h4>" +
+            '<div class="kid-list">' + rows + "</div>" +
+            '<p class="parent-note">每个孩子有独立的识字进度、星星和贴纸。切换后首页会显示是谁的进度。</p>' +
+            '<details class="kid-add"' + (list.length < 2 ? " open" : "") + ">" +
+              "<summary>➕ 添加一个孩子</summary>" +
+              '<div class="kid-form">' +
+                '<input id="kid-name" type="text" maxlength="12" placeholder="孩子的名字/小名" autocomplete="off">' +
+                '<div class="emoji-pick" id="kid-emoji">' +
+                  ["🐻", "🐰", "🦊", "🐼", "🐨", "🐯", "🦄", "🐳"].map(function (e, i) {
+                    return '<button class="emoji-opt-btn' + (i === 0 ? " on" : "") + '" data-e="' + e + '">' + e + "</button>";
+                  }).join("") +
+                "</div>" +
+                '<button class="btn btn-sky" id="kid-add-go">创建档案</button>' +
+              "</div></details></div>";
+        };
+
+        /* ---- 备份与搬家:存档导出/导入 ---- */
+        var backupPanel = function () {
+          var hasBackup = window.Store.hasImportBackup();
+          return '<div class="panel" id="panel-backup"><h4>' + Icons.svg("shield") + "备份与换手机</h4>" +
+            '<p class="parent-note">进度保存在本机浏览器里。换手机、清理浏览器数据前,先导出一份存档(一个 json 文件),在新设备上导入即可继续。</p>' +
+            '<div class="backup-btns">' +
+              '<button class="btn btn-sky" id="btn-export">⬇️ 导出存档</button>' +
+              '<button class="btn btn-ghost" id="btn-import">⬆️ 导入存档</button>' +
+            "</div>" +
+            '<input type="file" id="import-file" accept=".json,application/json" style="display:none">' +
+            '<div id="import-preview" class="import-preview" hidden></div>' +
+            (hasBackup ? '<button class="btn btn-ghost" id="btn-undo-import">↩️ 撤销上次导入</button>' : "") +
+            '<details class="text-mode"><summary>用文字复制/粘贴(适合微信传给自己)</summary>' +
+              '<textarea id="save-text" rows="4" placeholder="点上面的「导出存档」后,这里会出现一段文字;或把另一台设备的存档文字粘进来。"></textarea>' +
+              '<div class="backup-btns"><button class="btn btn-ghost" id="btn-text-out">生成文字</button>' +
+              '<button class="btn btn-ghost" id="btn-text-in">从文字导入</button></div>' +
+            "</details></div>";
+        };
+
         var statCard = function (icon, num, label) {
           return '<div class="stat-card"><span class="stat-ico">' + Icons.svg(icon) + "</span>" +
             '<span class="stat-body"><span class="stat-num">' + num + '</span><span class="stat-label">' + label + "</span></span></div>";
@@ -564,6 +617,7 @@
         var reduced = document.documentElement.classList.contains("reduce-motion") ? "true" : "false";
         var html =
           '<div class="screen">' +
+            kidPanel() +
             '<div class="stats-grid">' +
               statCard("book", c.learned + " / " + total, "已学汉字") +
               statCard("trophy", c.mastered, "进入长期记忆") +
@@ -685,8 +739,9 @@
           '<div class="panel"><h4>' + Icons.svg("sparkle") + '显示设置</h4>' +
           '<button class="switch-row" id="btn-motion" aria-pressed="' + reduced + '"><span>减少动态效果(关闭云朵飘动与庆祝动画)</span><span class="switch" aria-pressed="' + reduced + '"><i></i></span></button>' +
         '</div>' +
+        backupPanel() +
         '<div class="panel danger-zone"><h4>' + Icons.svg("lock") + '数据管理</h4>' +
-          '<button class="btn btn-danger" id="btn-reset">清空全部学习记录</button></div>' +
+          '<button class="btn btn-danger" id="btn-reset">清空当前孩子的学习记录</button></div>' +
           '<p class="parent-note" style="text-align:center;margin-top:2px">思问岛 v' + VER + ' · 数据保存在本机浏览器</p>' +
         "</div>";
         v.innerHTML = html;
@@ -701,6 +756,144 @@
           v.querySelector("#voice-try").addEventListener("click", function () {
             if (window.SFX) SFX.click();
             window.Speech.speak("小宝贝,我们一起来认字吧", 0.88);
+          });
+        }
+
+        /* ---------- 孩子档案:切换 / 改名 / 删除 / 新建 ---------- */
+        var rerender = function () { renderDash(v); };
+        v.querySelectorAll(".kid-row").forEach(function (row) {
+          var id = row.getAttribute("data-id");
+          row.querySelectorAll("[data-act]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var act = btn.getAttribute("data-act");
+              if (window.SFX) SFX.click();
+              if (act === "switch") {
+                var r = window.Store.switchProfile(id);
+                if (!r.ok) { window.UI.toast(r.err); return; }
+                window.UI.toast("已切换到「" + r.profile.name + "」");
+                rerender();
+              } else if (act === "rename") {
+                var cur = window.Store.profiles().filter(function (x) { return x.id === id; })[0];
+                var name = window.prompt("给孩子起个名字(最多 12 个字)", cur ? cur.name : "");
+                if (name === null) return;
+                var rr = window.Store.renameProfile(id, name, null);
+                if (!rr.ok) { window.UI.toast(rr.err); return; }
+                window.UI.toast("已改名为「" + rr.profile.name + "」");
+                rerender();
+              } else if (act === "del") {
+                var p2 = window.Store.profiles().filter(function (x) { return x.id === id; })[0];
+                if (!window.confirm("删除「" + (p2 ? p2.name : "") + "」的档案?\n该孩子的识字进度、星星和贴纸会一起删除,无法撤销。")) return;
+                var rd = window.Store.removeProfile(id);
+                if (!rd.ok) { window.UI.toast(rd.err); return; }
+                window.UI.toast("档案已删除");
+                rerender();
+              }
+            });
+          });
+        });
+        /* 头像/表情选择 */
+        var emojiPick = v.querySelector("#kid-emoji");
+        if (emojiPick) {
+          emojiPick.querySelectorAll(".emoji-opt-btn").forEach(function (b) {
+            b.addEventListener("click", function () {
+              emojiPick.querySelectorAll(".emoji-opt-btn").forEach(function (x) { x.classList.remove("on"); });
+              b.classList.add("on");
+            });
+          });
+        }
+        var addGo = v.querySelector("#kid-add-go");
+        if (addGo) {
+          addGo.addEventListener("click", function () {
+            var nameEl = v.querySelector("#kid-name");
+            var picked = emojiPick && emojiPick.querySelector(".emoji-opt-btn.on");
+            var r = window.Store.addProfile(nameEl ? nameEl.value : "", picked ? picked.getAttribute("data-e") : "🐰");
+            if (!r.ok) { window.UI.toast(r.err); return; }
+            window.UI.toast("已创建「" + r.profile.name + "」,现在是这个孩子的进度了");
+            rerender();
+          });
+        }
+
+        /* ---------- 备份与搬家 ---------- */
+        var expBtn = v.querySelector("#btn-export");
+        if (expBtn) {
+          expBtn.addEventListener("click", function () {
+            if (window.SFX) SFX.click();
+            try {
+              var text = JSON.stringify(window.Store.exportData());
+              var blob = new Blob([text], { type: "application/json" });
+              var url = URL.createObjectURL(blob);
+              var a = document.createElement("a");
+              a.href = url;
+              a.download = window.Store.exportFileName();
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              App.after(1500, function () { try { URL.revokeObjectURL(url); } catch (e) {} });
+              window.UI.toast("存档已导出,请保存好这个文件");
+            } catch (e) {
+              window.UI.toast("导出失败:" + e.message);
+            }
+          });
+        }
+        var impBtn = v.querySelector("#btn-import");
+        var impFile = v.querySelector("#import-file");
+        var impBox = v.querySelector("#import-preview");
+        /* 预览 + 二次确认:导入会覆盖,必须让家长看清"这份存档是谁的、有多少内容" */
+        var previewImport = function (text, fromFile) {
+          var r = window.Store.parseImport(text);
+          if (!r.ok) { window.UI.toast(r.err); return; }
+          var s2 = r.summary;
+          impBox.hidden = false;
+          impBox.innerHTML = '<div class="imp-head">这份存档来自「' + esc(s2.name) + "」</div>" +
+            '<div class="imp-meta">' + s2.learned + " 个已学汉字 · " + s2.stars + " ⭐ · " + s2.days + " 天记录</div>" +
+            '<div class="imp-ask">导入会<b>覆盖当前孩子(' + esc(window.Store.activeProfile().name) + ")的进度</b>(导入前会自动备份,可撤销)</div>" +
+            '<div class="backup-btns"><button class="btn btn-sky" id="imp-ok">确认覆盖导入</button>' +
+            '<button class="btn btn-ghost" id="imp-cancel">取消</button></div>';
+          v.querySelector("#imp-ok").addEventListener("click", function () {
+            var ar = window.Store.applyImport(text);
+            if (!ar.ok) { window.UI.toast(ar.err); return; }
+            window.UI.toast("导入成功!已恢复 " + ar.summary.learned + " 个字");
+            rerender();
+          });
+          v.querySelector("#imp-cancel").addEventListener("click", function () { impBox.hidden = true; impBox.innerHTML = ""; });
+          if (fromFile && impBox.scrollIntoView) impBox.scrollIntoView({ block: "center" });
+        };
+        if (impBtn && impFile) {
+          impBtn.addEventListener("click", function () { impFile.click(); });
+          impFile.addEventListener("change", function () {
+            var f = impFile.files && impFile.files[0];
+            if (!f) return;
+            var fr = new FileReader();
+            fr.onload = function () { previewImport(String(fr.result || ""), true); };
+            fr.onerror = function () { window.UI.toast("文件读取失败"); };
+            fr.readAsText(f);
+            impFile.value = "";       /* 允许重复选同一个文件 */
+          });
+        }
+        var textOut = v.querySelector("#btn-text-out");
+        var textIn = v.querySelector("#btn-text-in");
+        var saveText = v.querySelector("#save-text");
+        if (textOut && saveText) {
+          textOut.addEventListener("click", function () {
+            saveText.value = JSON.stringify(window.Store.exportData());
+            saveText.select();
+            window.UI.toast("已生成存档文字,可长按复制");
+          });
+        }
+        if (textIn && saveText) {
+          textIn.addEventListener("click", function () {
+            if (!saveText.value.trim()) { window.UI.toast("请先把存档文字粘贴进上面的框"); return; }
+            previewImport(saveText.value, true);
+          });
+        }
+        var undoBtn = v.querySelector("#btn-undo-import");
+        if (undoBtn) {
+          undoBtn.addEventListener("click", function () {
+            if (!window.confirm("恢复到导入之前的进度?")) return;
+            var ur = window.Store.undoImport();
+            if (!ur.ok) { window.UI.toast(ur.err); return; }
+            window.UI.toast("已恢复到导入前的进度");
+            rerender();
           });
         }
 

@@ -184,10 +184,21 @@
       var chip = function (icon, label, isDone) {
         return '<span class="tt-chip' + (isDone ? " done" : "") + '">' + Icons.svg(isDone ? "check" : icon) + label + "</span>";
       };
+      /* 一台设备上有多个孩子时,必须在首页说明"现在是谁的进度" ——
+         否则二宝打开看到的是大宝的星星,家长会以为数据串了。
+         点击进入家长验证(孩子点不动),不提供直接切换。 */
+      var kidChip = function () {
+        var list = window.Store.profiles ? window.Store.profiles() : [];
+        if (list.length < 2) return "";
+        var me = window.Store.activeProfile();
+        return '<button class="kid-chip" id="kid-chip" aria-label="当前是' + esc(me.name) + '的进度,点按切换">' +
+          '<span class="kid-emoji">' + me.emoji + "</span>" + esc(me.name) + "的进度 ›</button>";
+      };
 
       view.innerHTML =
         '<div class="screen">' +
           '<div class="home-hero">' +
+            (kidChip() ? '<div class="kid-chip-row">' + kidChip() + "</div>" : "") +
             '<div class="home-mascot">' +
               '<button class="mascot-btn" id="mascot-btn" aria-label="和三个小伙伴打招呼">' + Mascot.trio(mascotState, 84) + "</button>" +
             "</div>" +
@@ -240,6 +251,14 @@
           App.navigate(b.getAttribute("data-go"));
         });
       });
+      /* 首页的孩子标识:点了走家长验证,验证通过后落到家长中心的档案区 */
+      var kc = view.querySelector("#kid-chip");
+      if (kc) {
+        kc.addEventListener("click", function () {
+          if (window.SFX) SFX.click();
+          App.navigate("#/parent?focus=kids");
+        });
+      }
       /* 点熊猫:它会长高举手打招呼(孩子最爱的小交互) */
       var mb = view.querySelector("#mascot-btn");
       if (mb) {

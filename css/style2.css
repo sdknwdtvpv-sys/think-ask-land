@@ -200,3 +200,54 @@
 .star-fly.fly { transform: scale(.5); opacity: .3; }
 .word-flash { position: fixed; inset: 0; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 900; color: #ff9f1c; z-index: 245; pointer-events: none; animation: wordFlash .9s ease forwards; text-shadow: 0 2px 8px rgba(255,255,255,.9); }
 @keyframes wordFlash { 0% { transform: scale(.4); opacity: 0; } 30% { transform: scale(1.15); opacity: 1; } 75% { opacity: 1; } 100% { transform: scale(1) translateY(-40px); opacity: 0; } }
+
+/* ---------- 首页:当前孩子标识(只有多孩设备才出现) ---------- */
+.kid-chip-row { display: flex; justify-content: center; margin-bottom: 4px; }
+.kid-chip {
+  display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 6px 15px;
+  border-radius: 999px; background: rgba(255, 255, 255, .88);
+  box-shadow: 0 2px 8px var(--shadow-ink); font-size: 14px; font-weight: 800; color: var(--ink);
+}
+.kid-chip .kid-emoji { font-size: 19px; }
+
+/* ---------- 家长中心 · 孩子档案 ---------- */
+.kid-list { display: flex; flex-direction: column; gap: 10px; }
+.kid-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-radius: 16px; background: #fff; box-shadow: 0 2px 8px var(--shadow-ink);
+}
+.kid-row.active { background: #f3fbff; box-shadow: 0 0 0 2px var(--sky) inset, 0 2px 8px var(--shadow-ink); }
+.kid-face {
+  width: 46px; height: 46px; border-radius: 50%; font-size: 26px; background: #f2f6fa;
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+}
+.kid-info { flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.kid-name { font-size: 16px; font-weight: 900; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+.kid-badge { font-size: 11px; font-weight: 800; color: #fff; background: var(--sky-deep); border-radius: 999px; padding: 1px 8px; }
+.kid-info small { font-size: 12px; color: var(--ink-light); font-weight: 700; }
+.kid-ops { display: flex; gap: 6px; flex: 0 0 auto; }
+.mini-btn { min-height: 36px; padding: 0 12px; border-radius: 12px; background: #eef4fa; color: var(--ink); font-size: 13px; font-weight: 800; }
+.mini-btn.danger { background: #ffeef2; color: #d9577a; }
+.kid-add { margin-top: 11px; }
+.kid-add summary, .text-mode summary { font-size: 14px; font-weight: 800; color: var(--sky-deep); cursor: pointer; padding: 6px 0; }
+.kid-form { display: flex; flex-direction: column; gap: 10px; padding-top: 8px; }
+.kid-form input {
+  min-height: 46px; border-radius: 14px; border: 2px solid var(--line-strong);
+  padding: 0 14px; font-size: 16px; font-weight: 700; color: var(--ink); background: #fff;
+}
+.emoji-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.emoji-opt-btn { width: 46px; height: 46px; border-radius: 14px; font-size: 24px; background: #f2f6fa; }
+.emoji-opt-btn.on { background: #dff0ff; box-shadow: 0 0 0 2px var(--sky) inset; }
+
+/* ---------- 家长中心 · 备份与换手机 ---------- */
+.backup-btns { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0; }
+.backup-btns .btn { flex: 1 1 130px; }
+.import-preview { background: #f3fbff; border-radius: 14px; padding: 12px; margin: 10px 0; font-size: 13px; color: var(--ink); }
+.imp-head { font-weight: 900; margin-bottom: 4px; }
+.imp-meta { color: var(--ink-light); font-weight: 700; margin-bottom: 6px; }
+.text-mode { margin-top: 8px; }
+.text-mode textarea {
+  width: 100%; border-radius: 12px; border: 2px solid var(--line-strong); padding: 10px;
+  font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); background: #fff;
+  box-sizing: border-box; resize: vertical;
+}

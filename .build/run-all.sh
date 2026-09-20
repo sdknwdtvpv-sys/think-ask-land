@@ -18,7 +18,7 @@ PORT="${HZ_PORT:-8023}"
 BASE="http://127.0.0.1:$PORT"
 
 # 需要浏览器(jsdom)的套件:必须先有静态服务器
-NEEDS_SERVER="smoke games-pinyin-test cause-test a4a5-ui-test store-test speech-test voice-test beacon-test report-test ux-regression p0-visual-test p1-visual-test p2-visual-test p3-visual-test browser-test3"
+NEEDS_SERVER="smoke games-pinyin-test cause-test a4a5-ui-test profile-test store-test speech-test voice-test beacon-test report-test ux-regression profile-ui-test p0-visual-test p1-visual-test p2-visual-test p3-visual-test browser-test3"
 
 # 全部套件(顺序:纯逻辑 → 存档 → 视图 → 视觉)
 SUITES=(
@@ -39,6 +39,8 @@ SUITES=(
   p2-visual-test
   p3-visual-test
   a4a5-ui-test
+  profile-test
+  profile-ui-test
   browser-test3
 )
 
