@@ -43,11 +43,33 @@
     '<path class="m-mouth-smile" d="M60 86.2q-7.6 8.2-13.6.9M60 86.2q7.6 8.2 13.6.9" fill="none" stroke="#4a4458" stroke-width="2.4" stroke-linecap="round"/>' +
     '<path class="m-mouth-open" d="M60 86.6q-8.4 11.4-14.4.6M60 86.6q8.4 11.4 14.4.6" fill="none" stroke="#4a4458" stroke-width="2.4" stroke-linecap="round"/>';
 
+  /* 「思考」附加件:问号气泡(只有 think 态注入,CSS 可单独驱动) */
+  var THINK_EXTRA =
+    '<g class="m-think">' +
+      '<circle class="m-think-dot" cx="80" cy="45" r="3.2" fill="#fffaf0" stroke="#e2d9c6" stroke-width="1.6"/>' +
+      '<circle class="m-think-dot" cx="89" cy="35" r="4.8" fill="#fffaf0" stroke="#e2d9c6" stroke-width="1.6"/>' +
+      '<circle cx="102" cy="21" r="13" fill="#fffaf0" stroke="#e2d9c6" stroke-width="2"/>' +
+      '<text class="m-think-mark" x="102" y="27.5" text-anchor="middle" font-size="17" font-weight="800" fill="#8a83a3">?</text>' +
+    "</g>";
+
+  /* 「睡觉」附加件:闭眼弧线 + Zzz(sleep 态由 CSS 把 PANDA_BODY 的眼睛藏起来) */
+  var SLEEP_EXTRA =
+    '<g class="m-sleep">' +
+      '<path d="M39 58q6.6 6.4 13.2 0" fill="none" stroke="#2b2738" stroke-width="2.8" stroke-linecap="round"/>' +
+      '<path d="M67.8 58q6.6 6.4 13.2 0" fill="none" stroke="#2b2738" stroke-width="2.8" stroke-linecap="round"/>' +
+      '<text class="m-zzz" x="99" y="30" font-size="17" font-weight="800" fill="#a9a2bd">Z</text>' +
+      '<text class="m-zzz z2" x="110" y="18" font-size="12" font-weight="800" fill="#c3bcd6">z</text>' +
+    "</g>";
+
   var PLACEHOLDER = {
     name: "圆圆",
     viewBox: "0 0 120 120",
-    /* idle / happy 共用同一套部件,视觉差异由 CSS 的 .is-happy 规则驱动(举手+张嘴+弹跳) */
-    states: { idle: PANDA_BODY, happy: PANDA_BODY }
+    /* 熊猫共用同一套部件:举手/张嘴/弹跳由 CSS 的 .is-happy 驱动,
+       思考与睡觉另有附加件(问号气泡 / 闭眼 + Zzz) */
+    states: {
+      idle: PANDA_BODY, happy: PANDA_BODY, cheer: PANDA_BODY,
+      think: PANDA_BODY + THINK_EXTRA, sleep: PANDA_BODY + SLEEP_EXTRA
+    }
   };
 
   var current = PLACEHOLDER;
@@ -66,5 +88,5 @@
     return current;
   }
 
-  window.Mascot = { render: render, set: set, current: function () { return current; }, NAME: PLACEHOLDER.name };
+  window.Mascot = { render: render, set: set, current: function () { return current; } };
 })();

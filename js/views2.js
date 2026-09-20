@@ -5,13 +5,6 @@
   var esc = window.escHtml;
   var DB = window.CharDB;
 
-  function celebrateUnlocks(res, delay) {
-    var items = (res.stickers || []).map(function (s) { return { kind: "sticker", e: s.e, n: s.n }; })
-      .concat((res.badges || []).map(function (b) { return { kind: "badge", e: b.e, n: b.n, d: b.d }; }));
-    if (!items.length) return;
-    App.after(delay || 800, function () { window.UI.celebrate(items); });
-  }
-
   /* ================= 练习:范围选择 ================= */
   App.register("practice", {
     render: function (p, view) {
@@ -230,7 +223,7 @@
       var grade = ratio >= 1 ? { k: "S", t: "完美通关!", m: "cheer" }
         : ratio >= 0.8 ? { k: "A", t: "很棒哦!", m: "cheer" }
         : ratio >= 0.6 ? { k: "B", t: "不错,继续!", m: "happy" }
-        : { k: "C", t: "多练练更棒!", m: "idle" };
+        : { k: "C", t: "多练练更棒!", m: "think" };
       var msg = okCount === qs.length ? "全部答对,你是识字小冠军!" : okCount >= qs.length * 0.7 ? "很棒!再练一轮就更好啦!" : "多多练习,你会更厉害!";
       /* 星星逐颗跳出(超过 12 颗折叠显示) */
       var starRow = "";
@@ -323,7 +316,7 @@
           '<div class="screen" id="rc-root">' +
             '<div class="run-hud">' +
               '<div class="hud-top">' +
-                '<span class="hud-count">' + Mascot.render("idle", 26) + '第 <b id="rc">' + (idx + 1) + " / " + cards.length + "</b> 张</span>" +
+                '<span class="hud-count">' + Mascot.render("think", 26) + '第 <b id="rc">' + (idx + 1) + " / " + cards.length + "</b> 张</span>" +
                 '<span class="hud-knew">' + Icons.svg("check") + ' 已认识 <b id="knew-n">' + knew + "</b></span>" +
               "</div>" +
               '<div class="hud-bar"><i id="hud-fill" style="width:' + Math.round(idx / cards.length * 100) + '%"></i><span class="hud-ticks" id="hud-ticks"></span></div>' +
@@ -361,6 +354,9 @@
           if (flipped) return;
           flipped = true;
           flip.classList.add("flipped");
+          /* 翻开即"想起来啦":顶部小熊猫从思考切成开心 */
+          var hm = view.querySelector(".hud-count .mascot");
+          if (hm) hm.outerHTML = Mascot.render("happy", 26);
           if (window.SFX) SFX.flip();
           App.after(400, function () { window.Speech.speak(ch.c + "," + ch.w[0], 0.8); });
         });

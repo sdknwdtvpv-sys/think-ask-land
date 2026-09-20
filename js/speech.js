@@ -138,7 +138,6 @@
       }, 400);
     },
 
-    hasZh: function () { return !!this.voice; },
 
     /* 解锁 iOS 音频:首次触摸时调用 */
     warmup: function () {

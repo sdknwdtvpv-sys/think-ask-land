@@ -47,17 +47,12 @@
     }
 
     return {
-      raw: writer,
       /* 播放一遍笔顺动画 */
       play: function (onComplete) {
         try {
           writer.hideCharacter();
           writer.animateCharacter({ onComplete: function () { if (onComplete) onComplete(); } });
         } catch (e) { if (onComplete) onComplete(); }
-      },
-      /* 循环播放 */
-      loop: function () {
-        try { writer.loopCharacterAnimation(); } catch (e) {}
       },
       /* 描红测验: cb = { onCorrect(i,total), onMistake(i), onDone(summary) } */
       quiz: function (cb) {
@@ -70,7 +65,6 @@
           });
         } catch (e) { if (cb.onDone) cb.onDone({ mistakes: -1, total: 0 }); }
       },
-      show: function () { try { writer.showCharacter(); } catch (e) {} },
       destroy: function () { try { target.innerHTML = ""; } catch (e) {} }
     };
   }

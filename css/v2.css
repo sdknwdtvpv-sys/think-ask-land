@@ -122,6 +122,18 @@ body::after { /* 全局纸纹,极淡 */
 .mascot.is-happy .m-arm-down { display: none; }
 .mascot.is-happy .m-mouth-open { display: block; }
 .mascot.is-happy .m-mouth-smile { display: none; }
+/* 思考:歪头 + 问号气泡(复习回想、练习"再想想"结算) */
+.mascot.is-think { animation: mascot-think 2.8s ease-in-out infinite; }
+@keyframes mascot-think { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+.mascot .m-think { transform-box: fill-box; transform-origin: center; animation: think-pop 2.2s ease-in-out infinite; }
+@keyframes think-pop { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+/* 睡觉:闭眼 + Zzz 飘动(深夜问候) */
+.mascot.is-sleep { animation: mascot-doze 3.8s ease-in-out infinite; }
+@keyframes mascot-doze { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(2px) scale(1.025); } }
+.mascot.is-sleep .m-eye { display: none; }
+.mascot .m-zzz { transform-box: fill-box; transform-origin: center; animation: zzz-float 2.6s ease-in-out infinite; }
+.mascot .m-zzz.z2 { animation-delay: .9s; }
+@keyframes zzz-float { 0% { opacity: 0; transform: translateY(5px) scale(.9); } 35% { opacity: 1; } 100% { opacity: 0; transform: translateY(-7px) scale(1.05); } }
 
 /* ---------- 首页 ---------- */
 .home-hero { padding: 6px 0 4px; }

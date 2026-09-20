@@ -175,6 +175,9 @@
       var tDue = due;
       var doneN = (tLearn >= gLearn ? 1 : 0) + (tQuiz >= gQuiz ? 1 : 0) + (tDue === 0 ? 1 : 0);
       var allDone = doneN === 3;
+      /* 深夜(21:00~6:00)熊猫打瞌睡,与 greet() 的「夜深啦」呼应 */
+      var hour = new Date().getHours();
+      var mascotState = allDone ? "happy" : ((hour >= 21 || hour < 6) ? "sleep" : "idle");
       var taskGo = tDue > 0 ? "#/review" : (tLearn < gLearn ? "#/groups" : "#/practice");
       var chip = function (icon, label, isDone) {
         return '<span class="tt-chip' + (isDone ? " done" : "") + '">' + Icons.svg(isDone ? "check" : icon) + label + "</span>";
@@ -184,7 +187,7 @@
         '<div class="screen">' +
           '<div class="home-hero">' +
             '<div class="home-mascot">' +
-              '<button class="mascot-btn" id="mascot-btn" aria-label="和" + Mascot.current().name + "打招呼">' + Mascot.render(allDone ? "happy" : "idle", 104) + "</button>" +
+              '<button class="mascot-btn" id="mascot-btn" aria-label="和" + Mascot.current().name + "打招呼">' + Mascot.render(mascotState, 104) + "</button>" +
             "</div>" +
             '<div class="home-title">思问岛</div>' +
             '<div class="home-sub">' + greet() + ",小宝贝!今天想学什么呢?</div>" +
@@ -240,11 +243,12 @@
       if (mb) {
         mb.addEventListener("click", function () {
           var m = mb.querySelector(".mascot");
-          if (m) { m.classList.remove("is-idle"); m.classList.add("is-happy"); }
+          var baseCls = "is-" + mascotState;
+          if (m) { m.classList.remove(baseCls); m.classList.add("is-happy"); }
           if (window.SFX) SFX.star();
           window.Speech.speak(allDone ? "今天任务都完成啦,你真棒!" : greet() + ",我们一起来认字吧!", 0.9);
           App.after(1600, function () {
-            if (m && m.isConnected) { m.classList.remove("is-happy"); m.classList.add("is-idle"); }
+            if (m && m.isConnected) { m.classList.remove("is-happy"); m.classList.add(baseCls); }
           });
         });
       }

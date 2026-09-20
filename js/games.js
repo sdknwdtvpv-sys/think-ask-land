@@ -151,5 +151,5 @@
       return learned.map(function (c) { return BY_CHAR[c]; }).filter(Boolean);
     }
   };
-  window.Games = { buildRound: buildRound, makeQuestion: makeQuestion };
+  window.Games = { buildRound: buildRound };
 })();

@@ -174,6 +174,19 @@ const BENIGN = [
     await sleep(700);
     ok("退出描红后同一手势正常切字", win.location.hash === "#/card?g=0&i=1", win.location.hash);
 
+    /* ---------- 6. 角色情绪(idle/happy/cheer/think/sleep)与图标 ---------- */
+    const idleSvg = win.Mascot.render("idle", 40);
+    const thinkSvg = win.Mascot.render("think", 40);
+    const sleepSvg = win.Mascot.render("sleep", 40);
+    ok("think 有独立附加件(问号气泡)", thinkSvg.includes("m-think") && !idleSvg.includes("m-think"));
+    ok("sleep 有独立附加件(闭眼 + Zzz)", sleepSvg.includes("M39 58") && sleepSvg.includes("m-zzz") && !idleSvg.includes("m-zzz"));
+    ok("状态 class 落到 svg 上", thinkSvg.includes("is-think") && sleepSvg.includes("is-sleep"));
+    ok("五种情绪都能渲染", ["idle", "happy", "cheer", "think", "sleep"].every((s) => win.Mascot.render(s, 40).includes("<svg")));
+
+    const names = win.Icons.names;
+    ok("无用图标 left/clock 已移除", names.indexOf("left") < 0 && names.indexOf("clock") < 0, "共 " + names.length + " 个");
+    ok("在用的图标一个没少", ["book", "game", "refresh", "trophy", "parent", "star", "flame", "speak", "pencil", "grid", "check", "lock", "flag", "right", "home", "chart", "eye", "play"].every((n) => names.indexOf(n) > -1));
+
   } catch (e) {
     console.log("❌ 测试中断: " + (e && e.message));
     console.log(e && e.stack);
