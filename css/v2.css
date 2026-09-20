@@ -567,3 +567,23 @@ body::after { /* 全局纸纹,极淡 */
 @media (max-height: 820px) {
   .home-mascot .mascot-trio .mascot { width: 64px; height: 64px; }
 }
+
+/* ================= 家长周报分享卡 ================= */
+.report-mask {
+  position: fixed; inset: 0; z-index: 260; background: rgba(43, 36, 60, .55);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  animation: fadeIn .2s;
+}
+.report-box {
+  width: 100%; max-width: 420px; max-height: 92vh; overflow: auto;
+  background: var(--paper); border: 2px solid rgba(255, 255, 255, .9); border-radius: 24px;
+  box-shadow: 0 22px 44px rgba(43, 36, 60, .3);
+  padding: 16px 16px 14px;
+  animation: modalIn .4s cubic-bezier(.2, 1.4, .4, 1);
+}
+.report-head { font-family: var(--display); font-size: 19px; font-weight: 900; text-align: center; margin-bottom: 10px; }
+.report-canvas { border-radius: 16px; overflow: hidden; box-shadow: 0 4px 0 rgba(63, 58, 82, .10); }
+.report-img { display: block; width: 100%; height: auto; }
+.report-btns { display: flex; gap: 10px; margin-top: 12px; }
+.report-btns .btn { flex: 1; font-size: 16px; }
+.report-btns .btn .ico { width: 17px; height: 17px; }

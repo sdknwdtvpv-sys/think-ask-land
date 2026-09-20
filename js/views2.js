@@ -589,6 +589,15 @@
         }
         html += "</div>";
 
+        /* 本周学习报告:本地生成一张可保存/分享的卡片(数据不出设备) */
+        html +=
+          '<div class="panel"><h4>' + Icons.svg("chart") + '本周学习报告</h4>' +
+            '<p class="parent-note">把这一周的学习成果生成一张卡片,可保存到相册或分享给家人。' +
+            '<b>报告在这台设备上本地生成,不上传任何数据</b>,卡片里也不会出现孩子的姓名。</p>' +
+            '<button class="btn btn-sky" id="btn-report" style="width:100%;margin-top:10px">' +
+              Icons.svg("share") + "生成本周报告卡</button>" +
+          "</div>";
+
         var VER = (document.querySelector('meta[name="app-version"]') || {}).content || "dev";
         html +=
           '<div class="panel"><h4>' + Icons.svg("refresh") + '复习机制说明</h4><p class="parent-note">本应用采用简化版<b>艾宾浩斯间隔重复</b>:孩子标记"我会了"后,字会在 10 分钟后首次回到复习队列;每答对一次,下次复习间隔加倍延长(10分钟 → 1天 → 2天 → 4天 → 7天);答错则重新开始。连续答对 4 次(box≥4)即视为进入长期记忆。所有数据仅保存在本设备浏览器中。</p></div>' +
@@ -611,6 +620,17 @@
           v.querySelector("#voice-try").addEventListener("click", function () {
             if (window.SFX) SFX.click();
             window.Speech.speak("小宝贝,我们一起来认字吧", 0.88);
+          });
+        }
+
+        var reportBtn = v.querySelector("#btn-report");
+        if (reportBtn && window.Report) {
+          reportBtn.addEventListener("click", function () {
+            if (window.SFX) SFX.click();
+            reportBtn.disabled = true;
+            window.Report.preview()
+              .catch(function () { window.UI.toast("生成失败,请稍后再试"); })
+              .then(function () { reportBtn.disabled = false; });
           });
         }
 
