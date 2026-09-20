@@ -224,11 +224,11 @@
               '<span class="menu-ico">' + Icons.svg("book") + '</span><span class="menu-label">学汉字</span>' +
               '<span class="menu-sub">字卡 · 读音 · 笔顺</span>' +
               '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
-            '<button class="menu-btn c-coral" data-go="#/practice">' +
+            '<button class="menu-btn c-sun" data-go="#/practice">' +
               '<span class="menu-ico">' + Icons.svg("game") + '</span><span class="menu-label">趣味练习</span>' +
               '<span class="menu-sub">闯关答题赚星星</span>' +
               '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
-            '<button class="menu-btn c-mint" data-go="#/review">' +
+            '<button class="menu-btn c-coral" data-go="#/review">' +
               '<span class="menu-ico">' + Icons.svg("refresh") + '</span><span class="menu-label">今日复习</span>' +
               '<span class="menu-sub">记得更牢固</span>' +
               (due > 0 ? '<span class="due-badge">' + due + "</span>" : "") +
@@ -237,12 +237,15 @@
               '<span class="menu-ico">' + Icons.svg("trophy") + '</span><span class="menu-label">我的奖励</span>' +
               '<span class="menu-sub">贴纸 · 勋章墙</span>' +
               '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
-            '<button class="menu-btn c-lilac wide" data-go="#/pinyin">' +
-              '<span class="menu-ico">' + Icons.svg("speak") + '</span>' +
-              '<span><span class="menu-label" style="font-size:18px">拼音小课堂</span>' +
-              '<span class="menu-sub">声母 · 韵母 · 声调 · 拼读</span></span>' +
+            '<button class="menu-btn c-mint" data-go="#/read">' +
+              '<span class="menu-ico">' + Icons.svg("book") + '</span><span class="menu-label">读一读</span>' +
+              '<span class="menu-sub">短故事 · 找字</span>' +
               '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
-            '<button class="menu-btn c-sun wide" data-go="#/parent">' +
+            '<button class="menu-btn c-lilac" data-go="#/pinyin">' +
+              '<span class="menu-ico">' + Icons.svg("speak") + '</span><span class="menu-label">拼音小课堂</span>' +
+              '<span class="menu-sub">声母 · 韵母 · 声调</span>' +
+              '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
+            '<button class="menu-btn c-sand wide" data-go="#/parent">' +
               '<span class="menu-ico">' + Icons.svg("parent") + "</span>" +
               '<span><span class="menu-label" style="font-size:18px">家长中心</span>' +
               '<span class="menu-sub">学习报告 · 复习设置</span></span>' +

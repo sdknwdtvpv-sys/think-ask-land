@@ -12,7 +12,7 @@
   /* 记忆盒子间隔(毫秒): box=1..5,复习答对升一盒,遗忘降回盒1 */
   var INT = { 1: 10 * 60 * 1000, 2: 24 * 3600e3, 3: 2 * 24 * 3600e3, 4: 4 * 24 * 3600e3, 5: 7 * 24 * 3600e3 };
 
-  var SCHEMA = 2;        // 存档结构版本(2:每字增加 err 错因计数)
+  var SCHEMA = 4;        // 存档结构版本(2:每字 err 错因;3:reads 已读短文;4:dims 能力维度)
   var KEEP_DAYS = 60;    // 每日统计只保留最近 60 天(家长中心只看 7 天,长期累积只会白白撑大存档)
 
   /* 贴纸:每 STICKER_EVERY 颗星解锁一张 */
@@ -54,8 +54,16 @@
       daily: {},           // "YYYY-MM-DD" -> { stars, learned, quiz }
       streak: 0,
       lastDay: "",
-      welcomed: false
+      welcomed: false,
+      reads: {},           // 短文 id -> 首次读完时间(阅读启蒙进度)
+      dims: dimsZero()     // 能力维度 -> { ok, bad }:听音/拼音/字形/图义
     };
+  }
+
+  function dimsZero() {
+    var d = {};
+    DIMS.forEach(function (k) { d[k] = { ok: 0, bad: 0 }; });
+    return d;
   }
 
   function dayStr(d) {
@@ -92,6 +100,11 @@
 
   /* 把任意来源(旧版本结构 / 被外部工具改坏)的存档规整成当前结构。
      原则:宁可丢掉一条坏记录,也不能让一处脏数据把整个应用打不开。 */
+  /* 能力维度:家长端"能力地图"用它把正确率拆到不同能力上,
+     而不是只给一个笼统的总正确率 */
+  var DIMS = ["listen", "pinyin", "shape", "meaning"];
+  var DIM_NAME = { listen: "听音辨字", pinyin: "拼音拼读", shape: "字形结构", meaning: "看图识义" };
+
   /* 错因分类:孩子答错时"为什么错",用于因材施教(见 games.js classify) */
   var CAUSES = ["snd", "tone", "shp", "sem", "rcl"];
   var CAUSE_NAME = {
@@ -151,6 +164,24 @@
       for (var id in out.badges) if (known[id]) badges[id] = num(out.badges[id], Date.now());
     }
     out.badges = badges;
+
+    /* 已读短文:只保留 id 像 p01 这样的记录,时间戳合法 */
+    var reads = {};
+    if (out.reads && typeof out.reads === "object") {
+      for (var rid in out.reads) {
+        if (!/^p\d{1,3}$/.test(rid)) continue;
+        var ts = num(out.reads[rid], 0);
+        if (ts > 0) reads[rid] = ts;
+      }
+    }
+    out.reads = reads;
+
+    var dims = {};
+    DIMS.forEach(function (k) {
+      var d = (out.dims && out.dims[k]) || {};
+      dims[k] = { ok: Math.min(999999, nonNeg(d.ok, 0)), bad: Math.min(999999, nonNeg(d.bad, 0)) };
+    });
+    out.dims = dims;
 
     out.daily = pruneDaily(out.daily);
     out.v = SCHEMA;
@@ -349,9 +380,15 @@
   }
 
   /* 练习答题结果 */
-  function quizResult(ch, correct, cause) {
+  function quizResult(ch, correct, cause, dim) {
     touchDay();
     var r = charRec(ch);
+    /* 按能力维度累计:家长端据此看到"听音好、拼音弱"这类结论 */
+    if (dim && DIMS.indexOf(dim) > -1) {
+      if (!state.dims) state.dims = {};
+      var d = state.dims[dim] || (state.dims[dim] = { ok: 0, bad: 0 });
+      if (correct) d.ok = Math.min(999999, d.ok + 1); else d.bad = Math.min(999999, d.bad + 1);
+    }
     if (correct) {
       state.quizOk += 1; r.ok += 1;
       if (r.learned) { r.box = Math.min(5, r.box + 1); r.next = Date.now() + INT[r.box]; }
@@ -364,6 +401,40 @@
     r.seen = Date.now();
     todayRec().quiz += 1;
     save();
+  }
+
+  /* ---------- 能力地图:每个维度的正确率 + 一句可执行建议 ---------- */
+  function abilityMap() {
+    var reads = readCount();
+    var learned = 0, mastered = 0;
+    for (var c in state.chars) {
+      if (state.chars[c].learned) { learned++; if (state.chars[c].box >= 4) mastered++; }
+    }
+    var rows = DIMS.map(function (k) {
+      var d = (state.dims && state.dims[k]) || { ok: 0, bad: 0 };
+      var n = d.ok + d.bad;
+      return { k: k, name: DIM_NAME[k], ok: d.ok, bad: d.bad, n: n, acc: n ? Math.round(d.ok / n * 100) : null };
+    });
+    /* 阅读与记忆保持单独看:它们不是"答题正确率",而是覆盖度 */
+    rows.push({ k: "read", name: "短文阅读", ok: reads, bad: 0, n: reads, acc: null, count: reads, unit: "篇" });
+    rows.push({ k: "memory", name: "长期记忆", ok: mastered, bad: 0, n: learned, acc: learned ? Math.round(mastered / learned * 100) : null, count: mastered, unit: "字" });
+    return rows;
+  }
+
+  /* 一句"接下来练什么"的建议:找正确率最低且有足够样本的维度 */
+  function abilityAdvice() {
+    var rows = abilityMap().filter(function (r) { return r.n >= 8 && r.acc !== null && DIMS.indexOf(r.k) > -1; });
+    if (!rows.length) return "多练几轮(每个维度 8 题以上),这里就能看出孩子的强项和弱项。";
+    rows.sort(function (a, b) { return a.acc - b.acc; });
+    var weak = rows[0], best = rows[rows.length - 1];
+    var tips = {
+      listen: "多用「听写」和听音选字,读的时候把声调读清楚。",
+      pinyin: "去「拼音小课堂」练声母韵母和四声,再用拼一拼巩固。",
+      shape: "配合笔顺描红,边写边说出部件(如「木+目=相」)。",
+      meaning: "看图选字时先说说图里是什么,再选字。"
+    };
+    if (weak.acc >= 90) return "各维度都在 " + weak.acc + "% 以上,很均衡!可以开始读短文了。";
+    return "强项是" + best.name + "(" + best.acc + "%)," + weak.name + "偏弱(" + weak.acc + "%)。" + tips[weak.k];
   }
 
   /* ---------- 错因统计(家长端 / 能力地图 / 专项练习) ---------- */
@@ -402,6 +473,9 @@
   function noteStrokeQuiz(ch) {
     touchDay();
     state.strokeQuizzes += 1;
+    if (!state.dims) state.dims = {};
+    var ds = state.dims.shape || (state.dims.shape = { ok: 0, bad: 0 });
+    ds.ok += 1;
     var r = charRec(ch);
     var first = !r.quizDone;
     r.quizDone = true;
@@ -445,6 +519,20 @@
     }
     return out;
   }
+
+  /* 阅读:标记一篇短文读完(只记第一次),并给星星 */
+  function markRead(id) {
+    touchDay();
+    if (!state.reads) state.reads = {};
+    var first = !state.reads[id];
+    if (first) state.reads[id] = Date.now();
+    var res = first ? addStars(3) : { stickers: [], badges: [] };
+    todayRec().quiz += 1;
+    save();
+    return { first: first, res: res };
+  }
+  function readCount() { return Object.keys(state.reads || {}).length; }
+  function hasRead(id) { return !!(state.reads && state.reads[id]); }
 
   function reset() {
     state = defaultState();
@@ -603,7 +691,11 @@
     /* 存档导出/导入 */
     exportData: exportData, exportFileName: exportFileName,
     parseImport: parseImport, applyImport: applyImport,
-    hasImportBackup: hasImportBackup, undoImport: undoImport
+    hasImportBackup: hasImportBackup, undoImport: undoImport,
+    /* 阅读进度 */
+    markRead: markRead, readCount: readCount, hasRead: hasRead,
+    /* 能力地图 */
+    DIMS: DIMS, DIM_NAME: DIM_NAME, abilityMap: abilityMap, abilityAdvice: abilityAdvice
   };
   load();
 })();

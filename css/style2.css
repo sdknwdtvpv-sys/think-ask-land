@@ -323,3 +323,129 @@
 }
 .zl-item b { font-size: 19px; color: var(--ink); }
 .zl-item small { font-size: 11px; opacity: .9; }
+
+/* ---------- 首页菜单:家长中心用中性暖色,避免与孩子入口抢眼 ---------- */
+.menu-btn.c-sand { background: linear-gradient(160deg, #f4e4c8, #e6cfa6); box-shadow: 0 6px 0 #c2a878; }
+
+/* ---------- 读一读:短文列表 ---------- */
+.read-list { display: flex; flex-direction: column; gap: 11px; }
+.read-card {
+  display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+  padding: 12px 14px; border-radius: 20px; background: #fff; box-shadow: 0 4px 0 var(--shadow-ink);
+}
+.read-card.done { background: #f4fdf9; }
+.rc-emoji { font-size: 34px; flex: 0 0 auto; }
+.rc-body { flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.rc-title { font-size: 17px; font-weight: 900; color: var(--ink); display: flex; align-items: center; gap: 7px; }
+.rc-badge { font-size: 11px; font-weight: 800; color: #fff; background: var(--mint); border-radius: 999px; padding: 1px 8px; }
+.rc-meta { font-size: 12px; font-weight: 700; color: var(--ink-light); }
+.rc-bar { display: block; height: 7px; border-radius: 6px; background: rgba(63, 58, 82, .09); overflow: hidden; margin-top: 3px; }
+.rc-bar > i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, #9fd9a8, #43c99b); }
+
+/* ---------- 读一读:单篇 ---------- */
+.story-head { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 6px 0 10px; }
+.sh-emoji { font-size: 40px; }
+.sh-title { font-size: 24px; font-weight: 900; color: var(--ink); font-family: var(--display); }
+.story-body {
+  background: var(--paper); border-radius: 22px; padding: 16px 12px; box-shadow: 0 4px 0 var(--shadow-ink);
+  max-width: 460px; margin: 0 auto;
+}
+.rd-line {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 2px; padding: 7px 6px; border-radius: 14px; transition: background .2s;
+}
+.rd-line.reading { background: #fff3d6; }
+.rd-char {
+  font-size: 27px; font-weight: 700; color: var(--ink); line-height: 1.5;
+  min-width: 34px; min-height: 44px; padding: 0 3px; border-radius: 9px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.rd-char.unlearned { border-bottom: 2px dashed rgba(167, 139, 250, .75); }
+.rd-char.on { background: #dff0ff; }
+.rd-char.found { background: #ffe9b8; box-shadow: 0 0 0 2px var(--sun) inset; }
+.rd-punc { font-size: 24px; color: var(--ink-light); padding: 0 1px; }
+.rd-tip { text-align: center; font-size: 13px; font-weight: 800; color: var(--ink-light); min-height: 22px; margin: 10px 0; }
+.story-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.story-actions .btn { flex: 1 1 130px; }
+.find-hud {
+  text-align: center; font-size: 14px; font-weight: 800; color: var(--ink);
+  background: #fff8e6; border-radius: 16px; padding: 12px; margin-top: 12px;
+}
+.find-done { display: block; margin-top: 6px; color: #2fae86; font-size: 15px; }
+
+/* ---------- 打印物料(#/print) ---------- */
+.print-toolbar {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.print-hint { font-size: 12px; font-weight: 700; color: var(--ink-light); }
+.print-scope {
+  min-height: 46px; border-radius: 14px; border: 2px solid var(--line-strong);
+  padding: 0 12px; font-size: 14px; font-weight: 800; color: var(--ink); background: #fff;
+}
+.print-sheet { background: #fff; border-radius: 18px; padding: 18px; box-shadow: 0 4px 0 var(--shadow-ink); }
+.print-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; border-bottom: 2px solid var(--line); padding-bottom: 8px; }
+.ph-brand { font-size: 15px; font-weight: 900; color: var(--sky-deep); font-family: var(--display); }
+.ph-title { font-size: 18px; font-weight: 900; color: var(--ink); font-family: var(--display); }
+.ph-date { font-size: 12px; font-weight: 700; color: var(--ink-light); }
+.print-sub { font-size: 12px; font-weight: 700; color: var(--ink-light); margin: 8px 0 12px; }
+/* 字卡:每行 3 张 */
+.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pcard {
+  border: 2px dashed var(--line-strong); border-radius: 16px; padding: 10px 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; break-inside: avoid;
+}
+.pc-emoji { font-size: 26px; }
+.pc-char { font-size: 52px; font-weight: 700; line-height: 1.1; color: var(--ink); }
+.pc-py { font-size: 15px; font-weight: 800; color: var(--sky-deep); }
+.pc-word { font-size: 11px; font-weight: 700; color: var(--ink-light); text-align: center; }
+/* 描红纸 */
+.write-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.write-cell { border: 2px dashed var(--line-strong); border-radius: 14px; padding: 8px; break-inside: avoid; }
+.wc-char { font-size: 58px; font-weight: 700; text-align: center; color: #cfd6e0; line-height: 1.1; }
+.wc-py { font-size: 13px; font-weight: 800; color: var(--sky-deep); text-align: center; }
+.wc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 6px 0; }
+.wc-grid i { display: block; aspect-ratio: 1 / 1; border: 1px solid #c9cfd8; border-radius: 4px; position: relative; }
+.wc-hint { font-size: 11px; font-weight: 700; color: var(--ink-light); text-align: center; min-height: 14px; }
+/* 亲子任务卡 */
+.quest-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.quest-card {
+  border: 2px dashed var(--line-strong); border-radius: 16px; padding: 12px;
+  display: flex; flex-direction: column; gap: 5px; break-inside: avoid;
+}
+.qc-emoji { font-size: 30px; }
+.qc-title { font-size: 16px; font-weight: 900; color: var(--ink); }
+.qc-desc { font-size: 12.5px; line-height: 1.6; color: var(--ink); }
+.qc-foot { font-size: 11px; font-weight: 700; color: var(--ink-light); }
+
+/* ---------- 打印样式:去掉一切屏幕装饰,只留纸面 ---------- */
+@media print {
+  .no-print, .topbar, .scene, .toast, .modal-mask, .card-nav, .bottom-nav { display: none !important; }
+  html, body { background: #fff !important; }
+  .screen { animation: none !important; padding: 0 !important; }
+  .print-sheet { box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; }
+  .print-toolbar { display: none !important; }
+  .card-grid { grid-template-columns: repeat(3, 1fr); }
+  .quest-grid { grid-template-columns: repeat(2, 1fr); }
+  .write-grid { grid-template-columns: repeat(2, 1fr); }
+  .pcard, .quest-card, .write-cell { border-color: #bbb !important; }
+  @page { margin: 12mm; }
+}
+
+/* ---------- 家长中心:能力地图 / 亲子任务 ---------- */
+.ability-list { display: flex; flex-direction: column; gap: 9px; margin-bottom: 6px; }
+.ab-row { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: var(--ink); }
+.ab-name { flex: 0 0 62px; }
+.ab-bar { flex: 1 1 auto; height: 11px; border-radius: 8px; background: rgba(63, 58, 82, .09); overflow: hidden; }
+.ab-bar > i { display: block; height: 100%; border-radius: 8px; background: linear-gradient(90deg, #ffd166, #ff9f43); }
+.ab-val { flex: 0 0 40px; text-align: right; font-variant-numeric: tabular-nums; }
+.ab-sub { flex: 0 0 64px; text-align: right; font-size: 11px; color: var(--ink-light); }
+.today-quest {
+  display: flex; gap: 12px; align-items: flex-start; background: #fff8e6;
+  border-radius: 16px; padding: 13px; margin-bottom: 4px;
+}
+.tq-emoji { font-size: 30px; flex: 0 0 auto; }
+.tq-body { display: flex; flex-direction: column; gap: 4px; }
+.tq-title { font-size: 16px; font-weight: 900; color: var(--ink); }
+.tq-desc { font-size: 13px; line-height: 1.6; color: var(--ink); }
+.tq-foot { font-size: 11px; font-weight: 700; color: var(--ink-light); }

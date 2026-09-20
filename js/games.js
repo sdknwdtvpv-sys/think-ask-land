@@ -274,6 +274,15 @@
     return "rcl";
   }
 
+  /* 题型 → 能力维度(家长端能力地图按这个归类) */
+  var TYPE_DIM = {
+    listen: "listen", dictation: "listen",
+    charPinyin: "pinyin", pinyinChar: "pinyin", tonePick: "pinyin",
+    partJoin: "shape", partSplit: "shape",
+    emojiChar: "meaning", charEmoji: "meaning"
+  };
+  function dimOf(type) { return TYPE_DIM[type] || ""; }
+
   /* 错因 → 最该练的题型(因材施教) */
   var CAUSE_DRILL = { tone: "tonePick", snd: "dictation", shp: "pinyinChar", sem: "charEmoji", rcl: "listen" };
 
@@ -320,7 +329,7 @@
     }
   };
   window.Games = {
-    buildRound: buildRound, classify: classify, CAUSE_DRILL: CAUSE_DRILL,
+    buildRound: buildRound, classify: classify, CAUSE_DRILL: CAUSE_DRILL, dimOf: dimOf,
     _makeQuestion: makeQuestion, _pickBySound: pickBySound
   };
 })();

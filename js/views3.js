@@ -281,3 +281,181 @@
   /* 供测试与其它模块复用 */
   window.PinyinDrill = { buildBlend: buildBlend, buildTone: buildTone };
 })();
+
+/* ============ 思问岛 · 读一读(分级短文 + 阅读中找字) ============
+   设计:
+     - 每篇短文的用字全部来自 400 字字库(.build/read-test.js 逐字校验),孩子能自己读下来
+     - 点任意字可听读音;还没学过的字带虚线下划线,读的时候有心理准备
+     - "找字"把"读"变成"用":在文里找出目标字,找全给星星
+   列表按"最难的那个字在第几岛"排序,难度自然递进。 */
+(function () {
+  "use strict";
+  var App = window.App;
+  var esc = window.escHtml;
+
+  function passages() { return (window.PASSAGES || []).slice(); }
+  function charsOf(p) { return p.s.join("").split("").filter(function (c) { return /[\u4e00-\u9fff]/.test(c); }); }
+  function learnedSet() {
+    var set = {};
+    window.Store.learnedList().forEach(function (c) { set[c] = 1; });
+    return set;
+  }
+  /* 难度 = 用到的字里最深的那座岛(岛号越大越难) */
+  function levelOf(p) {
+    var DB = window.CharDB, max = 0;
+    charsOf(p).forEach(function (c) {
+      var rec = DB.BY_CHAR[c];
+      if (rec && rec.gi + 1 > max) max = rec.gi + 1;
+    });
+    return max;
+  }
+  /* 找字目标:出现 ≥2 次的字里挑,按出现次数从多到少 */
+  function findTargets(p, n) {
+    var cnt = {};
+    charsOf(p).forEach(function (c) { cnt[c] = (cnt[c] || 0) + 1; });
+    return Object.keys(cnt).filter(function (c) { return cnt[c] >= 2; })
+      .sort(function (a, b) { return cnt[b] - cnt[a]; }).slice(0, n || 1);
+  }
+
+  App.register("read", {
+    render: function (p, view) {
+      App.setTopbar("读一读", true);
+      var learned = learnedSet();
+      var list = passages().map(function (x) {
+        var cs = charsOf(x);
+        var known = cs.filter(function (c) { return learned[c]; }).length;
+        var uniq = Object.keys(cs.reduce(function (m, c) { m[c] = 1; return m; }, {})).length;
+        return { p: x, total: uniq, known: Object.keys(cs.reduce(function (m, c) { m[c] = 1; return m; }, {}))
+          .filter(function (c) { return learned[c]; }).length, lvl: levelOf(x), read: window.Store.hasRead(x.id) };
+      }).sort(function (a, b) { return a.lvl - b.lvl; });
+
+      var html = '<div class="screen">' +
+        '<div class="practice-intro">📖 每篇短文都<b>只用你已经学过的字</b>。点字能听读音,读完了还能玩找字游戏。' +
+        '已读完 <b>' + window.Store.readCount() + "</b> / " + list.length + " 篇。</div>" +
+        '<div class="read-list">';
+      list.forEach(function (r) {
+        var pct = Math.round(r.known / Math.max(1, r.total) * 100);
+        html += '<button class="read-card' + (r.read ? " done" : "") + '" data-id="' + r.p.id + '">' +
+          '<span class="rc-emoji">' + r.p.emoji + "</span>" +
+          '<span class="rc-body"><span class="rc-title">' + esc(r.p.title) +
+            (r.read ? '<span class="rc-badge">✅ 读过</span>' : "") + "</span>" +
+            '<span class="rc-meta">' + r.total + " 个不同的字 · 已学 " + r.known + " 个 · 第 " + r.lvl + " 岛难度</span>" +
+            '<span class="rc-bar"><i style="width:' + pct + '%"></i></span>' +
+          "</span><span class=\"scope-go\">›</span></button>";
+      });
+      html += "</div></div>";
+      view.innerHTML = html;
+      view.querySelectorAll(".read-card").forEach(function (b) {
+        b.addEventListener("click", function () {
+          if (window.SFX) SFX.click();
+          App.navigate("#/story?id=" + b.getAttribute("data-id"));
+        });
+      });
+      if (window.Beacon) Beacon.track("view", { v: "read" });
+    }
+  });
+
+  App.register("story", {
+    render: function (p, view) {
+      var id = p.id || (passages()[0] || {}).id;
+      var story = passages().filter(function (x) { return x.id === id; })[0];
+      if (!story) { App.navigate("#/read"); return; }
+      App.setTopbar(story.title, true);
+      var learned = learnedSet();
+      var targets = findTargets(story, 1);
+      var target = targets[0] || "";
+      var chars = charsOf(story);
+      var totalTarget = target ? chars.filter(function (c) { return c === target; }).length : 0;
+
+      var body = story.s.map(function (sent, si) {
+        return '<div class="rd-line">' + sent.split("").map(function (c) {
+          if (!/[\u4e00-\u9fff]/.test(c)) return '<span class="rd-punc">' + esc(c) + "</span>";
+          var un = learned[c] ? "" : " unlearned";
+          return '<button class="rd-char' + un + '" data-c="' + esc(c) + '" data-si="' + si + '">' + esc(c) + "</button>";
+        }).join("") + "</div>";
+      }).join("");
+
+      view.innerHTML = '<div class="screen">' +
+        '<div class="story-head"><span class="sh-emoji">' + story.emoji + "</span>" +
+          '<span class="sh-title">' + esc(story.title) + "</span></div>" +
+        '<div class="story-body">' + body + "</div>" +
+        '<div class="rd-tip" id="rd-tip">点一个字,听它怎么读</div>' +
+        '<div class="story-actions">' +
+          '<button class="btn btn-sky" id="rd-play">🔊 读一遍</button>' +
+          (target ? '<button class="btn btn-grape" id="rd-find">🎯 找「' + esc(target) + "」</button>" : "") +
+          '<button class="btn btn-mint" id="rd-done">读完啦 ✅</button>' +
+        "</div>" +
+        '<div class="find-hud" id="rd-find-hud" hidden></div>' +
+        '<div class="card-nav" style="position:static;background:none"><button class="btn btn-ghost" id="rd-back">‹ 换一篇</button></div>' +
+        "</div>";
+
+      var tip = view.querySelector("#rd-tip");
+      var findHud = view.querySelector("#rd-find-hud");
+      var findOn = false, found = 0;
+
+      view.querySelectorAll(".rd-char").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var c = b.getAttribute("data-c");
+          if (window.SFX) SFX.click();
+          var rec = window.CharDB.BY_CHAR[c];
+          tip.textContent = c + (rec ? " · " + rec.p : "");
+          b.classList.add("on");
+          App.after(200, function () { b.classList.remove("on"); });
+          window.Speech.speak(c, 0.7);
+          if (findOn && c === target) {
+            if (!b.classList.contains("found")) {
+              b.classList.add("found");
+              found++;
+              updateFind();
+            }
+          }
+        });
+      });
+
+      function updateFind() {
+        findHud.hidden = false;
+        findHud.innerHTML = "🎯 在短文里找出所有的「<b>" + esc(target) + "</b>」 —— 找到 <b>" + found + " / " + totalTarget + "</b>";
+        if (found >= totalTarget && totalTarget > 0) {
+          findOn = false;
+          var res = window.Store.markRead(story.id);
+          findHud.innerHTML += '<span class="find-done">🎉 全找到啦!' + (res.first ? " 读书 +3 ⭐" : "") + "</span>";
+          if (window.SFX) SFX.correct();
+          if (window.UI.burst) window.UI.burst(window.innerWidth / 2, window.innerHeight * 0.4, 26);
+        }
+      }
+
+      view.querySelector("#rd-play").addEventListener("click", function () {
+        if (window.SFX) SFX.click();
+        var seq = story.s.slice();
+        seq.forEach(function (_s, i) {
+          App.after(1500 * i, function () {
+            view.querySelectorAll(".rd-line").forEach(function (l, li) { l.classList.toggle("reading", li === i); });
+          });
+        });
+        App.after(1500 * seq.length, function () {
+          view.querySelectorAll(".rd-line").forEach(function (l) { l.classList.remove("reading"); });
+        });
+        window.Speech.speakSeq(seq, 0.72);
+      });
+      var findBtn = view.querySelector("#rd-find");
+      if (findBtn) {
+        findBtn.addEventListener("click", function () {
+          findOn = !findOn;
+          found = view.querySelectorAll(".rd-char.found").length;
+          if (findOn) { updateFind(); tip.textContent = "点短文里的字,把「" + target + "」都找出来"; }
+          else findHud.hidden = true;
+        });
+      }
+      view.querySelector("#rd-done").addEventListener("click", function () {
+        var res = window.Store.markRead(story.id);
+        window.UI.toast(res.first ? "读完一篇,读书 +3 ⭐" : "又读了一遍,真棒!");
+        if (window.SFX) SFX.correct();
+        App.after(700, function () { App.navigate("#/read"); });
+      });
+      view.querySelector("#rd-back").addEventListener("click", function () { App.navigate("#/read"); });
+      if (window.Beacon) Beacon.track("view", { v: "story" });
+    }
+  });
+
+  window.ReadDrill = { findTargets: findTargets, levelOf: levelOf, charsOf: charsOf };
+})();

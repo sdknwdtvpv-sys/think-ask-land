@@ -234,6 +234,21 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   .zl-item small { font-size: 10px; }
 }
 
+/* 入口卡已经有 6 张 + 家长中心:矮屏(笔记本窗口/多数手机)改为三列,
+   并把副标题收起 —— 目标是"一屏之内全部看得见、点得到",宁可少一行说明文字。
+   阈值取 900px 以覆盖 iPhone 的 844 逻辑高度。 */
+@media (max-height: 900px) {
+  .menu-grid { grid-template-columns: repeat(3, 1fr); gap: 9px; }
+  .menu-btn { padding: 11px 8px 10px; }
+  .menu-btn .menu-sub { display: none; }
+  .menu-ico .ico { width: 24px; height: 24px; }
+  .menu-label { font-size: 15px; letter-spacing: 0; }
+  .menu-btn.wide { padding: 10px 16px; }
+  .home-mascot svg { height: 64px; width: auto; }
+  .home-foot { margin-top: 8px; font-size: 11px; }
+  .today-task { padding: 9px 13px; }
+}
+
 /* 主操作常驻可视区:无论字卡内容多长(字理/配图/例句),
    "我会了"都必须能点到 —— 内容变长时不再把主按钮挤出首屏 */
 .card-nav {

@@ -211,7 +211,7 @@
         combo++;
         showCombo();
         okCount++; earned++;
-        window.Store.quizResult(q.target.c, true);
+        window.Store.quizResult(q.target.c, true, null, (window.Games && Games.dimOf) ? Games.dimOf(q.type) : null);
         var res = window.Store.addStars(1);
         acc.stickers = acc.stickers.concat(res.stickers);
         acc.badges = acc.badges.concat(res.badges);
@@ -236,7 +236,7 @@
         /* 错因分类:孩子为什么选错 → 记进档案,家长端能看到,下一轮优先练对应题型 */
         var chosenOpt = q.options[oi] || {};
         var cause = (window.Games && Games.classify) ? Games.classify(q.target, chosenOpt.ref, q.type) : null;
-        window.Store.quizResult(q.target.c, false, cause);
+        window.Store.quizResult(q.target.c, false, cause, (window.Games && Games.dimOf) ? Games.dimOf(q.type) : null);
         if (window.SFX) SFX.wrong();
         var right = area.querySelectorAll(".opt")[q.answerIdx];
         if (right) right.classList.add("correct");
@@ -694,6 +694,47 @@
         }
         html += "</div>";
 
+        /* ---- 能力地图:把"总正确率"拆成不同能力,家长才知道该练什么 ---- */
+        var amap = window.Store.abilityMap();
+        var amax = 100;
+        html += '<div class="panel"><h4>' + Icons.svg("chart") + "能力地图</h4>" +
+          '<div class="ability-list">' +
+          amap.map(function (r) {
+            var val = r.acc === null ? null : r.acc;
+            var w = val === null ? 0 : Math.max(4, Math.round(val / amax * 100));
+            var label = r.unit ? (r.count + " " + r.unit) : (r.n ? r.n + " 题" : "还没练过");
+            return '<div class="ab-row"><span class="ab-name">' + esc(r.name) + "</span>" +
+              '<span class="ab-bar"><i style="width:' + w + '%"></i></span>' +
+              '<span class="ab-val">' + (val === null ? "—" : val + "%") + "</span>" +
+              '<span class="ab-sub">' + label + "</span></div>";
+          }).join("") + "</div>" +
+          '<p class="parent-note">💡 ' + esc(window.Store.abilityAdvice()) + "</p></div>";
+
+        /* ---- 亲子任务:每天一张,线下做 ---- */
+        var quests = window.QUESTS || [];
+        if (quests.length) {
+          var dayIdx = Math.floor(Date.now() / 86400000) % quests.length;
+          var q = quests[dayIdx];
+          html += '<div class="panel"><h4>' + Icons.svg("sparkle") + "今日亲子任务</h4>" +
+            '<div class="today-quest"><span class="tq-emoji">' + q.emoji + "</span>" +
+              '<span class="tq-body"><span class="tq-title">' + esc(q.title) + "</span>" +
+              '<span class="tq-desc">' + esc(q.desc) + "</span>" +
+              '<span class="tq-foot">约 ' + q.min + " 分钟 · " + esc(q.tag) + "</span></span></div>" +
+            '<div class="backup-btns">' +
+              '<button class="btn btn-ghost" id="btn-quest-next">换一个</button>' +
+              '<button class="btn btn-sky" id="btn-print-quests">🖨️ 打印任务卡</button>' +
+            "</div>" +
+            '<p class="parent-note">3~6 岁识字的主战场在家里。这些任务都不用备课,照着念就能做。</p></div>';
+        }
+
+        /* ---- 打印物料 ---- */
+        html += '<div class="panel"><h4>' + Icons.svg("book") + "打印物料</h4>" +
+          '<p class="parent-note">屏幕上练,纸上也要练。打印出来贴冰箱、夹绘本里都行。</p>' +
+          '<div class="backup-btns">' +
+            '<button class="btn btn-sky" id="pr-cards">🃏 识字卡</button>' +
+            '<button class="btn btn-ghost" id="pr-write">✍️ 描红练习纸</button>' +
+          "</div></div>";
+
         /* ---- 朗读声音:换更自然的音色 ---- */
         var voices = window.Speech.supported ? window.Speech.listVoices() : [];
         var curVoice = window.Speech.voice;
@@ -902,6 +943,31 @@
             if (!ur.ok) { window.UI.toast(ur.err); return; }
             window.UI.toast("已恢复到导入前的进度");
             rerender();
+          });
+        }
+
+        var prCards = v.querySelector("#pr-cards");
+        if (prCards) prCards.addEventListener("click", function () { App.navigate("#/print?type=cards&scope=learned"); });
+        var prWrite = v.querySelector("#pr-write");
+        if (prWrite) prWrite.addEventListener("click", function () { App.navigate("#/print?type=write&scope=learned"); });
+        var prQuests = v.querySelector("#btn-print-quests");
+        if (prQuests) prQuests.addEventListener("click", function () { App.navigate("#/print?type=quests"); });
+        var questNext = v.querySelector("#btn-quest-next");
+        if (questNext) {
+          questNext.addEventListener("click", function () {
+            var box = v.querySelector(".today-quest");
+            var list = window.QUESTS || [];
+            if (!list.length || !box) return;
+            /* 轮流看下一张(不写存档:只是家长翻看) */
+            var cur = box.getAttribute("data-i");
+            var next = ((cur ? parseInt(cur, 10) : 0) + 1) % list.length;
+            var q2 = list[next];
+            box.setAttribute("data-i", String(next));
+            box.querySelector(".tq-emoji").textContent = q2.emoji;
+            box.querySelector(".tq-title").textContent = q2.title;
+            box.querySelector(".tq-desc").textContent = q2.desc;
+            box.querySelector(".tq-foot").textContent = "约 " + q2.min + " 分钟 · " + q2.tag;
+            if (window.SFX) SFX.click();
           });
         }
 

@@ -178,11 +178,21 @@ function check(name, cond, extra) {
 
   // ---- 首屏与遮挡回归 ----
   await page.evaluate(() => { location.hash = "#/home"; }); await sleep(600);
-  const home = await page.evaluate(() => {
+  /* 不变量是"没有东西盖住入口卡"(当年正是奖励弹窗的遮罩导致首页点不动),
+     而不是"必须挤在首屏" —— 入口变多后允许滚动,但每张卡滚到眼前时必须可点。 */
+  const home = await page.evaluate(async () => {
     const els = Array.from(document.querySelectorAll("[data-go]"));
-    return els.every(el => { const r = el.getBoundingClientRect(); const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return hit && el.contains(hit); });
+    const bad = [];
+    for (const el of els) {
+      el.scrollIntoView({ block: "center" });
+      await new Promise((r) => setTimeout(r, 60));
+      const r = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      if (!hit || !el.contains(hit)) bad.push((el.getAttribute("data-go") || "?") + " 被 " + (hit ? (hit.id || hit.className) : "视口外") + " 挡住");
+    }
+    return bad;
   });
-  check("首页入口仍全部可点", home);
+  check("首页入口全部可点(无遮挡)", home.length === 0, home.slice(0, 3).join(" | ") || "全部可点");
 
   console.log("\n浏览器错误:", errs.length ? errs : "无");
   if (errs.length) fails += errs.length;

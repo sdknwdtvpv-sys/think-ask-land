@@ -137,9 +137,9 @@ const BENIGN = [
   });
 
   /* ---------- 3) 存档兼容 ---------- */
-  t("v2 写盘保留 err 字段", () => {
+  t("写盘保留 err 字段(版本号与 SCHEMA 一致)", () => {
     const raw = JSON.parse(win.localStorage.getItem(KEY));
-    if (raw.v !== 2) return FAIL("SCHEMA=" + raw.v);
+    if (raw.v !== Store.SCHEMA) return FAIL("SCHEMA=" + raw.v + " ≠ " + Store.SCHEMA);
     const e = raw.chars["山"] && raw.chars["山"].err;
     return e && e.tone === 2 ? PASS("已落盘 tone=2 ✓") : FAIL("落盘内容 " + JSON.stringify(e));
   });

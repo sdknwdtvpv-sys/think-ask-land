@@ -104,10 +104,23 @@ function check(name, cond, extra) {
   });
   const target = changed[0];
   check("答错后存档记录到该字", changed.length === 1, "变化字=" + changed.join(",") + " 点了=" + clicked);
-  check("错因被判定为「音近」", target && after[target].err && after[target].err.snd === (before[target] && before[target].err ? (before[target].err.snd || 0) : 0) + 1,
-    target ? JSON.stringify(after[target].err) : "无变化字");
+  /* 听写题的干扰项可能是"只差声调"或"同韵/同声",所以错因可能是 tone/snd/shp/sem/rcl 中的任一个;
+     不变量是:恰好记下一个合法错因,并且给出的提示与该错因一致(而不是随便一句安慰)。 */
+  const CAUSE_HINT = {
+    tone: "声调不一样哦,再听一次 🔊",
+    snd: "它们听起来很像,仔细听~",
+    shp: "这两个字长得像,看清楚哦",
+    sem: "意思记混啦,再看看图",
+    rcl: "多听几遍就记住啦",
+  };
+  const beforeErr = (before[target] && before[target].err) || {};
+  const afterErr = (after[target] && after[target].err) || {};
+  const bumped = Object.keys(afterErr).filter((k) => (afterErr[k] || 0) === (beforeErr[k] || 0) + 1);
+  check("答错恰好记下一个合法错因", target && bumped.length === 1 && !!CAUSE_HINT[bumped[0]],
+    target ? "错因 " + JSON.stringify(afterErr) + " | 新增 " + bumped.join(",") : "无变化字");
   const hint = await text(".feedback-line .fb-hint");
-  check("答错给出针对性提示(不出现「错」字)", hint && /很像|再听|看清楚|记混|记住/.test(hint) && !/错/.test(hint), hint || "无提示");
+  check("提示与该错因一致(且不出现「错」字)", hint && bumped.length === 1 && hint === CAUSE_HINT[bumped[0]],
+    (hint || "无提示") + " | 期望 " + (bumped[0] ? CAUSE_HINT[bumped[0]] : "?"));
 
   /* ---------- 4) 家长中心错因面板 ---------- */
   await nav("#/parent");
