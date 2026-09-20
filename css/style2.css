@@ -139,7 +139,7 @@
 .wbar.zero { background: #eee9f5; }
 .wbar-label { font-size: 10.5px; color: var(--ink-light); font-weight: 700; }
 .weak-list { display: flex; flex-wrap: wrap; gap: 9px; }
-.weak-item { background: #fff3f5; border-radius: 14px; padding: 8px 13px; font-size: 21px; font-weight: 800; display: flex; align-items: center; gap: 7px; }
+.weak-item { background: #fff3f5; border-radius: 14px; padding: 8px 13px; min-height: 52px; font-size: 21px; font-weight: 800; display: flex; align-items: center; gap: 7px; }
 .weak-item small { font-size: 11px; color: var(--ink-light); font-weight: 700; }
 .parent-note { font-size: 12.5px; color: var(--ink-light); line-height: 1.9; }
 /* 家长中心 · 朗读声音选择 */

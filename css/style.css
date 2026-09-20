@@ -30,7 +30,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   border-bottom: 2px solid rgba(74, 68, 88, .06);
 }
 .icon-btn {
-  width: 42px; height: 42px; border-radius: 14px; flex: 0 0 auto;
+  width: 52px; height: 52px; border-radius: 14px; flex: 0 0 auto;
   background: #fff; box-shadow: 0 3px 0 rgba(74, 68, 88, .12);
   font-size: 26px; line-height: 1; color: var(--ink);
   display: flex; align-items: center; justify-content: center;
@@ -161,7 +161,9 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 .card-wrap { display: flex; flex-direction: column; align-items: center; }
 .card-pos { font-size: 13px; color: var(--ink-light); font-weight: 700; margin-bottom: 8px; }
 .py-big { font-size: 27px; font-weight: 800; color: var(--sky-deep); letter-spacing: 1px; min-height: 36px; display: flex; align-items: center; gap: 10px; }
-.py-big .mini-speak { font-size: 19px; background: #eaf5ff; border-radius: 99px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 0 #bcd9f2; }
+/* 读音钮视觉上仍是 34px 小圆钮,用 ::after 把可点区域撑到 52×52(幼儿手指精度低) */
+.py-big .mini-speak { font-size: 19px; background: #eaf5ff; border-radius: 99px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 0 #bcd9f2; position: relative; }
+.py-big .mini-speak::after { content: ""; position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; transform: translate(-50%, -50%); }
 .writer-box {
   margin: 10px 0 4px; background: #fff; border-radius: 26px; padding: 12px;
   box-shadow: var(--card-shadow); position: relative;

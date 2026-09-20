@@ -138,9 +138,24 @@
   function clearModals() {
     queue = [];
     showing = false;
+    lastFocus = null;   // 路由已切换,原焦点元素多半已被销毁,不再尝试归还
     var root = document.getElementById("modal-root");
     if (root) root.innerHTML = "";
   }
+  /* 弹窗无障碍:role=dialog + aria-label;打开时记住焦点,关闭后归还 */
+  function attr(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  var lastFocus = null;
+  function rememberFocus() { lastFocus = document.activeElement; }
+  function restoreFocus() {
+    var el = lastFocus;
+    lastFocus = null;
+    if (el && el.isConnected && el.focus) { try { el.focus(); } catch (e) { /* 忽略 */ } }
+  }
+
   function celebrate(items, onAllDone) {
     items.forEach(function (it) { queue.push(it); });
     if (onAllDone) queue.push({ kind: "_done", fn: onAllDone });
@@ -159,7 +174,7 @@
     var text = it.kind === "sticker" ? "集满 " + window.Store.STICKER_EVERY + " 颗星星的奖励,继续加油哦!" : it.kind === "badge" ? it.d || "" : it.text || "";
     var mood = (it.kind === "sticker" || it.kind === "badge") ? "cheer" : "happy";
     mask.innerHTML =
-      '<div class="modal-card">' +
+      '<div class="modal-card" role="dialog" aria-modal="true" aria-label="' + attr(title || "提示") + '">' +
         '<div class="modal-mascot">' + (window.Mascot ? Mascot.render(mood, 92) : "") + "</div>" +
         '<span class="modal-emoji">' + (it.e || "🎉") + "</span>" +
         '<div class="modal-title">' + title + "</div>" +
@@ -167,17 +182,22 @@
         '<div class="modal-btns"><button class="btn btn-lg btn-mint" id="modal-ok">' + (it.okText || "收下啦!") + "</button></div>" +
       "</div>";
     root.appendChild(mask);
+    rememberFocus();
+    var okBtn = mask.querySelector("#modal-ok");
+    if (okBtn) { try { okBtn.focus(); } catch (e) { /* 忽略 */ } }   // 打开即可直接确认
     if (it.kind === "sticker" || it.kind === "badge") { burst(window.innerWidth / 2, window.innerHeight / 2, 60); }
     // 点遮罩空白处也能关闭 —— 弹窗永远不会把用户困住
     mask.addEventListener("click", function (ev) {
       if (ev.target !== mask) return;
       mask.remove();
       showing = false;
+      restoreFocus();
       pump();
     });
     mask.querySelector("#modal-ok").addEventListener("click", function () {
       mask.remove();
       showing = false;
+      restoreFocus();
       pump();
     });
   }
@@ -188,7 +208,7 @@
     var mask = document.createElement("div");
     mask.className = "modal-mask";
     mask.innerHTML =
-      '<div class="modal-card">' +
+      '<div class="modal-card" role="dialog" aria-modal="true" aria-label="' + attr(o.title || "确认") + '">' +
         '<span class="modal-emoji">' + (o.emoji || "❓") + "</span>" +
         '<div class="modal-title">' + (o.title || "") + "</div>" +
         '<div class="modal-text">' + (o.text || "") + "</div>" +
@@ -198,24 +218,29 @@
         "</div>" +
       "</div>";
     root.appendChild(mask);
+    rememberFocus();
+    var okBtn = mask.querySelector("#cf-ok");
+    if (okBtn) { try { okBtn.focus(); } catch (e) { /* 忽略 */ } }
     mask.addEventListener("click", function (ev) {
       if (ev.target !== mask) return;
       mask.remove();
+      restoreFocus();
       o.onCancel && o.onCancel();
     });
-    mask.querySelector("#cf-ok").addEventListener("click", function () { mask.remove(); o.onOk && o.onOk(); });
-    mask.querySelector("#cf-cancel").addEventListener("click", function () { mask.remove(); o.onCancel && o.onCancel(); });
+    mask.querySelector("#cf-ok").addEventListener("click", function () { mask.remove(); restoreFocus(); o.onOk && o.onOk(); });
+    mask.querySelector("#cf-cancel").addEventListener("click", function () { mask.remove(); restoreFocus(); o.onCancel && o.onCancel(); });
   }
 
-  /* Esc 关闭庆祝弹窗(键盘可达性) */
+  /* Esc 关闭弹窗(键盘可达性) —— 必须关「最上面」那一层:
+     旧的 querySelector 只取第一个匹配,多层弹窗时会关掉被遮住的那层,
+     反而把上面的弹窗留在屏幕上。 */
   document.addEventListener("keydown", function (ev) {
     if (ev.key !== "Escape") return;
-    var ok = document.querySelector("#modal-root .modal-mask #modal-ok");
-    if (ok) ok.click();
-    else {
-      var cancel = document.querySelector("#modal-root .modal-mask #cf-cancel");
-      if (cancel) cancel.click();
-    }
+    var masks = document.querySelectorAll("#modal-root .modal-mask");
+    if (!masks.length) return;
+    var top = masks[masks.length - 1];
+    var btn = top.querySelector("#modal-ok") || top.querySelector("#cf-cancel");
+    if (btn) btn.click();
   });
 
   window.UI = {

@@ -99,9 +99,11 @@ hanzi-kids/
     └── hanzi-writer.min.js       # 笔顺引擎 v3.7.2 (MIT)
 ```
 
-> `.build/` 目录是开发辅助工具（零依赖静态服务器 `serve.js`、jsdom 冒烟 `smoke.js`、
+> `.build/` 目录是开发辅助工具（零依赖静态服务器 `serve.js`、内容质检 `content-qc.js`、
+> jsdom 冒烟 `smoke.js`、jsdom UX 回归 `ux-regression.js`（返回键/浏览器历史、resize、弹窗 Esc、描红手势）、
 > 真实浏览器验收 `browser-test3.js` / `p0-visual-test.js` / `p1-visual-test.js` / `p2-visual-test.js` / `p3-visual-test.js` / `voice-test.js`），
-> 与应用运行无关，可整体删除；回归时在该目录 `npm i puppeteer jsdom` 后运行对应脚本即可。
+> 与应用运行无关（**已纳入版本库**，部署时被 rsync 排除）；回归时在该目录 `npm i puppeteer jsdom` 后运行对应脚本，
+> 其中 `smoke.js` 与 `ux-regression.js` 需要先启动静态服务器（`node serve.js 8023`）。
 
 ## ♿ 无障碍与舒适度
 

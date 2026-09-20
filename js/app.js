@@ -33,13 +33,18 @@
       }, 120);
     },
 
+    /* 返回:走浏览器历史,让「实体返回键」与站内返回保持一致。
+       旧实现用 location.hash = 赋值,会向浏览器历史追加一条新记录 →
+       按实体/手势返回键会退回刚离开的那一页,要连按多次才能退出。 */
     back: function () {
       if (this.hist.length > 1) {
         this.hist.pop();
-        var t = this.hist[this.hist.length - 1] || "#/home";
         this._suppressPush = true;
-        if ((location.hash || "#/home") === t) this.render();
-        else location.hash = t;
+        var self = this;
+        /* 兜底:若上一历史项的 hash 与当前相同则不会触发 hashchange,
+           避免 _suppressPush 悬挂,导致后续路由不入栈 */
+        setTimeout(function () { self._suppressPush = false; }, 500);
+        history.back();
       } else {
         this.navigate("#/home");
       }
@@ -103,9 +108,14 @@
       var unlock = function () { window.Speech.warmup(); };
       document.addEventListener("pointerdown", unlock, { once: true });
       window.Store.on(function () { self.refreshStars(); });
+      /* 只在「宽度」变化时重渲染(横竖屏切换等)。
+         手机地址栏收起/展开只改高度却同样触发 resize —— 若照样重渲染,
+         字卡页会被整个重建:描红进度丢失、进页面时的自动朗读重放。 */
       window.addEventListener("resize", (function () {
-        var t = 0;
+        var t = 0, lastW = window.innerWidth;
         return function () {
+          if (window.innerWidth === lastW) return;
+          lastW = window.innerWidth;
           clearTimeout(t);
           t = setTimeout(function () { if (self.currentName === "card" || self.currentName === "groups") self.render(); }, 350);
         };
@@ -588,16 +598,20 @@
         }
       });
 
-      /* 左右滑动切换 */
-      var sx = 0, sy = 0;
+      /* 左右滑动切换(仅「看字/笔顺」态可用)。
+         描红态必须禁用:孩子的手指正在写字,一个横向笔画(|dx| 轻松超过 70px)
+         会被误判成滑动手势而跳到下一个字,描红进度直接丢失。 */
+      var sx = 0, sy = 0, t0 = 0;
       var box = view.querySelector("#writer-box");
       box.addEventListener("touchstart", function (e) {
-        sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+        sx = e.touches[0].clientX; sy = e.touches[0].clientY; t0 = Date.now();
       }, { passive: true });
       box.addEventListener("touchend", function (e) {
+        if (wMode === "quiz") return;              // 描红态:手指在写字,绝不切字
+        if (Date.now() - t0 > 600) return;         // 慢速拖动视为书写/滚动,不算滑动
         var dx = e.changedTouches[0].clientX - sx;
         var dy = e.changedTouches[0].clientY - sy;
-        if (Math.abs(dx) > 70 && Math.abs(dy) < 50) go(i + (dx < 0 ? 1 : -1));
+        if (Math.abs(dx) > 90 && Math.abs(dy) < 40) go(i + (dx < 0 ? 1 : -1));
       }, { passive: true });
     }
   });
