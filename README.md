@@ -122,15 +122,18 @@ python3 .build/gen-audio.py --selftest-sign    # 用腾讯云官方示例向量�
 
 ```bash
 python3 .build/gen-audio.py --list                          # 看已生成哪些音色、当前默认是谁
-python3 .build/gen-audio.py --set-default yunxia            # 切到微软/Azure 音色（云夏）
-python3 .build/gen-audio.py --set-default tc-402000         # 切到腾讯云音色（云晓芙）
+python3 .build/gen-audio.py --set-default tc-502007         # 切到腾讯云音色（智小虎）
+python3 .build/gen-audio.py --set-default yunxia            # 切回微软/Azure 音色（云夏）
+python3 .build/make-listen-page.py                          # 重新生成音色对比网页
 ```
 
 刷新页面即生效（前端读的就是 `config.json`），**不会重新生成任何音频**，随时可以切回来。
+想在浏览器里横向 A/B 多个音色：起本地服务器后打开 `http://127.0.0.1:8023/audio/_listen.html`
+（该页由 `make-listen-page.py` 生成，可一键让全部音色依次念同一段内容）。
 想让不同内容用不同音色，改上一节的 `roles` 即可。
 
 > 约定：音频目录按「音色来源」分开命名——`yunxia` / `xiaoyi` 是微软（Azure）音色，
-> `tc-<音色ID>` 是腾讯云音色。两套并存，互不覆盖。
+> `tc-<音色ID>` 是腾讯云音色。多套并存，互不覆盖。
 
 常用参数：`--limit N` / `--group N` 先做小样，`--dry-run` 只看清单，`--trim` 去首尾静音。
 

@@ -221,23 +221,33 @@ def _tc3_headers(secret_id, secret_key, payload_str, action="TextToVoice", versi
     }
 
 def gen_tencent(args, voice_id, text, path):
+    """腾讯云语音合成。
+    不同音色线支持的采样率不同（超自然大模型支持 24k，精品线只支持 16k/8k），
+    遇到 InvalidParameterValue.SampleRate 就逐级降级重试，避免换音色线就整个跑不动。"""
     import base64, urllib.request
-    body = {
+    base = {
         "Text": text, "SessionId": "siwen-%d" % (abs(hash(text)) % 10 ** 9),
-        "VoiceType": int(voice_id), "Codec": "mp3", "SampleRate": 24000,
+        "VoiceType": int(voice_id), "Codec": "mp3",
         "Speed": args.speed, "Volume": 0, "PrimaryLanguage": 1,
     }
-    payload = json.dumps(body, ensure_ascii=False)
-    headers = _tc3_headers(args.secret_id, args.secret_key, payload)
-    req = urllib.request.Request("https://tts.tencentcloudapi.com", data=payload.encode("utf-8"),
-                                 headers=headers, method="POST")
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
-    r = data.get("Response", {})
-    if "Audio" not in r:
-        raise RuntimeError("腾讯云返回错误: %s" % json.dumps(r, ensure_ascii=False)[:200])
-    with open(path, "wb") as fh:
-        fh.write(base64.b64decode(r["Audio"]))
+    last_err = None
+    for sr in (24000, 16000, 8000):
+        payload = json.dumps(dict(base, SampleRate=sr), ensure_ascii=False)
+        headers = _tc3_headers(args.secret_id, args.secret_key, payload)
+        req = urllib.request.Request("https://tts.tencentcloudapi.com", data=payload.encode("utf-8"),
+                                     headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        r = data.get("Response", {})
+        if "Audio" in r:
+            with open(path, "wb") as fh:
+                fh.write(base64.b64decode(r["Audio"]))
+            return
+        err = r.get("Error", {}) or {}
+        last_err = "腾讯云返回错误: %s" % json.dumps(r, ensure_ascii=False)[:200]
+        if "SampleRate" not in (str(err.get("Code", "")) + str(err.get("Message", ""))):
+            raise RuntimeError(last_err)     # 其它错误（额度/参数）不必重试
+    raise RuntimeError(last_err or "腾讯云未返回音频")
 
 # ---------- 可选：去首尾静音 ----------
 def find_ffmpeg():
@@ -375,11 +385,6 @@ def main():
     if default_key not in keys:
         sys.exit("--default-voice %s 不在 --voice 列表里" % default_key)
 
-    if args.engine == "tencent" and not args.dry_run and not (args.secret_id and args.secret_key):
-        sys.exit("腾讯云引擎需要 --secret-id / --secret-key（或 TENCENT_SECRET_ID / TENCENT_SECRET_KEY）")
-    if args.engine == "azure" and not args.dry_run and not args.azure_key:
-        sys.exit("Azure 引擎需要 --azure-key（或 AZURE_SPEECH_KEY）")
-
     if args.selftest_sign:
         sys.exit(selftest_sign())
 
@@ -462,7 +467,13 @@ def main():
 
     if args.check:
         chars_all = load_chars()
-        want = {t[3] for t in build_tasks(chars_all, None, None, args.engine)}
+        want_cache = {}
+
+        def want_for(engine):
+            if engine not in want_cache:
+                want_cache[engine] = {t[3] for t in build_tasks(chars_all, None, None, engine)}
+            return want_cache[engine]
+
         bad = 0
         cfg_file = os.path.join(OUT, "config.json")
         if os.path.exists(cfg_file):
@@ -473,10 +484,22 @@ def main():
                 print("❌ %s: 没有 index.json（尚未生成）" % vk)
                 bad += 1
                 continue
-            have = set(json.load(open(idx_path, encoding="utf-8")).keys())
+            # 每个音色按自己的引擎算期望条目：腾讯云能生成 发/谁，edge 不能，条数天然不同
+            meta = {}
+            mp = os.path.join(OUT, vk, "meta.json")
+            if os.path.exists(mp):
+                try:
+                    with open(mp, encoding="utf-8") as fh:
+                        meta = json.load(fh)
+                except Exception:
+                    meta = {}
+            eng = meta.get("engine", args.engine)
+            want = want_for(eng)
+            with open(idx_path, encoding="utf-8") as fh:
+                have = set(json.load(fh).keys())
             miss = want - have
             extra = have - want
-            print("%s %s: 覆盖 %d/%d" % ("✅" if not miss else "⚠️", vk, len(want & have), len(want)),
+            print("%s %-14s(%s): 覆盖 %d/%d" % ("✅" if not miss else "⚠️", vk, eng, len(want & have), len(want)),
                   end="")
             if miss:
                 print("  缺 %d 条（内容改过？需重新生成）: %s" % (len(miss), "、".join(list(miss)[:5])))
@@ -530,6 +553,12 @@ def main():
         else:
             print("多音字全部以 SSML 拼音音素锁定（无跳过）: %s" % "、".join(sorted(PHONEME)))
         return
+
+    # 只有真正要联网合成时才要求凭证：--check / --list / --retrim 等只读模式不该被卡住
+    if args.engine == "tencent" and not (args.secret_id and args.secret_key):
+        sys.exit("腾讯云引擎需要 --secret-id / --secret-key（或 TENCENT_SECRET_ID / TENCENT_SECRET_KEY）")
+    if args.engine == "azure" and not args.azure_key:
+        sys.exit("Azure 引擎需要 --azure-key（或 AZURE_SPEECH_KEY）")
 
     ffmpeg = find_ffmpeg() if args.trim else None
     if args.trim and not ffmpeg:
