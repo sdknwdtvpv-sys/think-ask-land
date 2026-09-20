@@ -16,8 +16,10 @@
   python3 .build/gen-audio.py --engine edge --voice zh-CN-YunxiaNeural,zh-CN-XiaoyiNeural
 
   # 引擎二：腾讯云 TTS（推荐正式使用：官方允许商用 + 拼音音素锁多音字）
-  python3 .build/gen-audio.py --engine tencent --voice 402000,403000 \
-      --secret-id "$TENCENT_SECRET_ID" --secret-key "$TENCENT_SECRET_KEY"
+  # 音色写法 ID[:目录名[:显示名]]，用别名可以让腾讯云音色直接覆盖到原目录，
+  # 这样 config.json 里的 roles 配置不用改：
+  python3 .build/gen-audio.py --engine tencent --voice "402000:yunxia:云夏,403000:xiaoyi:晓伊" \
+      --secret-id "$TENCENT_SECRET_ID" --secret-key "$TENCENT_SECRET_KEY" --trim
 
 常用参数
   --limit N      只生成前 N 个字（先小样验证）
@@ -86,8 +88,19 @@ def label_voice(name):
     return VOICE_LABELS.get(slug_voice(name), name)
 
 # ---------- 多音字处理 ----------
-SYNTH_AS = {"只": "支", "长": "常", "兴": "幸", "假": "架"}   # 单字：换同音字合成，读音才对
-SKIP_SINGLE = {"发", "谁"}                                    # 单字：无干净同音字，交给前端 TTS 兜底
+# edge-tts 不支持 SSML/音素，只能用同音字替代；腾讯云支持 <phoneme alphabet="py">，可以直接锁音。
+SYNTH_AS = {"只": "支", "长": "常", "兴": "幸", "假": "架"}   # 仅 edge：换同音字合成，读音才对
+SKIP_SINGLE = {"发", "谁"}                                    # 仅 edge：无干净同音字，交给前端 TTS 兜底
+
+# 腾讯云：拼音 + 声调数字（1 阴平 / 2 阳平 / 3 上声 / 4 去声 / 5 轻声）
+PHONEME = {
+    "只": "zhi1", "长": "chang2", "兴": "xing4",
+    "假": "jia4", "发": "fa4", "谁": "shei2",
+}
+
+def ssml_phoneme(ch):
+    """把单字包成 SSML，用拼音音素锁死读音（腾讯云 TTS）"""
+    return '<speak><phoneme alphabet="py" ph="%s">%s</phoneme></speak>' % (PHONEME[ch], ch)
 
 # ---------- 读字库 ----------
 def load_chars():
@@ -106,7 +119,7 @@ def text_hash(text):
     """文件名用「文本哈希」保证唯一：同音字（一/衣、一个/衣服）不能让两个键指向同一个文件"""
     return hashlib.sha1(text.encode("utf-8")).hexdigest()[:8]
 
-def build_tasks(chars, limit=None, group=None):
+def build_tasks(chars, limit=None, group=None, engine="edge"):
     """返回 [(kind, 文件名主干, 合成用文本, 索引键)]，kind ∈ z/w/s"""
     if group is not None:
         per = len(chars) // 10
@@ -116,8 +129,12 @@ def build_tasks(chars, limit=None, group=None):
     tasks = []
     for ch in chars:
         c, py = ch["c"], pinyin_key(ch["p"])
-        if c not in SKIP_SINGLE:
-            tasks.append(("z", "%s-%s" % (py, text_hash(c)), SYNTH_AS.get(c, c), c))            # 单字
+        if engine == "tencent":
+            text = ssml_phoneme(c) if c in PHONEME else c        # 音素锁读音，发/谁 也能生成
+        else:
+            text = SYNTH_AS.get(c, c) if c not in SKIP_SINGLE else None   # edge 只能同音字替代
+        if text is not None:
+            tasks.append(("z", "%s-%s" % (py, text_hash(c)), text, c))                          # 单字
         for i, w in enumerate(ch["w"]):
             tasks.append(("w", "%s-%d-%s" % (py, i + 1, text_hash(w)), w, w))                   # 组词
         if ch["s"]:
@@ -132,9 +149,9 @@ def gen_edge(bin_path, voice, rate, text, path):
         raise RuntimeError("edge-tts 失败: %s" % (r.stderr.decode("utf-8", "ignore")[:200]))
 
 # ---------- 引擎：腾讯云 TTS（TC3-HMAC-SHA256 签名，标准库实现，无需 SDK） ----------
-def _tc3_headers(secret_id, secret_key, payload_str, action="TextToVoice", version="2019-08-23"):
-    host, service, region = "tts.tencentcloudapi.com", "tts", "ap-guangzhou"
-    ts = int(datetime.now(timezone.utc).timestamp())
+def _tc3_headers(secret_id, secret_key, payload_str, action="TextToVoice", version="2019-08-23",
+                 service="tts", host="tts.tencentcloudapi.com", region="ap-guangzhou", timestamp=None):
+    ts = int(timestamp or datetime.now(timezone.utc).timestamp())
     date = datetime.fromtimestamp(ts, timezone.utc).strftime("%Y-%m-%d")
     hashed = hashlib.sha256(payload_str.encode("utf-8")).hexdigest()
     canonical = "POST\n/\n\ncontent-type:application/json; charset=utf-8\nhost:%s\nx-tc-action:%s\n\ncontent-type;host;x-tc-action\n%s" % (
@@ -157,11 +174,11 @@ def _tc3_headers(secret_id, secret_key, payload_str, action="TextToVoice", versi
         "X-TC-Timestamp": str(ts), "X-TC-Region": region,
     }
 
-def gen_tencent(args, text, path):
+def gen_tencent(args, voice_id, text, path):
     import base64, urllib.request
     body = {
         "Text": text, "SessionId": "siwen-%d" % (abs(hash(text)) % 10 ** 9),
-        "VoiceType": int(args.voice), "Codec": "mp3", "SampleRate": 24000,
+        "VoiceType": int(voice_id), "Codec": "mp3", "SampleRate": 24000,
         "Speed": args.speed, "Volume": 0, "PrimaryLanguage": 1,
     }
     payload = json.dumps(body, ensure_ascii=False)
@@ -223,6 +240,49 @@ def trim(ffmpeg, path):
             pass
     return False
 
+# ---------- 签名自检：用官方文档《签名方法 v3》的示例向量核对实现 ----------
+SIGN_VECTOR = {
+    "service": "cvm", "host": "cvm.tencentcloudapi.com", "region": "ap-guangzhou",
+    "action": "DescribeInstances", "version": "2017-03-12", "timestamp": 1551113065,
+    "payload": '{"Limit": 1, "Filters": [{"Values": ["\\u672a\\u547d\\u540d"], "Name": "instance-name"}]}',
+    "hashed_payload": "35e9c5b0e3ae67532d3c9f17ead6c90222632e5b1ff7f6e89887f1398934f064",
+    "hashed_canonical": "7019a55be8395899b900fb5564e4200d984910f34794a27cb3fb7d10ff6a1e84",
+    "signature": "10b1a37a7301a02ca19a647ad722d5e43b4b3cff309d421d85b46093f6ab6c4f",
+}
+
+def selftest_sign():
+    v = SIGN_VECTOR
+    ok = True
+    hashed = hashlib.sha256(v["payload"].encode("utf-8")).hexdigest()
+    print("① 请求正文哈希  %s  %s" % (hashed, "✓" if hashed == v["hashed_payload"] else "✗ 期望 " + v["hashed_payload"]))
+    ok &= hashed == v["hashed_payload"]
+
+    canonical = ("POST\n/\n\n"
+                 "content-type:application/json; charset=utf-8\n"
+                 "host:%s\nx-tc-action:%s\n\n"
+                 "content-type;host;x-tc-action\n%s") % (v["host"], v["action"].lower(), hashed)
+    hcanon = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    print("② 规范请求串哈希 %s  %s" % (hcanon, "✓" if hcanon == v["hashed_canonical"] else "✗ 期望 " + v["hashed_canonical"]))
+    ok &= hcanon == v["hashed_canonical"]
+
+    # 官方文档把密钥打码成 N 个星号，逐个长度试出与文档中间值一致的那个，顺带验证 HMAC 链
+    matched = None
+    for n in range(24, 40):
+        hdrs = _tc3_headers("AKID" + "*" * n, "*" * n, v["payload"], v["action"], v["version"],
+                            v["service"], v["host"], v["region"], v["timestamp"])
+        sig = hdrs["Authorization"].rsplit("Signature=", 1)[1]
+        if sig == v["signature"]:
+            matched = n
+            break
+    if matched:
+        print("③ 最终签名      %s  ✓（密钥星号数 %d，HMAC 派生链正确）" % (v["signature"], matched))
+    else:
+        print("③ 最终签名      ✗ 未能在 24~39 个星号内复现文档签名")
+        ok = False
+    print("\n签名自检: %s" % ("通过 ✅" if ok else "失败 ❌"))
+    return 0 if ok else 1
+
+
 # ---------- 主流程 ----------
 def main():
     ap = argparse.ArgumentParser()
@@ -241,24 +301,66 @@ def main():
     ap.add_argument("--resume", action="store_true", help="跳过已生成的音频")
     ap.add_argument("--default-voice", default="", help="哪个音色作为 config.default（默认取第一个）")
     ap.add_argument("--retrim", action="store_true", help="只对已生成的音频重新去静音,不重新合成")
+    ap.add_argument("--check", action="store_true", help="只检查现有音频是否覆盖当前字库(内容改动后会出现缺口)")
+    ap.add_argument("--selftest-sign", action="store_true", help="用官方示例向量自检腾讯云签名实现")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    voices = [v.strip() for v in args.voice.split(",") if v.strip()]
+    voices = []
+    for spec in args.voice.split(","):
+        spec = spec.strip()
+        if not spec:
+            continue
+        parts = spec.split(":")
+        vid = parts[0].strip()
+        key = (parts[1].strip() if len(parts) > 1 and parts[1].strip() else slug_voice(vid))
+        label = (parts[2].strip() if len(parts) > 2 and parts[2].strip() else label_voice(vid))
+        voices.append({"id": vid, "key": key, "label": label})
     if not voices:
         sys.exit("--voice 不能为空")
-    keys = [slug_voice(v) for v in voices]
-    default_key = slug_voice(args.default_voice) if args.default_voice else keys[0]
+    keys = [v["key"] for v in voices]
+    default_key = (args.default_voice.strip() if args.default_voice else keys[0])
     if default_key not in keys:
         sys.exit("--default-voice %s 不在 --voice 列表里" % default_key)
 
     if args.engine == "tencent" and not args.dry_run and not (args.secret_id and args.secret_key):
         sys.exit("腾讯云引擎需要 --secret-id / --secret-key（或 TENCENT_SECRET_ID / TENCENT_SECRET_KEY）")
 
+    if args.selftest_sign:
+        sys.exit(selftest_sign())
+
+    if args.check:
+        chars_all = load_chars()
+        want = {t[3] for t in build_tasks(chars_all, None, None, args.engine)}
+        bad = 0
+        cfg_file = os.path.join(OUT, "config.json")
+        if os.path.exists(cfg_file):
+            keys = sorted(json.load(open(cfg_file, encoding="utf-8")).get("voices", {}).keys()) or keys
+        for vk in keys:
+            idx_path = os.path.join(OUT, vk, "index.json")
+            if not os.path.exists(idx_path):
+                print("❌ %s: 没有 index.json（尚未生成）" % vk)
+                bad += 1
+                continue
+            have = set(json.load(open(idx_path, encoding="utf-8")).keys())
+            miss = want - have
+            extra = have - want
+            print("%s %s: 覆盖 %d/%d" % ("✅" if not miss else "⚠️", vk, len(want & have), len(want)),
+                  end="")
+            if miss:
+                print("  缺 %d 条（内容改过？需重新生成）: %s" % (len(miss), "、".join(list(miss)[:5])))
+                bad += 1
+            else:
+                print("  无缺口" + ("；另有 %d 条已废弃" % len(extra) if extra else ""))
+        sys.exit(1 if bad else 0)
+
     if args.retrim:
         ff = find_ffmpeg()
         if not ff:
             sys.exit("--retrim 需要 ffmpeg（可 pip install imageio-ffmpeg）")
+        cfg_file = os.path.join(OUT, "config.json")
+        if os.path.exists(cfg_file):
+            keys = sorted(json.load(open(cfg_file, encoding="utf-8")).get("voices", {}).keys()) or keys
         total = done = 0
         for vk in keys:
             for kind in ("z", "w", "s"):
@@ -275,12 +377,12 @@ def main():
         return
 
     chars = load_chars()
-    tasks = build_tasks(chars, args.limit, args.group)
+    tasks = build_tasks(chars, args.limit, args.group, args.engine)
     print("字库 %d 字 → 每条音色 %d 条（单字 %d / 组词 %d / 例句 %d）" % (
         len(chars), len(tasks),
         sum(1 for t in tasks if t[0] == "z"), sum(1 for t in tasks if t[0] == "w"),
         sum(1 for t in tasks if t[0] == "s")))
-    print("音色: %s" % "、".join("%s(%s)" % (label_voice(v), slug_voice(v)) for v in voices))
+    print("音色: %s" % "、".join("%s(%s←%s)" % (v["label"], v["key"], v["id"]) for v in voices))
     print("默认音色: %s" % default_key)
 
     if args.dry_run:
@@ -288,8 +390,11 @@ def main():
             print("   %s %-14s ← %s" % (kind, stem, text))
         if len(tasks) > 20:
             print("   …其余 %d 条" % (len(tasks) - 20))
-        skipped = sorted(SKIP_SINGLE & {c["c"] for c in chars})
-        print("跳过的单字（前端回退浏览器 TTS）: %s" % ("、".join(skipped) or "无"))
+        if args.engine == "edge":
+            skipped = sorted(SKIP_SINGLE & {c["c"] for c in chars})
+            print("跳过的单字（前端回退浏览器 TTS）: %s" % ("、".join(skipped) or "无"))
+        else:
+            print("多音字全部以 SSML 拼音音素锁定（无跳过）: %s" % "、".join(sorted(PHONEME)))
         return
 
     ffmpeg = find_ffmpeg() if args.trim else None
@@ -314,7 +419,7 @@ def main():
 
     reg = {}
     for vi, voice in enumerate(voices):
-        vkey = keys[vi]
+        vkey = voice["key"]
         vdir = os.path.join(OUT, vkey)
         for kind in ("z", "w", "s"):
             os.makedirs(os.path.join(vdir, kind), exist_ok=True)
@@ -333,9 +438,9 @@ def main():
             for attempt in range(3):                     # 失败重试 3 次（网络抖动/限流）
                 try:
                     if args.engine == "edge":
-                        gen_edge(args.edge_bin, voice, args.rate, text, path)
+                        gen_edge(args.edge_bin, voice["id"], args.rate, text, path)
                     else:
-                        gen_tencent(args, text, path)
+                        gen_tencent(args, voice["id"], text, path)
                     if not sane(path):       # 服务偶发返回空音频,重试
                         raise RuntimeError("产出异常(%s 字节)" % (os.path.getsize(path) if os.path.exists(path) else 0))
                     if ffmpeg and not trim(ffmpeg, path):
@@ -349,7 +454,7 @@ def main():
             errs.append("%s: %s" % (text[:8], last))
             return (key, None, last)
 
-        print("\n▶ 生成音色 %s（%s）" % (label_voice(voice), voice))
+        print("\n▶ 生成音色 %s（%s → audio/%s/）" % (voice["label"], voice["id"], vkey))
         index = {}
         with ThreadPoolExecutor(max_workers=args.concurrency) as ex:
             for key, rel, err in ex.map(work, uniq):
@@ -363,7 +468,7 @@ def main():
             json.dump(index, fh, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
         reg[vkey] = {
-            "label": label_voice(voice), "engine": args.engine, "voice": voice,
+            "label": voice["label"], "engine": args.engine, "voice": voice["id"],
             "count": len(index), "dir": vkey,
         }
         if errs:

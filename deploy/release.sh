@@ -40,7 +40,7 @@ echo
 
 # ---------- 1. 提交（可选） ----------
 if [ "$DEPLOY_ONLY" = "0" ]; then
-  echo "▶ [1/4] 提交到本地仓库"
+  echo "▶ [1/5] 提交到本地仓库"
   if [ -z "$(git status --porcelain)" ]; then
     echo "  · 无文件改动，跳过提交"
   else
@@ -50,12 +50,12 @@ if [ "$DEPLOY_ONLY" = "0" ]; then
     echo "  ✓ 已提交: $(git log --oneline -1)"
   fi
 else
-  echo "▶ [1/4] 跳过提交（--deploy-only）"
+  echo "▶ [1/5] 跳过提交（--deploy-only）"
 fi
 
 # ---------- 2. 推送到 GitHub ----------
 if [ "$NO_PUSH" = "0" ]; then
-  echo "▶ [2/4] 推送到 GitHub"
+  echo "▶ [2/5] 推送到 GitHub"
   if [ ! -f "$REPO/../.deploy/github_ed25519" ]; then
     echo "  ⚠️ 未找到 GitHub 私钥，跳过推送"
   else
@@ -76,15 +76,30 @@ if [ "$NO_PUSH" = "0" ]; then
     fi
   fi
 else
-  echo "▶ [2/4] 跳过推送（--no-push）"
+  echo "▶ [2/5] 跳过推送（--no-push）"
 fi
 
 # ---------- 3. 部署到腾讯云 ----------
-echo "▶ [3/4] 部署到腾讯云"
+# ---------- 3. 预置音频检查 ----------
+echo "▶ [3/5] 检查预置朗读音频"
+if [ -f audio/config.json ]; then
+  if python3 .build/gen-audio.py --check; then
+    echo "  ✓ 音频覆盖完整"
+  else
+    echo "  ⚠️ 音频与当前字库不一致：缺口条目会回退浏览器 TTS"
+    echo "     重新生成: python3 .build/gen-audio.py --engine tencent --voice <音色ID,...> --trim"
+  fi
+else
+  echo "  ℹ️ 未生成 audio/：朗读将全部走浏览器 TTS"
+  echo "     生成: python3 .build/gen-audio.py --engine tencent --voice <音色ID,...> --trim"
+fi
+
+# ---------- 4. 部署到腾讯云 ----------
+echo "▶ [4/5] 部署到腾讯云"
 ./deploy/deploy-tencent.sh 2>&1 | grep -E "✅|❌|⚠️" | sed 's/^/  /' || true
 
 # ---------- 4. 验证 ----------
-echo "▶ [4/4] 验证"
+echo "▶ [5/5] 验证"
 # 4a. 线上可访问 + 标题正确
 TITLE="$(curl -s --max-time 15 --resolve "$DOMAIN:443:$IP" "https://$DOMAIN/" | grep -oE "<title>[^<]*</title>" | head -1)"
 printf "  · 线上标题: %s\n" "${TITLE:-（取不到）}"

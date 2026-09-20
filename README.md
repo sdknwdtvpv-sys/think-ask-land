@@ -61,10 +61,27 @@ python3 -m http.server 8023
 pip install edge-tts imageio-ffmpeg
 python3 .build/gen-audio.py --engine edge --voice zh-CN-YunxiaNeural,zh-CN-XiaoyiNeural --trim
 
-# 正式生成（推荐腾讯云：官方允许商用，免费额度覆盖这点量，且支持拼音音素锁多音字）
-python3 .build/gen-audio.py --engine tencent --voice 402000,403000 \
+# 正式生成（推荐腾讯云：官方允许商用、免费额度覆盖这点量、支持拼音音素锁多音字）
+# 音色写法 ID[:目录名[:显示名]]——用别名让腾讯云音色直接覆盖到原目录，
+# 这样 config.json 里的 roles 配置完全不用改
+python3 .build/gen-audio.py --engine tencent \
+    --voice "402000:yunxia:云夏,403000:xiaoyi:晓伊" \
     --secret-id "$TENCENT_SECRET_ID" --secret-key "$TENCENT_SECRET_KEY" --trim
 ```
+
+常用参数：`--limit N` / `--group N` 先做小样，`--dry-run` 只看清单，`--trim` 去首尾静音，`--resume` 断点续跑。
+
+两个自检命令（改过字库或换过音色后跑一下）：
+
+```bash
+python3 .build/gen-audio.py --check            # 现有音频是否覆盖当前字库（缺口会逐条列出）
+python3 .build/gen-audio.py --selftest-sign    # 用腾讯云官方示例向量自检签名实现，应输出「通过」
+```
+
+> 改过字库却没重新生成音频时，缺口条目会**自动回退浏览器 TTS**，不会报错；
+> `deploy/release.sh` 在部署前会跑一次 `--check`，有缺口会提醒。
+> 腾讯云引擎会用 `<phoneme alphabet="py">` 锁死 6 个多音字的读音，所以 `发`、`谁` 也能生成
+> （edge-tts 不支持 SSML，只能用同音字替代，这两个字只能跳过）。
 
 ### 多音色与接入 IP
 
