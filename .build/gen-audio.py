@@ -134,8 +134,12 @@ def text_hash(text):
     """文件名用「文本哈希」保证唯一：同音字（一/衣、一个/衣服）不能让两个键指向同一个文件"""
     return hashlib.sha1(text.encode("utf-8")).hexdigest()[:8]
 
-def build_tasks(chars, limit=None, group=None, engine="edge", voice=""):
+def build_tasks(chars, limit=None, group=None, engine="edge", voice="", only=None):
     """返回 [(kind, 文件名主干, 合成用文本, 索引键)]，kind ∈ z/w/s"""
+    if only:
+        want = [c for c in only if c]
+        chars = [c for c in chars if c["c"] in want]
+        chars.sort(key=lambda c: want.index(c["c"]))
     if group is not None:
         per = len(chars) // 10
         chars = chars[group * per:(group + 1) * per]
@@ -339,6 +343,7 @@ def main():
     ap.add_argument("--secret-id", default=os.environ.get("TENCENT_SECRET_ID", ""))
     ap.add_argument("--secret-key", default=os.environ.get("TENCENT_SECRET_KEY", ""))
     ap.add_argument("--limit", type=int)
+    ap.add_argument("--only", default="", help="只生成指定的字（逗号分隔，用于小样试听）")
     ap.add_argument("--group", type=int)
     ap.add_argument("--concurrency", type=int, default=6)
     ap.add_argument("--trim", action="store_true")
@@ -457,7 +462,10 @@ def main():
         return
 
     chars = load_chars()
-    tasks = build_tasks(chars, args.limit, args.group, args.engine, voices[0]["id"] if voices else "")
+    only = [c for c in args.only.replace(" ", "").split(",") if c]
+    tasks = build_tasks(chars, args.limit, args.group, args.engine, voices[0]["id"] if voices else "", only)
+    if only and not tasks:
+        sys.exit("--only 指定的字在字库里一个都没找到: %s" % args.only)
     print("字库 %d 字 → 每条音色 %d 条（单字 %d / 组词 %d / 例句 %d）" % (
         len(chars), len(tasks),
         sum(1 for t in tasks if t[0] == "z"), sum(1 for t in tasks if t[0] == "w"),
