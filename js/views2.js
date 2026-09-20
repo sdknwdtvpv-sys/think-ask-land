@@ -72,7 +72,7 @@
       '<div class="screen" id="run-root">' +
         '<div class="run-hud">' +
           '<div class="hud-top">' +
-            '<span class="hud-count">第 <b id="rc">1 / ' + qs.length + '</b> 题</span>' +
+            '<span class="hud-count">' + Mascot.render("idle", 26, "wenzai") + '第 <b id="rc">1 / ' + qs.length + '</b> 题</span>' +
             '<span class="combo-badge" id="combo">🔥 连对 <b id="combo-n">0</b></span>' +
           "</div>" +
           '<div class="hud-bar" role="progressbar" aria-label="答题进度"><i id="hud-fill"></i><span class="hud-ticks" id="hud-ticks"></span></div>' +
@@ -199,7 +199,8 @@
         if (window.SFX) SFX.wrong();
         var right = area.querySelectorAll(".opt")[q.answerIdx];
         if (right) right.classList.add("correct");
-        fb.textContent = "没关系~ 它是「" + q.target.c + "」 " + q.target.p;
+        fb.innerHTML = Mascot.render("happy", 22, "baobaodou") +
+          '<span>没关系~ 它是「' + q.target.c + "」 " + q.target.p + "</span>";
         fb.classList.add("bad");
         window.Speech.speak(q.type === "listen" ? q.speak : q.target.c, 0.75);
         App.after(2100, next);
@@ -238,7 +239,9 @@
             '<span class="grade-letter">' + grade.k + '</span>' +
             '<span class="grade-word">' + grade.t + "</span>" +
           "</div>" +
-          '<div class="end-mascot">' + Mascot.render(grade.m, 92) + "</div>" +
+          '<div class="end-mascot">' + (grade.k === "S" || grade.k === "A"
+            ? Mascot.trio("cheer", 72)
+            : Mascot.render(grade.m, 92, "shuxiaoman")) + "</div>" +
           '<div class="score-big">答对 ' + okCount + " / " + qs.length + " 题</div>" +
           '<div class="score-sub">' + msg + (perfect && qs.length >= 10 ? "<br>🌟 全对奖励 +3 颗星!" : "") + "</div>" +
           '<div class="end-star-row">' + starRow + "</div>" +
@@ -316,7 +319,7 @@
           '<div class="screen" id="rc-root">' +
             '<div class="run-hud">' +
               '<div class="hud-top">' +
-                '<span class="hud-count">' + Mascot.render("think", 26) + '第 <b id="rc">' + (idx + 1) + " / " + cards.length + "</b> 张</span>" +
+                '<span class="hud-count">' + Mascot.render("think", 26, "baobaodou") + '第 <b id="rc">' + (idx + 1) + " / " + cards.length + "</b> 张</span>" +
                 '<span class="hud-knew">' + Icons.svg("check") + ' 已认识 <b id="knew-n">' + knew + "</b></span>" +
               "</div>" +
               '<div class="hud-bar"><i id="hud-fill" style="width:' + Math.round(idx / cards.length * 100) + '%"></i><span class="hud-ticks" id="hud-ticks"></span></div>' +
@@ -356,7 +359,7 @@
           flip.classList.add("flipped");
           /* 翻开即"想起来啦":顶部小熊猫从思考切成开心 */
           var hm = view.querySelector(".hud-count .mascot");
-          if (hm) hm.outerHTML = Mascot.render("happy", 26);
+          if (hm) hm.outerHTML = Mascot.render("happy", 26, "baobaodou");
           if (window.SFX) SFX.flip();
           App.after(400, function () { window.Speech.speakSeq([ch.c, ch.w[0]], 0.8); });
         });
@@ -428,7 +431,7 @@
       var html =
         '<div class="screen">' +
           '<div class="reward-head">' +
-            '<div class="rh-mascot">' + Mascot.render(unlocked > 0 ? "happy" : "idle", 76) + "</div>" +
+            '<div class="rh-mascot">' + Mascot.render(unlocked > 0 ? "happy" : "idle", 76, "shuxiaoman") + "</div>" +
             '<div class="reward-stars">⭐ ' + st.stars + "</div>" +
             '<div class="reward-next">' + (allGot ? "全部贴纸都集齐啦,太厉害了!" : "再得 " + need + " 颗星,解锁下一张贴纸!") + "</div>" +
             (allGot ? "" :

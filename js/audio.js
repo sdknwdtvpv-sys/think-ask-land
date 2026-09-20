@@ -20,6 +20,7 @@
   var CONFIG_URL = "audio/config.json";
   var IDLE = 0, LOADING = 1, OK = 2, OFF = -1;
   var state = IDLE, config = null, activeVoice = "", index = null;
+  var explicitVoice = false;   // 是否被显式指定过音色(家长选择 / 调用方 setVoice)
   var cache = {};                  // 音色 -> 索引
   var el = null, token = 0;
 
@@ -80,7 +81,7 @@
   function setVoice(key) {
     if (!config || !config.voices[key]) return Promise.resolve(false);
     return loadVoice(key).then(function (idx) {
-      activeVoice = key; index = idx; state = OK; return true;
+      activeVoice = key; index = idx; state = OK; explicitVoice = true; return true;
     }).catch(function () { return false; });
   }
 
@@ -91,11 +92,15 @@
     return rel ? String(rel).split("/")[0] : "";
   }
 
-  /* 角色 → 音色:没配就回退默认音色 */
+  /* 角色 → 音色。优先级:**显式选择 > 角色路由 > 默认音色**
+     设计取舍:家长在「朗读声音」里手动选过的音色永远优先(不能被角色覆盖),
+     没手动选过时才按 roles 让不同角色用不同音色(默认即有角色区分)。 */
   function voiceFor(role) {
+    if (explicitVoice && activeVoice) return activeVoice;
     var roles = (config && config.roles) || {};
     var k = role && roles[role];
-    return (k && config.voices[k]) ? k : activeVoice;
+    if (k && config.voices[k]) return k;
+    return activeVoice;
   }
 
   function has(text, role) {
@@ -106,6 +111,8 @@
   function count() { return index ? Object.keys(index).length : 0; }
   function voices() { return config ? Object.keys(config.voices) : []; }
   function currentVoice() { return activeVoice; }
+  /* 回到"按角色路由"的默认状态(家长点「恢复默认」时调用) */
+  function useRoles() { explicitVoice = false; }
 
   /* 返回 true = 已接管本次发声:成功回调 onEnd,失败回调 onFallback(让调用方走 TTS) */
   function play(text, onFallback, onEnd, role) {
@@ -141,7 +148,7 @@
 
   window.AudioPack = {
     load: load, play: play, stop: stop, has: has, ready: ready, count: count,
-    setVoice: setVoice, voices: voices, currentVoice: currentVoice, kindOf: kindOf,
+    setVoice: setVoice, voices: voices, currentVoice: currentVoice, kindOf: kindOf, useRoles: useRoles,
   };
   load();   // 尽早取配置与索引,首次点读就能命中
 })();

@@ -180,7 +180,7 @@ const BENIGN = [
     const thinkSvg = win.Mascot.render("think", 40);
     const sleepSvg = win.Mascot.render("sleep", 40);
     ok("think 有独立附加件(问号气泡)", thinkSvg.includes("m-think") && !idleSvg.includes("m-think"));
-    ok("sleep 有独立附加件(闭眼 + Zzz)", sleepSvg.includes("M39 58") && sleepSvg.includes("m-zzz") && !idleSvg.includes("m-zzz"));
+    ok("sleep 有独立附加件(闭眼 + Zzz)", sleepSvg.includes("m-sleep") && sleepSvg.includes("m-zzz") && !idleSvg.includes("m-zzz"));
     ok("状态 class 落到 svg 上", thinkSvg.includes("is-think") && sleepSvg.includes("is-sleep"));
     ok("五种情绪都能渲染", ["idle", "happy", "cheer", "think", "sleep"].every((s) => win.Mascot.render(s, 40).includes("<svg")));
 

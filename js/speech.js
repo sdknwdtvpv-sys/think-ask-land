@@ -188,14 +188,16 @@
     },
 
     /* 发声:rate 为语速(0.5~1.4,越小越慢;幼儿建议 0.8~0.9)
-       兼容两种调用:speak(text, rate, onend) / speak(text, { rate, pitch, onend }) */
+       兼容两种调用:speak(text, rate, onend) / speak(text, { rate, pitch, role, onend })
+       role:交给预置音频的角色路由(见 audio/config.json 的 roles),用来区分"谁在说话" */
     speak: function (text, rate, onend) {
       if (!text) { if (onend) onend(); return; }
-      var pitch = 1.04;
+      var pitch = 1.04, role = "";
       if (rate && typeof rate === "object") {
         var o = rate;
         if (o.onend) onend = o.onend;
         if (o.pitch != null) pitch = o.pitch;
+        if (o.role) role = o.role;
         rate = (o.speed != null) ? (1 / o.speed) : o.rate;
       }
       var self = this;
@@ -213,7 +215,7 @@
       if (window.AudioPack && window.AudioPack.play(text, function () {
         if (!isCurrent()) return;             // 期间已被 stop()/新发声取代
         ttsSay(self, text, rate, pitch, once, isCurrent);
-      }, once)) return;
+      }, once, role)) return;
       /* 通道二:浏览器 TTS 兜底 */
       ttsSay(self, text, rate, pitch, once, isCurrent);
     },

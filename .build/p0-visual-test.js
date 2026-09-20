@@ -75,11 +75,11 @@ function check(name, cond, extra) {
   // 4. 熊猫角色
   const m0 = await page.evaluate(() => {
     const m = document.querySelector(".home-mascot .mascot");
-    return { cls: m && m.getAttribute("class"), eyes: document.querySelectorAll(".home-mascot .m-eye").length, btns: !!document.querySelector("#mascot-btn") };
+    return { cls: m && m.getAttribute("class"), eyes: document.querySelectorAll(".home-mascot .m-eye").length, chars: document.querySelectorAll(".home-mascot .mascot").length, btns: !!document.querySelector("#mascot-btn") };
   });
   const VALID_MOOD = /is-(idle|sleep|think|happy|cheer)/;
   const moodBefore = (m0.cls.match(/is-[a-z]+/) || ["is-?"])[0];
-  check("熊猫角色已渲染(有效情绪 + 眨眼)", VALID_MOOD.test(m0.cls) && m0.eyes === 2, m0.cls);
+  check("三伙伴已渲染(问仔/抱抱豆/书小满 + 眨眼)", VALID_MOOD.test(m0.cls) && m0.chars === 3 && m0.eyes === 6, m0.chars + " 个角色 / " + m0.eyes + " 只眼 | " + m0.cls);
   await page.click("#mascot-btn"); await sleep(350);
   const m1 = await page.evaluate(() => document.querySelector(".home-mascot .mascot").getAttribute("class"));
   check("点熊猫切换为开心状态", /is-happy/.test(m1), m1);

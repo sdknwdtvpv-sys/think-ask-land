@@ -546,3 +546,24 @@ body::after { /* 全局纸纹,极淡 */
 .switch i { position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(63, 58, 82, .25); transition: transform .22s cubic-bezier(.3, 1.4, .4, 1); }
 .switch[aria-pressed="true"] { background: var(--mint); }
 .switch[aria-pressed="true"] i { transform: translateX(22px); }
+
+/* ================= 三伙伴（问仔 · 抱抱豆 · 书小满） ================= */
+.mascot-trio {
+  display: inline-flex; align-items: flex-end; justify-content: center; gap: 2px;
+}
+.mascot-trio-item { display: inline-block; }
+/* 首页品牌亮相：三个并排（高度统一，中间略高形成节奏） */
+.home-mascot .mascot-trio .mascot { width: 78px; height: 78px; margin: 0; }
+.home-mascot .mascot-trio .mascot-trio-item:nth-child(2) { transform: translateY(-6px); }
+/* 结算页 S/A 级三伙伴庆祝 */
+.end-mascot .mascot-trio { gap: 0; }
+.end-mascot .mascot-trio .mascot { width: 64px; height: 64px; }
+/* 答错时抱抱豆出现在提示文字前 */
+.feedback-line .mascot {
+  display: inline-block; width: 22px; height: 22px; vertical-align: -5px; margin-right: 4px;
+}
+.feedback-line .mascot .m-eye { animation: none; }
+/* 矮视口：三伙伴进一步收小，保证首屏 */
+@media (max-height: 820px) {
+  .home-mascot .mascot-trio .mascot { width: 64px; height: 64px; }
+}

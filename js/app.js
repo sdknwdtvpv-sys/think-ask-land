@@ -187,7 +187,7 @@
         '<div class="screen">' +
           '<div class="home-hero">' +
             '<div class="home-mascot">' +
-              '<button class="mascot-btn" id="mascot-btn" aria-label="和" + Mascot.current().name + "打招呼">' + Mascot.render(mascotState, 104) + "</button>" +
+              '<button class="mascot-btn" id="mascot-btn" aria-label="和三个小伙伴打招呼">' + Mascot.trio(mascotState, 84) + "</button>" +
             "</div>" +
             '<div class="home-title">思问岛</div>' +
             '<div class="home-sub">' + greet() + ",小宝贝!今天想学什么呢?</div>" +
@@ -242,13 +242,23 @@
       var mb = view.querySelector("#mascot-btn");
       if (mb) {
         mb.addEventListener("click", function () {
-          var m = mb.querySelector(".mascot");
+          /* 点一下:三个小伙伴一起开心(品牌亮相的"活起来"时刻) */
+          var ms = mb.querySelectorAll(".mascot");
           var baseCls = "is-" + mascotState;
-          if (m) { m.classList.remove(baseCls); m.classList.add("is-happy"); }
+          Array.prototype.forEach.call(ms, function (m) {
+            m.classList.remove(baseCls);
+            m.classList.add("is-happy");
+          });
           if (window.SFX) SFX.star();
-          window.Speech.speak(allDone ? "今天任务都完成啦,你真棒!" : greet() + ",我们一起来认字吧!", 0.9);
+          /* 由"陪伴者"抱抱豆的声音说话(hug 角色音色,缺省自动回退) */
+          window.Speech.speak(allDone ? "今天任务都完成啦,你真棒!" : greet() + ",我们一起来认字吧!",
+            { rate: 0.9, role: "hug" });
           App.after(1600, function () {
-            if (m && m.isConnected) { m.classList.remove("is-happy"); m.classList.add(baseCls); }
+            Array.prototype.forEach.call(ms, function (m) {
+              if (!m.isConnected) return;
+              m.classList.remove("is-happy");
+              m.classList.add(baseCls);
+            });
           });
         });
       }
@@ -415,7 +425,7 @@
 
       view.innerHTML =
         '<div class="screen card-wrap" id="card-root">' +
-          '<div class="card-pos">' + Mascot.render("idle", 30) +
+          '<div class="card-pos">' + Mascot.render("idle", 30, "wenzai") +
             "<span>第 " + (i + 1) + " / " + g.chars.length + " 个 · " + esc(g.name) + "</span></div>" +
           '<div class="py-big">' + esc(ch.p) +
             '<button class="mini-speak" id="py-speak" aria-label="读拼音">' + Icons.svg("speak", "ico-solo") + "</button></div>" +
