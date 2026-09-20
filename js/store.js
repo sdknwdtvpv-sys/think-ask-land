@@ -6,6 +6,9 @@
   /* 记忆盒子间隔(毫秒): box=1..5,复习答对升一盒,遗忘降回盒1 */
   var INT = { 1: 10 * 60 * 1000, 2: 24 * 3600e3, 3: 2 * 24 * 3600e3, 4: 4 * 24 * 3600e3, 5: 7 * 24 * 3600e3 };
 
+  var SCHEMA = 1;        // 存档结构版本:将来改结构时 +1,并在 migrate() 里加对应的升级分支
+  var KEEP_DAYS = 60;    // 每日统计只保留最近 60 天(家长中心只看 7 天,长期累积只会白白撑大存档)
+
   /* 贴纸:每 STICKER_EVERY 颗星解锁一张 */
   var STICKER_EVERY = 15;
   var STICKERS = [
@@ -34,6 +37,7 @@
 
   function defaultState() {
     return {
+      v: SCHEMA,           // 存档结构版本(每次写盘都会带上,便于将来做增量迁移)
       stars: 0,            // 累计星星(=总获得,不消耗)
       chars: {},           // 字 -> { learned:ts, box:1-5, next:ts, ok:n, bad:n, quizDone:bool }
       badges: {},          // id -> ts
@@ -54,24 +58,131 @@
   }
   function shiftDay(n) { var d = new Date(); d.setDate(d.getDate() + n); return dayStr(d); }
 
+  function num(v, d) { return (typeof v === "number" && isFinite(v)) ? v : d; }
+  function nonNeg(v, d) { return Math.max(0, num(v, d)); }
+  /* 严格校验日期键:格式对但日期不存在(如 2026-13-99)也要拒掉,
+     否则它会按字典序排在"最近 60 天"里,把真实记录挤出去 */
+  function isValidDay(d) {
+    if (typeof d !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+    var y = +d.slice(0, 4), m = +d.slice(5, 7), dd = +d.slice(8, 10);
+    var dt = new Date(y, m - 1, dd);
+    return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === dd;
+  }
+
+  /* 每日统计裁剪:只保留最近 keep 天,并保证"今天"这条一定存在(否则一进来就写不进去) */
+  function pruneDaily(daily, keep) {
+    keep = keep || KEEP_DAYS;
+    var out = {}, keys = [];
+    if (daily && typeof daily === "object") for (var d in daily) if (isValidDay(d)) keys.push(d);
+    keys.sort();                                   // YYYY-MM-DD 的字典序即时间序
+    for (var i = Math.max(0, keys.length - keep); i < keys.length; i++) {
+      var r = (daily && daily[keys[i]]) || {};
+      out[keys[i]] = { stars: nonNeg(r.stars, 0), learned: nonNeg(r.learned, 0), quiz: nonNeg(r.quiz, 0) };
+    }
+    var t = dayStr();
+    if (!out[t]) out[t] = { stars: 0, learned: 0, quiz: 0 };
+    return out;
+  }
+
+  /* 把任意来源(旧版本结构 / 被外部工具改坏)的存档规整成当前结构。
+     原则:宁可丢掉一条坏记录,也不能让一处脏数据把整个应用打不开。 */
+  function migrate(obj) {
+    var def = defaultState();
+    if (!obj || typeof obj !== "object" || Object.prototype.toString.call(obj) === "[object Array]") return def;
+    var out = {};
+    for (var k in def) if (k !== "v") out[k] = (obj[k] === undefined || obj[k] === null) ? def[k] : obj[k];
+
+    /* 标量:类型不对就退回默认值,负数一律归零 */
+    out.stars = nonNeg(out.stars, 0);
+    out.strokeQuizzes = nonNeg(out.strokeQuizzes, 0);
+    out.perfectRounds = nonNeg(out.perfectRounds, 0);
+    out.reviewsDone = nonNeg(out.reviewsDone, 0);
+    out.quizOk = nonNeg(out.quizOk, 0);
+    out.quizBad = nonNeg(out.quizBad, 0);
+    out.streak = nonNeg(out.streak, 0);
+    out.welcomed = !!out.welcomed;
+    if (typeof out.lastDay !== "string") out.lastDay = "";
+
+    /* 逐字记录:丢掉非对象条目,数值字段纠正到合法区间 */
+    var chars = {};
+    if (out.chars && typeof out.chars === "object") {
+      for (var c in out.chars) {
+        var r = out.chars[c];
+        if (!r || typeof r !== "object") continue;
+        chars[c] = {
+          learned: nonNeg(r.learned, 0),
+          box: Math.min(5, nonNeg(r.box, 0)),
+          next: nonNeg(r.next, 0),
+          ok: nonNeg(r.ok, 0),
+          bad: nonNeg(r.bad, 0),
+          quizDone: !!r.quizDone,
+          seen: nonNeg(r.seen, 0)
+        };
+      }
+    }
+    out.chars = chars;
+
+    /* 勋章:只保留当前版本认识的 id,避免废弃勋章永久留在存档里 */
+    var known = {}, badges = {};
+    BADGES.forEach(function (b) { known[b.id] = 1; });
+    if (out.badges && typeof out.badges === "object") {
+      for (var id in out.badges) if (known[id]) badges[id] = num(out.badges[id], Date.now());
+    }
+    out.badges = badges;
+
+    out.daily = pruneDaily(out.daily);
+    out.v = SCHEMA;
+    return out;
+  }
+
   var state = defaultState();
   var listeners = [];
+  var saveWarned = false;
 
   function load() {
+    var raw = null;
+    try { raw = localStorage.getItem(KEY); } catch (e) { raw = null; }
+    if (!raw) { state = defaultState(); return state; }
     try {
-      var raw = localStorage.getItem(KEY);
-      if (raw) {
-        var obj = JSON.parse(raw);
-        var def = defaultState();
-        for (var k in def) if (obj[k] === undefined) obj[k] = def[k];
-        state = obj;
-      }
-    } catch (e) { state = defaultState(); }
+      state = migrate(JSON.parse(raw));
+    } catch (e) {
+      /* 存档损坏(半写入 / 被手动改过):留一份原始副本便于排查,再用默认值继续,
+         保证应用一定能打开 —— 旧实现是静默重置,用户连"进度为什么没了"都无从查起 */
+      try { localStorage.setItem(KEY + ".broken", raw); } catch (e2) { /* 忽略 */ }
+      try { console.warn("思问岛:学习存档解析失败,已保留副本 " + KEY + ".broken 并重置", e); } catch (e2) { /* 忽略 */ }
+      state = defaultState();
+    }
     return state;
   }
+
+  /* 写盘失败(隐私模式 / 配额满)绝不能静默吞掉 ——
+     否则家长以为进度存上了,其实一关页面就没了 */
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* 隐私模式等 */ }
-    listeners.forEach(function (fn) { try { fn(state); } catch (e) {} });
+    var payload;
+    try { payload = JSON.stringify(state); } catch (e) { payload = null; }
+    if (payload !== null) {
+      try {
+        localStorage.setItem(KEY, payload);
+        saveWarned = false;
+      } catch (e) {
+        var okSaved = false;
+        try {
+          /* 先裁掉较老的每日统计再试一次:它最占体积,又最不影响体验 */
+          state.daily = pruneDaily(state.daily, 7);
+          localStorage.setItem(KEY, JSON.stringify(state));
+          okSaved = true;
+          saveWarned = false;
+        } catch (e2) { okSaved = false; }
+        if (!okSaved && !saveWarned) {
+          saveWarned = true;   // 只提示一次,避免每答一题都弹
+          try { console.warn("思问岛:学习记录保存失败,进度可能不会被保留", e); } catch (e2) { /* 忽略 */ }
+          try {
+            if (window.UI && window.UI.toast) window.UI.toast("⚠️ 进度保存失败,请检查浏览器是否禁用了本地存储", 4000);
+          } catch (e2) { /* 忽略 */ }
+        }
+      }
+    }
+    listeners.forEach(function (fn) { try { fn(state); } catch (e) { /* 忽略 */ } });
   }
   function on(fn) { listeners.push(fn); }
 
@@ -82,6 +193,7 @@
     if (state.lastDay === shiftDay(-1)) state.streak += 1;
     else state.streak = 1;
     state.lastDay = today;
+    state.daily = pruneDaily(state.daily);   // 跨天时顺手裁剪,存档不会随年月无限膨胀
   }
   function todayRec() {
     var t = dayStr();
@@ -241,6 +353,7 @@
 
   window.Store = {
     INT: INT, STICKERS: STICKERS, STICKER_EVERY: STICKER_EVERY, BADGES: BADGES,
+    SCHEMA: SCHEMA, KEEP_DAYS: KEEP_DAYS,
     get state() { return state; },
     load: load, save: save, on: on, dayStr: dayStr, touchDay: touchDay,
     addStars: addStars, counts: counts, stickerCount: stickerCount,

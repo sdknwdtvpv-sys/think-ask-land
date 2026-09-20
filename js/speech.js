@@ -69,6 +69,7 @@
     voice: null,
     _voicesLoaded: false,
     _tries: 0,
+    _gen: 0,             // 发声代号:stop() 或新的 speak() 会 +1,用来作废在途回调
 
     /* 全部中文音色,按"自然好听"排序 */
     listVoices: function () {
@@ -141,6 +142,8 @@
 
     /* 解锁 iOS 音频:首次触摸时调用 */
     warmup: function () {
+      /* 音效解锁与「是否支持朗读」无关:不能因为浏览器没有 TTS,就把音效一起跳过 */
+      SFX.unlock();
       if (!this.supported) return;
       try {
         if (!this.voice) this.autoPick();
@@ -150,10 +153,10 @@
         if (this.voice) u.voice = this.voice;
         window.speechSynthesis.speak(u);
       } catch (e) { /* 忽略 */ }
-      SFX.unlock();
     },
 
     stop: function () {
+      this._gen++;   // 作废所有在途回调,避免"停止之后又把下一句念出来"
       if (!this.supported) return;
       try { window.speechSynthesis.cancel(); } catch (e) { /* 忽略 */ }
     },
@@ -169,9 +172,14 @@
         if (o.pitch != null) pitch = o.pitch;
         rate = (o.speed != null) ? (1 / o.speed) : o.rate;
       }
+      var self = this;
+      /* 本次发声的代号:之后任何一次 stop() 或新的 speak() 都会让它作废 ——
+         既避免"上一句的回调把下一句念出来",也避免 onend/onerror 双触发导致回调跑两次 */
+      var gen = ++this._gen;
       try {
         if (!this.voice) this.autoPick();      // 音色表迟到时兜底
-        window.speechSynthesis.cancel();
+        var synth = window.speechSynthesis;
+        synth.cancel();
         var u = new SpeechSynthesisUtterance(text);
         /* 语言必须跟随所选音色,否则引擎可能换成另一个音色 */
         u.lang = (this.voice && this.voice.lang) || "zh-CN";
@@ -179,8 +187,21 @@
         u.pitch = Math.max(0.6, Math.min(1.4, pitch));        // 1.15 → 1.04:去掉"电子娃娃音"
         u.volume = 1;
         if (this.voice) u.voice = this.voice;
-        if (onend) u.onend = onend;
-        window.speechSynthesis.speak(u);
+        var done = false;
+        var finish = function () {
+          if (done || gen !== self._gen) return;   // 已完成,或已被 stop()/新发声取代
+          done = true;
+          if (onend) { try { onend(); } catch (e) { /* 忽略 */ } }
+        };
+        u.onend = finish;
+        /* 合成失败/被打断同样要回调:否则调用方的连读链(字→词)会永远卡住 */
+        u.onerror = finish;
+        /* Chrome 在 cancel() 之后立刻 speak() 有概率把这一句吞掉:
+           放到下一个事件循环再念,保证第一声一定发得出来 */
+        setTimeout(function () {
+          if (gen !== self._gen) return;
+          try { synth.speak(u); } catch (e) { finish(); }
+        }, 0);
       } catch (e) { if (onend) onend(); }
     }
   };
