@@ -237,6 +237,11 @@
               '<span class="menu-ico">' + Icons.svg("trophy") + '</span><span class="menu-label">我的奖励</span>' +
               '<span class="menu-sub">贴纸 · 勋章墙</span>' +
               '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
+            '<button class="menu-btn c-lilac wide" data-go="#/pinyin">' +
+              '<span class="menu-ico">' + Icons.svg("speak") + '</span>' +
+              '<span><span class="menu-label" style="font-size:18px">拼音小课堂</span>' +
+              '<span class="menu-sub">声母 · 韵母 · 声调 · 拼读</span></span>' +
+              '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
             '<button class="menu-btn c-sun wide" data-go="#/parent">' +
               '<span class="menu-ico">' + Icons.svg("parent") + "</span>" +
               '<span><span class="menu-label" style="font-size:18px">家长中心</span>' +
@@ -444,6 +449,25 @@
       var st = window.Store.state;
       var isLearned = st.chars[ch.c] && st.chars[ch.c].learned;
 
+      /* 字理:部首 + 部件。
+         数据来自 Unicode Unihan + cjkvi-ids(见 .build/gen-hanzi-parts.py),不手写杜撰;
+         没有把握的字宁可不显示,也不能把错的部首教给孩子。 */
+      var ziliRow = function (c) {
+        var rad = window.CharDB.radOf(c.c);
+        var radName = window.CharDB.radNameOf(c.c);
+        var parts = window.CharDB.partsOf(c.c);
+        if (!rad && !parts) return "";
+        var bits = [];
+        if (rad) {
+          bits.push('<span class="zl-item" data-zl="部">部首 <b class="kai">' + esc(rad) + "</b>" +
+            (radName && radName !== rad ? '<small>(' + esc(radName) + "部)</small>" : "<small>(部首)</small>") + "</span>");
+        }
+        if (parts) {
+          bits.push('<span class="zl-item" data-zl="件">部件 ' + parts.map(function (x) { return '<b class="kai">' + esc(x) + "</b>"; }).join(' + ') + "</span>");
+        }
+        return '<div class="zili-row">' + bits.join("") + "</div>";
+      };
+
       view.innerHTML =
         '<div class="screen card-wrap" id="card-root">' +
           '<div class="card-pos">' + Mascot.render("idle", 30, "wenzai") +
@@ -461,6 +485,7 @@
             '<button class="btn btn-grape" id="act-anim">' + Icons.svg("pencil") + "笔顺</button>" +
             '<button class="btn btn-coral" id="act-quiz">' + Icons.svg("grid") + "描一描</button>" +
           "</div>" +
+          ziliRow(ch) +
           '<div class="word-row" id="word-row"></div>' +
           '<button class="sent-card" id="sent-card"><span class="sent-ico">📖</span><span>' + hl(ch.s, ch.c) + "</span></button>" +
           '<div class="card-nav">' +

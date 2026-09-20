@@ -65,13 +65,16 @@ function check(name, cond, extra) {
   // 3. 图标系统
   const icons = await page.evaluate(() => {
     const uses = Array.from(document.querySelectorAll(".menu-ico svg use"));
+    const btns = document.querySelectorAll(".menu-btn").length;   /* 入口卡数量会随功能增加,断言不写死 */
     const bad = uses.filter(u => !document.getElementById((u.getAttribute("href") || "").slice(1)));
     const sprite = !!document.getElementById("ico-sprite");
     const syms = document.querySelectorAll("#ico-sprite symbol").length;
     const emptyEmoji = document.querySelectorAll(".menu-emoji").length;
-    return { uses: uses.length, bad: bad.length, sprite, syms, emptyEmoji };
+    return { uses: uses.length, btns, bad: bad.length, sprite, syms, emptyEmoji };
   });
-  check("入口卡全部为矢量图标", icons.uses === 5 && icons.bad === 0, icons.uses + " 个图标,符号库 " + icons.syms + " 个");
+  check("每张入口卡都有可用的矢量图标", icons.btns >= 5 && icons.uses === icons.btns && icons.bad === 0,
+    icons.btns + " 张卡 / " + icons.uses + " 个图标,符号库 " + icons.syms + " 个");
+  check("图标 sprite 已注入", icons.sprite && icons.syms >= 20, "符号 " + icons.syms + " 个");
   check("旧 emoji 图标已移除", icons.emptyEmoji === 0);
 
   // 4. 熊猫角色

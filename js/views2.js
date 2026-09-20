@@ -154,6 +154,14 @@
           '<div class="prompt-area"><div class="prompt-label">🎵 听一听,声调对吗?</div>' +
           '<div class="prompt-char-row"><div class="prompt-char kai">' + esc(q.target.c) + "</div>" +
           '<button class="speak-big small" id="sp-btn">🔊</button></div></div>';
+      } else if (q.type === "partJoin") {
+        prompt =
+          '<div class="prompt-area"><div class="prompt-label">🧩 这些部件能拼成哪个字?</div>' +
+          '<div class="part-tiles">' + q.parts.map(function (x) { return '<span class="part-tile kai">' + esc(x) + "</span>"; }).join('<span class="part-plus">+</span>') + "</div></div>";
+      } else if (q.type === "partSplit") {
+        prompt =
+          '<div class="prompt-area"><div class="prompt-label">🔍 它是由哪些部件组成的?</div>' +
+          '<div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
       } else if (q.type === "charEmoji") {
         prompt = '<div class="prompt-area"><div class="prompt-label">这个字是哪幅图呢?</div><div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
       } else if (q.type === "emojiChar") {
@@ -165,7 +173,7 @@
       }
       var opts = '<div class="opts-grid">';
       q.options.forEach(function (o, oi) {
-        var cls = o.kind === "emoji" ? "emoji-opt" : o.kind === "py" ? "py-opt" : "";
+        var cls = o.kind === "emoji" ? "emoji-opt" : o.kind === "py" ? "py-opt" : o.kind === "parts" ? "parts-opt" : "";
         var inner = o.kind === "char" ? '<span class="kai">' + esc(o.value) + "</span>" : esc(o.value);
         opts += '<button class="opt ' + cls + '" data-oi="' + oi + '">' + inner + "</button>";
       });

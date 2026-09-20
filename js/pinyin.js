@@ -104,7 +104,7 @@
 
   function sameBase(a, b) { return base(a) === base(b) && isPinyin(a) && isPinyin(b); }
 
-  /* 声母表:双字母优先(zh/ch/sh 必须排在 z/c/s 之前) */
+  /* 声母表(仅供程序判断,不是给孩子看的):双字母优先(zh/ch/sh 必须排在 z/c/s 之前) */
   var INITIALS = ["zh", "ch", "sh", "b", "p", "m", "f", "d", "t", "n", "l",
     "g", "k", "h", "j", "q", "x", "r", "z", "c", "s", "y", "w"];
 
@@ -128,9 +128,60 @@
     return 9;                                    // 无关音
   }
 
+  /* ================= 拼音启蒙教学用的表 =================
+     声母按教学顺序排列,read 是"呼读音"(b 读作 bo 而不是英文字母 bee),
+     这样孩子听到的和老师教的一致;TTS 直接读 read 即可。 */
+  var TEACH_INITIALS = [
+    { l: "b", read: "bo" }, { l: "p", read: "po" }, { l: "m", read: "mo" }, { l: "f", read: "fo" },
+    { l: "d", read: "de" }, { l: "t", read: "te" }, { l: "n", read: "ne" }, { l: "l", read: "le" },
+    { l: "g", read: "ge" }, { l: "k", read: "ke" }, { l: "h", read: "he" },
+    { l: "j", read: "ji" }, { l: "q", read: "qi" }, { l: "x", read: "xi" },
+    { l: "zh", read: "zhi" }, { l: "ch", read: "chi" }, { l: "sh", read: "shi" }, { l: "r", read: "ri" },
+    { l: "z", read: "zi" }, { l: "c", read: "ci" }, { l: "s", read: "si" },
+    { l: "y", read: "yi" }, { l: "w", read: "wu" }
+  ];
+  /* 韵母分三组,与小学教材的分法一致 */
+  var FINAL_GROUPS = [
+    { name: "单韵母", items: ["a", "o", "e", "i", "u", "ü"] },
+    { name: "复韵母", items: ["ai", "ei", "ui", "ao", "ou", "iu", "ie", "üe", "er"] },
+    { name: "鼻韵母", items: ["an", "en", "in", "un", "ün", "ang", "eng", "ing", "ong"] }
+  ];
+  var TONE_INFO = [
+    { t: 1, mark: "ˉ", name: "一声", desc: "又高又平", demo: "mā" },
+    { t: 2, mark: "ˊ", name: "二声", desc: "往上扬", demo: "má" },
+    { t: 3, mark: "ˇ", name: "三声", desc: "先降后升", demo: "mǎ" },
+    { t: 4, mark: "ˋ", name: "四声", desc: "干脆下降", demo: "mà" }
+  ];
+  var ORDINAL = { 1: "一", 2: "二", 3: "三", 4: "四", 0: "轻" };
+  function toneName(t) { return t >= 1 && t <= 4 ? ORDINAL[t] + "声" : "轻声"; }
+
+  /* 全库音节索引:由字库反推,保证"教的音节都是孩子真能用到的" */
+  function syllableIndex() {
+    var db = window.CharDB;
+    if (!db) return { byBase: {}, byInitial: {} };
+    var byBase = {}, byInitial = {};
+    db.ALL.forEach(function (c) {
+      var b = base(c.p), pa = parts(c.p);
+      (byBase[b] = byBase[b] || []).push(c);
+      if (pa.initial) (byInitial[pa.initial] = byInitial[pa.initial] || []).push(c);
+    });
+    idxCache = { byBase: byBase, byInitial: byInitial };
+    return idxCache;
+  }
+  var idxCache = null;
+  function index() { return idxCache || syllableIndex(); }
+
+  /* 声母的例字(优先已学过的) */
+  function examplesForInitial(ini, n) {
+    var list = index().byInitial[ini] || [];
+    return list.slice(0, n || 3);
+  }
+
   window.Py = {
     base: base, tone: tone, apply: apply, variants: variants,
     sameBase: sameBase, isValid: isPinyin, split: split,
-    parts: parts, likeness: likeness
+    parts: parts, likeness: likeness,
+    TEACH_INITIALS: TEACH_INITIALS, FINAL_GROUPS: FINAL_GROUPS, TONE_INFO: TONE_INFO, toneName: toneName,
+    syllableIndex: syllableIndex, index: index, examplesForInitial: examplesForInitial
   };
 })();

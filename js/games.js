@@ -2,18 +2,37 @@
 (function () {
   "use strict";
 
+  /* ---------- 字理数据(部首/部件) ----------
+     来自 data/hanzi-parts.js(由 .build/gen-hanzi-parts.py 依据 Unicode Unihan + cjkvi-ids 生成),
+     不是手写内容 —— 教给孩子的部首/部件必须可追溯、可复现。 */
+  var HP = window.HANZI_PARTS || {};
+  function partsOf(ch) {
+    var h = HP[ch];
+    return (h && h.p && h.p.length >= 2) ? h.p.slice() : null;
+  }
+  function radOf(ch) {
+    var h = HP[ch];
+    return (h && h.r) ? h.r : "";
+  }
+  function radNameOf(ch) {
+    var h = HP[ch];
+    return (h && h.rn2) ? h.rn2 : "";
+  }
+
   /* ---------- 字库索引 ---------- */
   var ALL = [];
   (window.CHAR_GROUPS || []).forEach(function (g, gi) {
     g.chars.forEach(function (ch, i) {
-      /* rad=部首(字形近判定)、lvl=难度、str=结构:字库里可能缺,统一带上便于各题型复用 */
+      /* rad 优先用字理数据的权威部首;lvl/str 字库里可能缺,统一带上便于各题型复用 */
       ALL.push({
         c: ch.c, p: ch.p, w: ch.w, s: ch.s, e: ch.e,
-        rad: ch.rad || "", lvl: ch.lvl || 0, str: ch.str || "",
+        rad: radOf(ch.c) || ch.rad || "", lvl: ch.lvl || 0, str: ch.str || "",
         gi: gi, i: i, gn: g.name
       });
     });
   });
+  /* 有部件拆分的字(可出"部件拼字"题) */
+  var PART_POOL = ALL.filter(function (c) { return !!partsOf(c.c); });
   var BY_CHAR = {};
   ALL.forEach(function (ch) { BY_CHAR[ch.c] = ch; });
 
@@ -75,6 +94,8 @@
       types.push("dictation");
       if (window.Py.variants(target.p).length >= 2) types.push("tonePick");
     }
+    var myParts = partsOf(target.c);
+    if (myParts && PART_POOL.length >= 8) { types.push("partJoin", "partSplit"); }
     if (avoidType && types.length > 1) types = types.filter(function (t) { return t !== avoidType; });
     /* 因材施教:这个字上次错在"声调/音近/字形/词义",这一轮优先练对应题型 */
     var type;
@@ -153,6 +174,45 @@
       q.options = opts6;
       q.answerIdx = opts6.findIndex(function (o) { return o.ref.c === target.c; });
 
+    } else if (type === "partSplit") {
+      /* 拆字:看字,选出它的部件组合 */
+      q.parts = myParts;
+      var want = myParts.join(" + ");
+      var seenSet = {}; seenSet[want] = 1;
+      var cands = PART_POOL.filter(function (d) {
+        if (d.c === target.c) return false;
+        var s2 = partsOf(d.c).join(" + ");
+        if (seenSet[s2]) return false;
+        seenSet[s2] = 1; return true;
+      });
+      shuffle(cands);
+      var opts9 = cands.slice(0, 3).map(function (d) {
+        return { kind: "parts", value: partsOf(d.c).join(" + "), ref: d };
+      });
+      opts9.push({ kind: "parts", value: want, ref: target });
+      shuffle(opts9);
+      q.options = opts9;
+      q.answerIdx = opts9.findIndex(function (o) { return o.value === want; });
+
+    } else if (type === "partJoin") {
+      /* 部件拼字:给几个部件,选出能拼成的字。干扰项优先同部首(更像),且不能与答案同部件 */
+      q.parts = myParts;
+      var key = myParts.slice().sort().join("");
+      var sameRad = [], others = [];
+      PART_POOL.forEach(function (d) {
+        if (d.c === target.c) return;
+        var dp = partsOf(d.c);
+        if (!dp || dp.slice().sort().join("") === key) return;
+        (d.rad && d.rad === target.rad ? sameRad : others).push(d);
+      });
+      shuffle(sameRad); shuffle(others);
+      var dsp2 = sameRad.concat(others).slice(0, 3);
+      var opts8 = dsp2.map(function (d) { return { kind: "char", value: d.c, ref: d }; });
+      opts8.push({ kind: "char", value: target.c, ref: target });
+      shuffle(opts8);
+      q.options = opts8;
+      q.answerIdx = opts8.findIndex(function (o) { return o.ref.c === target.c; });
+
     } else { /* tonePick 辨调:看字+听音,选出正确的声调拼音 */
       q.speak = target.c;
       var vs = window.Py.variants(target.p).slice(0, 3);
@@ -203,8 +263,12 @@
       var lk = Py.likeness(chosen.p, target.p);
       if (lk === 2 || lk === 3) return "snd";
     }
-    /* 拼音题不涉及字形;其余题型(选项是汉字)再看字形 */
+    /* 部件拼字题:选错说明部件组合没记清,一律算字形问题 */
+    if (qtype === "partJoin" || qtype === "partSplit") return "shp";
+    /* 拼音题不涉及字形;其余题型(选项是汉字)再看字形:共同部件 > 同部首 */
     var isPyQ = (qtype === "charPinyin" || qtype === "tonePick");
+    var tp = partsOf(target.c), cp = partsOf(chosen.c);
+    if (!isPyQ && tp && cp && tp.some(function (x) { return cp.indexOf(x) > -1; })) return "shp";
     if (!isPyQ && chosen.rad && target.rad && chosen.rad === target.rad) return "shp";
     if (chosen.gi === target.gi) return "sem";
     return "rcl";
@@ -241,6 +305,8 @@
 
   window.CharDB = {
     ALL: ALL, BY_CHAR: BY_CHAR, GROUPS: window.CHAR_GROUPS || [],
+    PART_POOL: PART_POOL, partsOf: partsOf, radOf: radOf, radNameOf: radNameOf,
+    hasParts: function (c) { return !!partsOf(c); },
     wordForListen: wordForListen, shuffle: shuffle,
     groupPool: function (gi) { return ALL.filter(function (c) { return c.gi === gi; }); },
     learnedPool: function () {

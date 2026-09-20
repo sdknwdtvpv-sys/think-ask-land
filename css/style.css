@@ -227,4 +227,22 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   .sent-card { margin-top: 8px; padding: 10px 13px; font-size: 15.5px; line-height: 1.6; }
   .card-nav { margin-top: 12px; }
   .card-nav .nav-btn { min-height: 54px; flex-basis: 56px; }
+  /* 字理行(部首/部件)是补充信息,矮视口下压到最低高度 */
+  .zili-row { margin: 4px auto 0; gap: 6px; font-size: 11px; }
+  .zl-item { padding: 3px 9px; }
+  .zl-item b { font-size: 15px; }
+  .zl-item small { font-size: 10px; }
+}
+
+/* 主操作常驻可视区:无论字卡内容多长(字理/配图/例句),
+   "我会了"都必须能点到 —— 内容变长时不再把主按钮挤出首屏 */
+.card-nav {
+  position: sticky; bottom: 0; z-index: 6;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to top, rgba(255, 250, 240, .98) 62%, rgba(255, 250, 240, 0));
+}
+.card-nav::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -14px; height: 14px;
+  background: linear-gradient(to top, rgba(255, 250, 240, .92), rgba(255, 250, 240, 0));
+  pointer-events: none;
 }

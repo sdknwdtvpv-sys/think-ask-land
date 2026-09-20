@@ -251,3 +251,75 @@
   font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); background: #fff;
   box-sizing: border-box; resize: vertical;
 }
+
+/* ---------- 拼音小课堂 ---------- */
+.menu-btn.c-lilac { background: linear-gradient(160deg, #b8d4ff, #7ea9f7); box-shadow: 0 6px 0 #5480c9; }
+.py-group-name { font-size: 13px; font-weight: 800; color: var(--ink-light); margin: 8px 0 6px; }
+.py-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.py-cell {
+  min-width: 52px; min-height: 52px; padding: 0 12px; border-radius: 14px;
+  background: #fff; box-shadow: 0 3px 0 var(--shadow-ink); font-size: 24px; font-weight: 800;
+  color: var(--ink); display: flex; align-items: center; justify-content: center;
+}
+.py-cell.py-final { font-size: 20px; background: #f7fbff; }
+.py-cell.on { transform: translateY(2px) scale(.96); background: #dff0ff; box-shadow: 0 1px 0 var(--shadow-ink); }
+.py-examples { margin-top: 12px; font-size: 13px; color: var(--ink-light); font-weight: 700; min-height: 24px; }
+.py-ex-label { margin-right: 6px; }
+.py-ex-char {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 1px;
+  min-width: 52px; min-height: 56px; padding: 5px 9px; margin: 4px 6px 0 0;
+  border-radius: 14px; background: #fff; box-shadow: 0 3px 0 var(--shadow-ink);
+}
+.py-ex-char .kai { font-size: 26px; }
+.py-ex-char small { font-size: 11px; color: var(--ink-light); font-weight: 700; }
+.py-ex-char.learned { background: #fff8e6; box-shadow: 0 3px 0 #e8cf9a; }
+.tone-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.tone-card {
+  background: #fff; border-radius: 16px; box-shadow: 0 4px 0 var(--shadow-ink);
+  padding: 12px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.tone-card.on { background: #dff0ff; transform: translateY(2px); box-shadow: 0 2px 0 var(--shadow-ink); }
+.tone-demo { font-size: 32px; font-weight: 800; color: var(--sky-deep); }
+.tone-name { font-size: 13px; font-weight: 900; color: var(--ink); }
+.tone-desc { font-size: 11px; font-weight: 700; color: var(--ink-light); }
+.tone-family { margin-top: 10px; }
+.tone-fam-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.tone-fam-item {
+  display: flex; flex-direction: column; align-items: center; min-width: 58px; padding: 8px 10px;
+  border-radius: 14px; background: #fff8e6; box-shadow: 0 3px 0 #e8cf9a;
+}
+.tone-fam-item .kai { font-size: 28px; }
+.tone-fam-item small { font-size: 11px; font-weight: 700; color: var(--ink-light); }
+/* 拼一拼 */
+.blend-hud { font-size: 13px; font-weight: 800; color: var(--ink-light); margin-bottom: 8px; }
+.blend-eq { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 14px; }
+.blend-part, .blend-q {
+  min-width: 62px; min-height: 62px; padding: 0 14px; border-radius: 18px; background: #fff;
+  box-shadow: 0 4px 0 var(--shadow-ink); font-size: 30px; font-weight: 800; color: var(--sky-deep);
+  display: flex; align-items: center; justify-content: center;
+}
+.blend-q { color: var(--ink-light); background: #f4f6fa; }
+.blend-plus { font-size: 24px; font-weight: 800; color: var(--ink-light); }
+.blend-opts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; max-width: 420px; margin: 0 auto; }
+.blend-done { text-align: center; font-size: 18px; font-weight: 900; color: var(--ink); }
+
+/* ---------- 部件拼字题 ---------- */
+.part-tiles { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.part-tile {
+  min-width: 64px; min-height: 64px; padding: 0 12px; border-radius: 16px; background: #fff8e6;
+  box-shadow: 0 4px 0 #e8cf9a; font-size: 38px; font-weight: 700; color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+}
+.part-plus { font-size: 22px; font-weight: 800; color: var(--ink-light); }
+.opt.parts-opt { font-size: 22px; font-weight: 800; color: var(--ink); letter-spacing: 1px; }
+/* ---------- 字卡上的"字理"(部首 / 部件) ---------- */
+.zili-row {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
+  max-width: 420px; margin: 10px auto 2px; font-size: 13px; font-weight: 800; color: var(--ink-light);
+}
+.zl-item {
+  display: inline-flex; align-items: baseline; gap: 4px; padding: 6px 12px; border-radius: 999px;
+  background: #f4f8fd; box-shadow: 0 2px 0 var(--shadow-ink);
+}
+.zl-item b { font-size: 19px; color: var(--ink); }
+.zl-item small { font-size: 11px; opacity: .9; }
