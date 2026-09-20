@@ -15,7 +15,11 @@
   # 多个音色用逗号分隔；第一个作为默认音色
   python3 .build/gen-audio.py --engine edge --voice zh-CN-YunxiaNeural,zh-CN-XiaoyiNeural
 
-  # 引擎二：腾讯云 TTS（推荐正式使用：官方允许商用 + 拼音音素锁多音字）
+  # 引擎二：Azure 语音服务（与 edge-tts 同一批音色，保听感不变；付费层明确可商用）
+  python3 .build/gen-audio.py --engine azure --voice zh-CN-YunxiaNeural,zh-CN-XiaoyiNeural \
+      --azure-key "$AZURE_SPEECH_KEY" --azure-region eastasia --trim
+
+  # 引擎三：腾讯云 TTS（国内厂商：官方允许商用，音色是腾讯自己的，与云夏/晓伊不同）
   # 音色写法 ID[:目录名[:显示名]]，用别名可以让腾讯云音色直接覆盖到原目录，
   # 这样 config.json 里的 roles 配置不用改：
   python3 .build/gen-audio.py --engine tencent --voice "402000:yunxia:云夏,403000:xiaoyi:晓伊" \
@@ -45,7 +49,7 @@
   等切换到腾讯云后可用 <phoneme alphabet="py" ph="fa4">发</phoneme> 精确锁定：
       发 fà、谁 shéi
 """
-import argparse, glob, hashlib, hmac, json, os, re, shutil, subprocess, sys, tempfile, time
+import argparse, glob, hashlib, hmac, html, json, os, re, shutil, subprocess, sys, tempfile, time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
@@ -98,9 +102,20 @@ PHONEME = {
     "假": "jia4", "发": "fa4", "谁": "shei2",
 }
 
+# Azure 的拼音音素写法是 alphabet="sapi" + 拼音与声调用空格隔开
+AZURE_PHONEME = {
+    "只": "zhi 1", "长": "chang 2", "兴": "xing 4",
+    "假": "jia 4", "发": "fa 4", "谁": "shei 2",
+}
+
 def ssml_phoneme(ch):
     """把单字包成 SSML，用拼音音素锁死读音（腾讯云 TTS）"""
     return '<speak><phoneme alphabet="py" ph="%s">%s</phoneme></speak>' % (PHONEME[ch], ch)
+
+def ssml_azure(ch, voice):
+    """Azure 的 SSML：<voice> 里放 <phoneme alphabet="sapi">"""
+    return ('<speak version="1.0" xml:lang="zh-CN"><voice name="%s">'
+            '<phoneme alphabet="sapi" ph="%s">%s</phoneme></voice></speak>') % (voice, AZURE_PHONEME[ch], ch)
 
 # ---------- 读字库 ----------
 def load_chars():
@@ -119,7 +134,7 @@ def text_hash(text):
     """文件名用「文本哈希」保证唯一：同音字（一/衣、一个/衣服）不能让两个键指向同一个文件"""
     return hashlib.sha1(text.encode("utf-8")).hexdigest()[:8]
 
-def build_tasks(chars, limit=None, group=None, engine="edge"):
+def build_tasks(chars, limit=None, group=None, engine="edge", voice=""):
     """返回 [(kind, 文件名主干, 合成用文本, 索引键)]，kind ∈ z/w/s"""
     if group is not None:
         per = len(chars) // 10
@@ -131,6 +146,8 @@ def build_tasks(chars, limit=None, group=None, engine="edge"):
         c, py = ch["c"], pinyin_key(ch["p"])
         if engine == "tencent":
             text = ssml_phoneme(c) if c in PHONEME else c        # 音素锁读音，发/谁 也能生成
+        elif engine == "azure":
+            text = ssml_azure(c, voice) if c in PHONEME else c   # 同上，Azure 用 sapi 拼音
         else:
             text = SYNTH_AS.get(c, c) if c not in SKIP_SINGLE else None   # edge 只能同音字替代
         if text is not None:
@@ -147,6 +164,31 @@ def gen_edge(bin_path, voice, rate, text, path):
     r = subprocess.run(cmd, capture_output=True)
     if r.returncode != 0 or not os.path.exists(path) or os.path.getsize(path) == 0:
         raise RuntimeError("edge-tts 失败: %s" % (r.stderr.decode("utf-8", "ignore")[:200]))
+
+# ---------- 引擎：Azure 语音服务 ----------
+def gen_azure(args, voice, text, path):
+    """POST SSML 到 Azure 语音服务，直接拿 mp3。
+       注意：免费层(F0)的商用权在条款上有争议，正式发布请用付费层(S0)。"""
+    import urllib.request
+    url = "https://%s.tts.speech.microsoft.com/cognitiveservices/v1" % args.azure_region
+    if text.lstrip().startswith("<speak"):
+        ssml = text
+    else:
+        ssml = ('<speak version="1.0" xml:lang="zh-CN"><voice name="%s">'
+                '<prosody rate="%s">%s</prosody></voice></speak>') % (voice, args.rate, html.escape(text, quote=False))
+    req = urllib.request.Request(url, data=ssml.encode("utf-8"), method="POST", headers={
+        "Ocp-Apim-Subscription-Key": args.azure_key,
+        "Content-Type": "application/ssml+xml; charset=utf-8",
+        "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3",
+        "User-Agent": "siwen-island",
+    })
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        data = resp.read()
+    if len(data) < MIN_BYTES:
+        raise RuntimeError("Azure 返回内容过短(%d 字节)，多半是 SSML 被拒" % len(data))
+    with open(path, "wb") as fh:
+        fh.write(data)
+
 
 # ---------- 引擎：腾讯云 TTS（TC3-HMAC-SHA256 签名，标准库实现，无需 SDK） ----------
 def _tc3_headers(secret_id, secret_key, payload_str, action="TextToVoice", version="2019-08-23",
@@ -286,12 +328,14 @@ def selftest_sign():
 # ---------- 主流程 ----------
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--engine", choices=["edge", "tencent"], default="edge")
+    ap.add_argument("--engine", choices=["edge", "azure", "tencent"], default="edge")
     ap.add_argument("--voice", default="zh-CN-YunxiaNeural",
                     help="逗号分隔；edge 填音色名，tencent 填音色 ID（如 402000,403000）。第一个为默认音色")
     ap.add_argument("--edge-bin", default="edge-tts")
     ap.add_argument("--rate", default="-10%", help="edge-tts 语速（给幼儿听略慢一点）")
     ap.add_argument("--speed", type=float, default=-0.1, help="腾讯云语速，-2~2")
+    ap.add_argument("--azure-key", default=os.environ.get("AZURE_SPEECH_KEY", ""))
+    ap.add_argument("--azure-region", default=os.environ.get("AZURE_SPEECH_REGION", "eastasia"))
     ap.add_argument("--secret-id", default=os.environ.get("TENCENT_SECRET_ID", ""))
     ap.add_argument("--secret-key", default=os.environ.get("TENCENT_SECRET_KEY", ""))
     ap.add_argument("--limit", type=int)
@@ -325,6 +369,8 @@ def main():
 
     if args.engine == "tencent" and not args.dry_run and not (args.secret_id and args.secret_key):
         sys.exit("腾讯云引擎需要 --secret-id / --secret-key（或 TENCENT_SECRET_ID / TENCENT_SECRET_KEY）")
+    if args.engine == "azure" and not args.dry_run and not args.azure_key:
+        sys.exit("Azure 引擎需要 --azure-key（或 AZURE_SPEECH_KEY）")
 
     if args.selftest_sign:
         sys.exit(selftest_sign())
@@ -377,7 +423,7 @@ def main():
         return
 
     chars = load_chars()
-    tasks = build_tasks(chars, args.limit, args.group, args.engine)
+    tasks = build_tasks(chars, args.limit, args.group, args.engine, voices[0]["id"] if voices else "")
     print("字库 %d 字 → 每条音色 %d 条（单字 %d / 组词 %d / 例句 %d）" % (
         len(chars), len(tasks),
         sum(1 for t in tasks if t[0] == "z"), sum(1 for t in tasks if t[0] == "w"),
@@ -439,6 +485,8 @@ def main():
                 try:
                     if args.engine == "edge":
                         gen_edge(args.edge_bin, voice["id"], args.rate, text, path)
+                    elif args.engine == "azure":
+                        gen_azure(args, voice["id"], text, path)
                     else:
                         gen_tencent(args, voice["id"], text, path)
                     if not sane(path):       # 服务偶发返回空音频,重试

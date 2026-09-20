@@ -57,17 +57,27 @@ python3 -m http.server 8023
 2. **浏览器 TTS（兜底）**：配置缺失、条目未命中或播放失败时自动回退，行为与从前完全一致。
 
 ```bash
-# 试听用（免密钥；edge-tts 是非官方接口，只适合快速验证）。多个音色用逗号分隔
+# ① 试听用：edge-tts（免密钥，但**是非官方接口，不能用于正式发布**）
 pip install edge-tts imageio-ffmpeg
 python3 .build/gen-audio.py --engine edge --voice zh-CN-YunxiaNeural,zh-CN-XiaoyiNeural --trim
 
-# 正式生成（推荐腾讯云：官方允许商用、免费额度覆盖这点量、支持拼音音素锁多音字）
-# 音色写法 ID[:目录名[:显示名]]——用别名让腾讯云音色直接覆盖到原目录，
-# 这样 config.json 里的 roles 配置完全不用改
+# ② 正式发布 · 想保住现在的音色（云夏/晓伊本身就是微软的神经音色）
+#    同款音色，付费层(S0)明确可商用，这点量约 ¥0.5
+#    ⚠️ 免费层(F0)的商用权在微软条款上有争议，正式发布别用免费层
+python3 .build/gen-audio.py --engine azure \
+    --voice zh-CN-YunxiaNeural,zh-CN-XiaoyiNeural \
+    --azure-key "$AZURE_SPEECH_KEY" --azure-region eastasia --trim
+
+# ③ 正式发布 · 想用国内厂商（腾讯自己的音色，与云夏/晓伊不是同一批，需要重新试听）
+#    音色写法 ID[:目录名[:显示名]]——用别名让腾讯云音色直接覆盖到原目录，
+#    这样 config.json 里的 roles 配置完全不用改
 python3 .build/gen-audio.py --engine tencent \
     --voice "402000:yunxia:云夏,403000:xiaoyi:晓伊" \
     --secret-id "$TENCENT_SECRET_ID" --secret-key "$TENCENT_SECRET_KEY" --trim
 ```
+
+> **选哪条**：已经听过并且认可云夏/晓伊 → 选 ②（听感零变化）；更看重国内厂商与结算便利 → 选 ③
+> （但要重新挑音色）。两条都支持拼音音素锁多音字，`发`/`谁` 都能生成。
 
 常用参数：`--limit N` / `--group N` 先做小样，`--dry-run` 只看清单，`--trim` 去首尾静音，`--resume` 断点续跑。
 
