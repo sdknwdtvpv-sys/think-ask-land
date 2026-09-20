@@ -53,7 +53,8 @@ function check(name, cond, extra) {
     return {
       title: document.title,
       homeTitle: document.querySelector(".home-title") ? document.querySelector(".home-title").textContent : null,
-      cards: document.querySelectorAll("[data-go]").length,
+      cards: document.querySelectorAll(".menu-btn").length,        /* 入口卡数量随功能增长,断言不写死 */
+      taskCard: !!document.querySelector(".today-task[data-go]"),
       mascot: !!document.querySelector(".home-mascot .mascot"),
       scene: !!document.getElementById("scene"),
       font: document.fonts.check("20px KuaiLe"),
@@ -63,7 +64,8 @@ function check(name, cond, extra) {
     };
   });
   check("页面标题与首页内容正确", info.title.includes("思问岛") && info.homeTitle === "思问岛", info.title);
-  check("角色/场景/入口卡渲染", info.mascot && info.scene && info.cards === 6, info.cards + " 个入口卡");
+  check("角色/场景/入口卡渲染", info.mascot && info.scene && info.cards >= 5 && info.taskCard,
+    info.cards + " 个入口卡" + (info.taskCard ? " + 今日任务卡" : ""));
   check("显示字体从服务器加载成功", info.font, info.fonts.join(", "));
   check("字库与笔顺数据完整", info.chars === 400 && info.strokes === 400, info.chars + " 字 / " + info.strokes + " 份笔顺");
 
