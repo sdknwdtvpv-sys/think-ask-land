@@ -22,7 +22,8 @@ function check(name, cond, extra) {
     // v1.1.0 起预置音频(js/audio.js)为可选资源:音频目录缺失时会 404 并自动回退浏览器 TTS,
     // 属设计内降级路径,不计为错误;其余错误附带 URL 便于定位
     const u = (m.location && m.location().url) || "";
-    if (u.indexOf("/audio/") > -1) return;
+    if (u.indexOf("/audio/") > -1) return;        // 预置音频:可选资源,缺失即回退 TTS
+    if (u.indexOf("/api/beacon") > -1) return;    // 匿名埋点:本地/未部署端点时为 404,属预期
     errs.push(m.text() + (u ? " @ " + u : ""));
   });
   page.on("pageerror", (e) => errs.push("[pageerror] " + e.message));

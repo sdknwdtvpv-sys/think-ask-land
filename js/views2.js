@@ -165,6 +165,7 @@
       area.querySelectorAll(".opt").forEach(function (b) { b.classList.add("locked"); });
       var fb = view.querySelector("#fb");
       var correct = oi === q.answerIdx;
+      if (window.Beacon) Beacon.track("quiz", { t: q.type, ok: correct ? 1 : 0 });
       var tick = tickEls[idx];
 
       if (correct) {
@@ -220,6 +221,7 @@
       } else {
         window.Store.save();
       }
+      if (window.Beacon) Beacon.track("end", { n: qs.length, ok: okCount, sc: scope });
       var ratio = qs.length ? okCount / qs.length : 0;
       var grade = ratio >= 1 ? { k: "S", t: "完美通关!", m: "cheer" }
         : ratio >= 0.8 ? { k: "A", t: "很棒哦!", m: "cheer" }
@@ -368,6 +370,7 @@
 
         function answer(ok) {
           window.Store.reviewResult(ch.c, ok);
+          if (window.Beacon) Beacon.track("rev", { ok: ok ? 1 : 0 });
           if (tickEls[idx]) tickEls[idx].classList.add(ok ? "ok" : "bad");
           if (ok) {
             knew++; earned++;
@@ -598,6 +601,18 @@
               Icons.svg("share") + "生成本周报告卡</button>" +
           "</div>";
 
+        /* 匿名使用数据:可关闭、可重置标识(隐私优先) */
+        var tracking = window.Beacon ? Beacon.on() : false;
+        html +=
+          '<div class="panel"><h4>' + Icons.svg("chart") + '帮助改进(匿名统计)</h4>' +
+            '<p class="parent-note">只收集"打开了几次、哪类题容易错、在哪一步退出"这类<b>匿名统计</b>,用于改进产品。' +
+            '<br>不收集孩子姓名、头像、语音等任何个人信息;<b>匿名标识每天更换,无法跨天追踪同一个孩子</b>。随时可以关闭。</p>' +
+            '<button class="switch-row" id="btn-track" aria-pressed="' + (tracking ? "true" : "false") + '">' +
+              '<span>发送匿名统计</span>' +
+              '<span class="switch" aria-pressed="' + (tracking ? "true" : "false") + '"><i></i></span></button>' +
+            '<button class="btn btn-ghost" id="btn-seed" style="width:100%;min-height:44px;font-size:15px">换一个匿名标识</button>' +
+          "</div>";
+
         var VER = (document.querySelector('meta[name="app-version"]') || {}).content || "dev";
         html +=
           '<div class="panel"><h4>' + Icons.svg("refresh") + '复习机制说明</h4><p class="parent-note">本应用采用简化版<b>艾宾浩斯间隔重复</b>:孩子标记"我会了"后,字会在 10 分钟后首次回到复习队列;每答对一次,下次复习间隔加倍延长(10分钟 → 1天 → 2天 → 4天 → 7天);答错则重新开始。连续答对 4 次(box≥4)即视为进入长期记忆。所有数据仅保存在本设备浏览器中。</p></div>' +
@@ -620,6 +635,22 @@
           v.querySelector("#voice-try").addEventListener("click", function () {
             if (window.SFX) SFX.click();
             window.Speech.speak("小宝贝,我们一起来认字吧", 0.88);
+          });
+        }
+
+        var trackBtn = v.querySelector("#btn-track");
+        if (trackBtn && window.Beacon) {
+          trackBtn.addEventListener("click", function () {
+            var now = !Beacon.on();
+            Beacon.setOn(now);
+            trackBtn.setAttribute("aria-pressed", now ? "true" : "false");
+            var sw = trackBtn.querySelector(".switch");
+            if (sw) sw.setAttribute("aria-pressed", now ? "true" : "false");
+            window.UI.toast(now ? "已开启匿名统计,谢谢你帮我们改进" : "已关闭匿名统计");
+          });
+          v.querySelector("#btn-seed").addEventListener("click", function () {
+            Beacon.reset();
+            window.UI.toast("已换一个匿名标识");
           });
         }
 

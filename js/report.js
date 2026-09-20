@@ -254,6 +254,7 @@
 
   /* ---------- 预览浮层(先看再存,避免直接弹出下载) ---------- */
   function preview() {
+    if (window.Beacon) Beacon.track("report", { a: "open" });
     return make().then(function (canvas) {
       var mask = document.createElement("div");
       mask.className = "report-mask";
@@ -275,9 +276,11 @@
         if (ev.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
       });
       mask.querySelector("#rp-save").addEventListener("click", function () {
+        if (window.Beacon) Beacon.track("report", { a: "save" });
         download(canvas).then(function () { window.UI.toast("已保存,去相册/下载里看看"); });
       });
       mask.querySelector("#rp-share").addEventListener("click", function () {
+        if (window.Beacon) Beacon.track("report", { a: "share" });
         share(canvas).then(function (res) {
           if (res === "downloaded") window.UI.toast("已导出图片,可手动发送");
           else if (res === "shared") window.UI.toast("已分享");

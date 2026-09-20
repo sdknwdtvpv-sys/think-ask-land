@@ -17,7 +17,13 @@ function check(name, cond, extra) {
   const page = await browser.newPage();
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2 });
   const errs = [];
-  page.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
+  page.on("console", (m) => {
+    if (m.type() !== "error") return;
+    const u = (m.location && m.location().url) || "";
+    if (u.indexOf("/audio/") > -1) return;        // 预置音频:可选资源,缺失即回退 TTS
+    if (u.indexOf("/api/beacon") > -1) return;    // 匿名埋点:本地/未部署端点时为 404,属预期
+    errs.push(m.text() + (u ? " @ " + u : ""));
+  });
   page.on("pageerror", (e) => errs.push("pageerror: " + e.message));
 
   await page.goto("http://127.0.0.1:8023/", { waitUntil: "networkidle0" });
@@ -92,8 +98,9 @@ function check(name, cond, extra) {
       window.__dl.push({ download: this.download, isBlob: this.href.indexOf("blob:") === 0 });
     };
   });
-  await page.click(".report-mask #rp-save");
-  await sleep(1200);
+  /* 用元素派发而非坐标点击:浮层有入场动画,坐标点击会偶发落空 */
+  await page.evaluate(() => document.querySelector(".report-mask #rp-save").click());
+  await sleep(2000);
   const dl = await page.evaluate(() => {
     HTMLAnchorElement.prototype.click = window.__dlOrig;
     return window.__dl;

@@ -84,6 +84,7 @@
       var r = this.parse();
       var def = this.routes[r.name] || this.routes.home;
       this.currentName = def === this.routes.home ? "home" : r.name;
+      if (window.Beacon) Beacon.track("view", { n: this.currentName });
       var view = document.getElementById("view");
       view.innerHTML = "";
       view.scrollTop = 0;
@@ -120,6 +121,7 @@
           t = setTimeout(function () { if (self.currentName === "card" || self.currentName === "groups") self.render(); }, 350);
         };
       })());
+      if (window.Beacon) Beacon.track("open");
       this.render();
       this.welcome();
     },
@@ -585,6 +587,7 @@
         var btn = this;
         btn.disabled = true; // 防连点
         var r1 = window.Store.markLearned(ch.c);
+        if (window.Beacon) Beacon.track("card", { first: r1.first ? 1 : 0 });
         var advance = function () {
           if (i + 1 < g.chars.length) go(i + 1);
           else {
