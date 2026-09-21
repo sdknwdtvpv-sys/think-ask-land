@@ -483,3 +483,18 @@
 .snd-row > span:last-child { text-align: right; flex: 1 1 auto; word-break: break-word; }
 .snd-ok { color: #2fae86; font-weight: 900; }
 .snd-bad { color: #d9577a; font-weight: 900; }
+
+/* ---------- 家长中心:内置音色选择器 ---------- */
+.bi-voice-list { display: flex; flex-direction: column; gap: 9px; margin-bottom: 4px; }
+.bi-voice {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  border-radius: 16px; background: #fff; box-shadow: 0 2px 8px var(--shadow-ink);
+}
+.bi-voice.on { background: #f3fbff; box-shadow: 0 0 0 2px var(--sky) inset, 0 2px 8px var(--shadow-ink); }
+.bi-pick {
+  flex: 1 1 auto; display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; text-align: left; min-height: 46px; color: var(--ink);
+}
+.bi-name { font-size: 16px; font-weight: 900; }
+.bi-pick small { font-size: 12px; font-weight: 700; color: var(--ink-light); }
+.bi-voice.on .bi-name::after { content: " ✓"; color: var(--sky-deep); }

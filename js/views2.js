@@ -772,16 +772,40 @@
           "</div>" +
           '<p class="parent-note" id="snd-tip">' + sndAdvice(snd, sndAp) + "</p></div>";
 
-        /* ---- 朗读声音:换更自然的音色 ---- */
+        /* ---- 朗读声音:内置音色(主角)+ 系统音色(兜底) ----
+           这里原来的问题是:只列了手机系统音色,而孩子实际听到的是我们内置的 mp3,
+           家长在自己的选择里找不到"智小虎",就以为没内置进去。现在两层都摆出来,并说清分工。 */
+        var builtin = (window.AudioPack && window.AudioPack.voiceList) ? window.AudioPack.voiceList() : [];
         var voices = window.Speech.supported ? window.Speech.listVoices() : [];
         var curVoice = window.Speech.voice;
         var curId = curVoice ? (curVoice.voiceURI || curVoice.name) : "";
-        html += '<div class="panel"><h4>' + Icons.svg("speak") + '朗读声音</h4>';
+        html += '<div class="panel"><h4>' + Icons.svg("speak") + '朗读声音</h4>' +
+          '<p class="parent-note">孩子听到的声音分两层:<b>内置音色</b>优先(音质一致、离线可用),' +
+          '内置音频里还没有的条目才用<b>手机系统音色</b>兜底。</p>';
+
+        if (builtin.length) {
+          html += '<div class="py-group-name">内置音色 · 孩子听到的就是它</div><div class="bi-voice-list">';
+          builtin.forEach(function (v) {
+            var engineName = v.engine === "tencent" ? "腾讯云" : (v.engine === "edge" ? "微软" : (v.engine === "azure" ? "Azure" : v.engine));
+            html += '<div class="bi-voice' + (v.current ? " on" : "") + '" data-key="' + esc(v.key) + '">' +
+              '<button class="bi-pick" data-act="pick" aria-pressed="' + (v.current ? "true" : "false") + '">' +
+                '<span class="bi-name">' + esc(v.label) + "</span>" +
+                '<small>' + esc(engineName) + " · " + v.entries + " 条" + (v.current ? " · 当前" : "") + "</small>" +
+              "</button>" +
+              '<button class="mini-btn" data-act="try">🔊 试听</button>' +
+            "</div>";
+          });
+          html += '</div><p class="parent-note" id="bi-tip">选中一个内置音色,全站(字/词/例句/角色台词)都用它。</p>';
+        } else {
+          html += '<p class="parent-note">内置音频还没加载(一般是首次打开或离线)。连一次网络后回到这里即可看到。</p>';
+        }
+
+        html += '<details class="text-mode"' + (builtin.length ? "" : " open") + '><summary>手机系统音色(仅兜底用)</summary>';
         if (!voices.length) {
-          html += '<p class="parent-note">当前浏览器还没提供中文音色。可以试试:用 Chrome/Safari 打开,或在系统里安装中文语音包(见下方提示)。</p>';
+          html += '<p class="parent-note">当前浏览器还没提供中文音色。可以试试:用 Chrome/Safari 打开,或在系统里安装中文语音包。</p>';
         } else {
           var hasHQ = voices.some(function (x) { return window.Speech.isHQ({ name: x.name, voiceURI: x.id }); });
-          html += '<p class="parent-note">换一个更自然的音色,孩子听得更舒服。带 ✨ 的是系统里的高音质音色,最不像"机器人"。</p>' +
+          html += '<p class="parent-note">只在内置音频没有该条目时才会用到它。带 ✨ 的是系统里的高音质音色。</p>' +
             '<div class="voice-row"><select id="voice-sel">';
           voices.forEach(function (x) {
             var hq = window.Speech.isHQ({ name: x.name, voiceURI: x.id });
@@ -790,12 +814,13 @@
           });
           html += '</select><button class="btn btn-sky" id="voice-try">🔊 试听</button></div>';
           if (!hasHQ) {
-            html += '<p class="parent-note">💡 想要更自然的声音:在系统里下载「增强/高级」中文音色,回来后这里就会出现带 ✨ 的选项。<br>' +
+            html += '<p class="parent-note">💡 想要更自然的兜底声音:在系统里下载「增强/高级」中文音色。<br>' +
               "macOS:系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 中文(普通话),选带「增强」的下载<br>" +
               "Windows:设置 → 时间和语言 → 语音 → 管理语音 → 添加语音(中文)<br>" +
               "iPhone/iPad:设置 → 辅助功能 → 朗读内容 → 声音 → 中文</p>";
           }
         }
+        html += "</details>";
         html += "</div>";
 
         /* 本周学习报告:本地生成一张可保存/分享的卡片(数据不出设备) */
@@ -982,6 +1007,30 @@
             rerender();
           });
         }
+
+        /* 内置音色:选中即全站生效(走 AudioPack.setVoice);试听只临时切换,不改设置 */
+        v.querySelectorAll(".bi-voice").forEach(function (row) {
+          var key = row.getAttribute("data-key");
+          row.querySelectorAll("[data-act]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var act = btn.getAttribute("data-act");
+              if (!window.AudioPack) return;
+              if (act === "try") {
+                if (window.SFX) SFX.click();
+                var tip = v.querySelector("#bi-tip");
+                window.AudioPack.preview(key, function () {
+                  if (tip) tip.textContent = "刚才试听的是「" + (row.querySelector(".bi-name") || {}).textContent + "」,试听不会改变设置。";
+                });
+                return;
+              }
+              window.AudioPack.setVoice(key).then(function (ok) {
+                if (!ok) { window.UI.toast("切换失败,请稍后再试"); return; }
+                window.UI.toast("已切换内置音色,全站生效");
+                renderDash(v);
+              });
+            });
+          });
+        });
 
         var sndTest = v.querySelector("#snd-test");
         if (sndTest) {

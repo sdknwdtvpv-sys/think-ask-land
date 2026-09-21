@@ -96,6 +96,10 @@
       cache[key] = null;      /* 标记为不可用:后续不再重试,调用方自动回退 TTS */
       return null;
     }).then(function (r) { delete inflight[key]; return r; });
+    /* ⚠️ 这一行不能少:少了它 loadVoice 返回 undefined,load() 里 .then 会抛
+       TypeError → 整个预置音频降级为"不可用",孩子听到的永远是浏览器 TTS。
+       (v1.1.0~v1.9.0 一直缺这一行,导致 19MB 预置音频从未播放过) */
+    return inflight[key];
   }
 
   function load() {
@@ -128,6 +132,46 @@
     return loadVoice(key).then(function (idx) {
       activeVoice = key; index = idx; state = OK; explicitVoice = true; return true;
     }).catch(function () { return false; });
+  }
+
+  /* 该音色里"拿来做试听"的一条:优先常用独体字,保证每个音色都能念出来 */
+  var SAMPLE_PREFER = ["日", "山", "水", "火", "月", "一", "大", "小"];
+  function sampleOf(key) {
+    var idx = cache[key];
+    /* 索引还没加载(例如家长还没点过这个音色):仍返回一个"各音色都必然有"的常用字,
+       让试听按钮不会点了没反应;真正的加载由 preview() 负责 */
+    if (!idx) return SAMPLE_PREFER[0];
+    for (var i = 0; i < SAMPLE_PREFER.length; i++) if (idx[SAMPLE_PREFER[i]]) return SAMPLE_PREFER[i];
+    var keys = Object.keys(idx);
+    for (var j = 0; j < keys.length; j++) if (String(idx[keys[j]]).indexOf("z/") === 0) return keys[j];
+    return keys[0] || "";
+  }
+
+  /* 试听:临时切到某个音色念一条真音频,念完自动切回来 ——
+     绝不能因为家长"听一下"就把设置改掉(这是最容易踩的坑) */
+  function preview(key, onEnd) {
+    if (!config || !config.voices[key]) return Promise.resolve(false);
+    var prevVoice = activeVoice, prevIndex = index, prevExplicit = explicitVoice;
+    var restore = function () { activeVoice = prevVoice; index = prevIndex; explicitVoice = prevExplicit; };
+    return loadVoice(key).then(function (idx) {
+      if (!idx) { restore(); return false; }
+      var text = sampleOf(key);
+      if (!text) { restore(); return false; }
+      activeVoice = key; index = idx;
+      var settled = false;
+      var done = function () {
+        if (settled) return;
+        settled = true;
+        clearTimeout(guard);
+        restore();
+        if (onEnd) onEnd();
+      };
+      /* 兜底:万一边缘情况既不触发 ended 也不触发 error(被系统静音、切后台等),
+         试听也不能把"当前音色"永久改成试听的那个 —— 到时无条件切回来 */
+      var guard = setTimeout(done, 4000);
+      if (!play(text, done, done, "")) { clearTimeout(guard); restore(); return false; }
+      return true;
+    }).catch(function () { restore(); return false; });
   }
 
   /* 内容类型:索引路径第一段就是 z/w/s,拿来当默认角色 */
@@ -208,8 +252,23 @@
     };
   }
 
+  /* 内置音色清单:给家长端选择器用(label/engine/条目数/是否当前) */
+  function voiceList() {
+    if (!config || !config.voices) return [];
+    return Object.keys(config.voices).map(function (k) {
+      var v = config.voices[k];
+      var idx = cache[k];
+      return {
+        key: k, label: v.label || k, engine: v.engine || "", voice: v.voice || "",
+        dir: v.dir || k, entries: idx ? Object.keys(idx).length : (v.count || 0),
+        current: k === activeVoice, isDefault: k === (config.default || "")
+      };
+    }).sort(function (a, b) { return (b.current ? 1 : 0) - (a.current ? 1 : 0) || b.entries - a.entries; });
+  }
+
   window.AudioPack = {
     load: load, play: play, stop: stop, has: has, ready: ready, count: count,
+    voiceList: voiceList, sampleOf: sampleOf, preview: preview,
     unlock: unlock, isUnlocked: isUnlocked, diag: diag, ensureEl: ensureEl,
     setVoice: setVoice, voices: voices, currentVoice: currentVoice, kindOf: kindOf, useRoles: useRoles,
   };

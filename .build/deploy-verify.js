@@ -70,6 +70,22 @@ function check(name, cond, extra) {
   check("字库与笔顺数据完整", info.chars === 400 && info.strokes === 400, info.chars + " 字 / " + info.strokes + " 份笔顺");
 
   if (await page.$("#modal-ok")) { await page.click("#modal-ok"); await sleep(300); }
+
+  /* 预置音频必须在线上真的生效:曾经因为 loadVoice 少一行 return,
+     整套预置音频静默降级成浏览器 TTS,而所有本地测试都没发现(jsdom 没有 fetch)。
+     这里直接在真实网络环境里验证:状态就绪 + 点读会去取 mp3。 */
+  const mp3 = [];
+  page.on("request", (r) => { if (/\.mp3($|\?)/.test(r.url())) mp3.push(r.url()); });
+  const apState = await page.evaluate(() => (window.AudioPack && window.AudioPack.diag) ? window.AudioPack.diag() : null);
+  await page.evaluate(() => { location.hash = "#/card?g=0&i=0"; });
+  await sleep(1200);
+  await page.evaluate(() => { const b = document.querySelector(".py-big .mini-speak"); if (b) b.click(); });
+  await sleep(2000);
+  check("预置音频已就绪(未降级为浏览器 TTS)", !!(apState && apState.state === 2),
+    apState ? apState.stateName + " · " + (apState.label || "?") + " · " + apState.entries + " 条" : "取不到 AudioPack");
+  check("点读会加载预置 mp3", mp3.length > 0, mp3.length ? mp3.length + " 个请求,如 " + mp3[0].split("/").slice(-1)[0] : "没有任何 mp3 请求");
+  await page.evaluate(() => { location.hash = "#/home"; });
+  await sleep(400);
   // 真实点击走一圈
   await page.tap('[data-go="#/groups"]'); await sleep(700);
   const islands = await page.evaluate(() => ({ hash: location.hash, n: document.querySelectorAll(".group-card.island").length, path: !!document.querySelector("#map-path path") }));

@@ -11,6 +11,8 @@
 const fs = require("fs");
 const path = require("path");
 const { JSDOM, VirtualConsole } = require("jsdom");
+const { makeFetch } = require("./jsdom-fetch");
+const ROOT = path.join(__dirname, "..");
 
 const BASE = process.env.HZ_BASE || "http://127.0.0.1:8023";
 const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's scrollTo",
@@ -26,11 +28,12 @@ async function openPage() {
   vc.on("error", (...a) => errors.push("[console.error] " + a.map(String).join(" ")));
   const dom = await JSDOM.fromURL(BASE + "/index.html", {
     runScripts: "dangerously", resources: "usable", pretendToBeVisual: true, virtualConsole: vc,
+    beforeParse(w) { w.fetch = makeFetch(ROOT); },
   });
   const win = dom.window;
   const t0 = Date.now();
   while (Date.now() - t0 < 15000) {
-    try { if (win.Speech && win.AudioPack && win.App && win.CharDB) break; } catch (e) {}
+    try { if (win.Speech && win.AudioPack && win.App && win.CharDB && win.AudioPack.ready()) break; } catch (e) {}
     await new Promise((r) => setTimeout(r, 100));
   }
   return { win, errors, dom };
@@ -111,6 +114,7 @@ async function openPage() {
   const dom = await JSDOM.fromURL(BASE + "/index.html", {
     runScripts: "dangerously", resources: "usable", pretendToBeVisual: true, virtualConsole: vc,
     beforeParse(w) {
+      w.fetch = makeFetch(ROOT);
       /* 伪装成"从主屏幕图标启动":display-mode: standalone */
       w.matchMedia = function (q) {
         return { matches: /standalone/.test(q), media: q, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} };
