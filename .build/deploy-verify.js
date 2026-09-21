@@ -93,9 +93,11 @@ function check(name, cond, extra) {
   check("选关页:小岛地图正常", islands.hash === "#/groups" && islands.n >= 13 && islands.path, islands.n + " 座岛");
   await page.tap('.group-card[data-g="0"]'); await sleep(700);
   const tiles = await page.evaluate(() => document.querySelectorAll(".char-tile").length);
+  const g0n = await page.evaluate(() => window.CharDB.GROUPS[0].chars.length);
   await page.tap(".char-tile"); await sleep(1200);
   const card = await page.evaluate(() => ({ hash: location.hash, svg: !!document.querySelector("#writer-target svg"), know: !!document.querySelector("#btn-know") }));
-  check("字表 30 格 + 字卡笔顺正常", tiles === 30 && card.svg && card.know, card.hash);
+  check("字表格数与字库一致 + 字卡笔顺正常", tiles === g0n && card.svg && card.know,
+    tiles + " 格 / 字库第1岛 " + g0n + " 字 · " + card.hash);
 
   await page.screenshot({ path: __dirname + "/shots/shot-deployed-card.png" });
   await page.evaluate(() => { location.hash = "#/home"; }); await sleep(700);
