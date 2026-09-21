@@ -88,3 +88,12 @@ git checkout . 2>/dev/null || true   # 若已用 git 管理
 | **网站目录出现 `.git`**（可被公网读取） | 接入 git 后若部署脚本未排除，`.git` 会被同步到网站根目录（体积从 1.1M 涨到 5M+，且 `https://域名/.git/config` 可读）。排查：`ssh 服务器 'ls -a /var/www/hanzi-kids \| grep git'`；处置：删掉远端 `.git`，并确认 `deploy.sh` 有 `--exclude '.git/'`、中转目录已清空。当前脚本已内置三重防护与部署后自检 |
 | ssh 报 `invalid quotes` | 工作区路径含撇号：用 `deploy-tencent.sh`（内部已复制密钥到 `/tmp`）或手动 `-i /tmp/hzdeploy/id_ed25519` |
 
+---
+
+## 📖 需要手动操作时,看这里
+
+凡是"需要你亲自点几步"的事情(拿腾讯云密钥、生成音频、发版、回滚),
+都写在 [deploy/guides/](guides/README.md) 里,每份都是"照着点就行"的步骤 + 出错对照表。
+
+- [01 · 腾讯云密钥与预置音频生成](guides/01-tencent-key-and-audio.md)
+- [02 · 发版上线与回滚](guides/02-release-and-rollback.md)
