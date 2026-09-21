@@ -17,9 +17,8 @@ window.Store = global.Store;
 
 require(path.join(ROOT, "js/pinyin.js"));
 const Py = window.Py;
-[1, 2, 3, 4, 5, 6].forEach((i) => require(path.join(ROOT, "data/chars-" + i + ".js")));
-require(path.join(ROOT, "data/chars.js"));
-require(path.join(ROOT, "js/games.js"));
+/* 字库批次自动发现(以前写死 1..6,新批次不参与测试) */
+require("./load-chars");
 
 const results = [];
 /* 断言:显式 false 或 {ok:false} 才算失败 —— 字符串一律当作"通过说明",
@@ -55,7 +54,7 @@ t("isPinyin 接受全库拼音与全部声调变体", () => {
   });
   ["mǎ", "yí", "nǚ", "ér"].forEach((p) => { if (!Py.isValid(p)) bad.push("标准样例被拒:" + p); });
   ["hello!", "", "ma1", "汉"].forEach((p) => { if (Py.isValid(p)) bad.push("非法串被接受:" + JSON.stringify(p)); });
-  return bad.length ? brief(bad) : "400 字 + 全部变体合法";
+  return bad.length ? brief(bad) : ALL.length + " 字 + 全部变体合法";
 });
 
 t("sameBase 对同音节不同调成立", () => {
@@ -93,7 +92,7 @@ t("听写题覆盖全库每个字", () => {
     if (q.options[q.answerIdx].value !== c.c) { bad.push(c.c + ":答案不是本字"); return; }
     if (q.speak !== c.c) { bad.push(c.c + ":发音不是单字"); }
   });
-  return bad.length ? brief(bad) : "400/400 通过";
+  return bad.length ? brief(bad) : ALL.length + "/" + ALL.length + " 通过";
 });
 
 t("听写干扰项不含同音字", () => {
@@ -160,7 +159,7 @@ t("轻声字不出辨调题", () => {
 
 /* ---------- 3) 全题型结构不变式 ---------- */
 t("全题型不变式(≥4 选项/答案唯一/kind 合法)", () => {
-  const KINDS = { char: 1, py: 1, emoji: 1 };
+  const KINDS = { char: 1, py: 1, emoji: 1, parts: 1 };
   const bad = [], seen = {};
   ALL.forEach((c) => {
     for (let i = 0; i < 40; i++) {
@@ -173,7 +172,7 @@ t("全题型不变式(≥4 选项/答案唯一/kind 合法)", () => {
     }
   });
   const types = Object.keys(seen).sort();
-  return bad.length ? false : types.length + " 种题型 " + types.join(",");
+  return bad.length ? brief(bad, 6) : types.length + " 种题型 " + types.join(",");
 });
 
 t("avoidType 生效(不连续出同一题型)", () => {

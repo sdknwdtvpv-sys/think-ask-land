@@ -4,10 +4,15 @@ const fs = require("fs");
 const path = require("path");
 const ROOT = path.join(__dirname, "..");
 
-/* 载入已有 316 字 */
+/* 载入已有字库(批次自动发现,避免新批次不参与"撞字/撞图"检查) */
 global.window = {};
-[1, 2, 3, 4, 5].forEach((i) => require(path.join(ROOT, "data", "chars-" + i + ".js")));
-const EX = [].concat(window.CHAR_GROUPS_P1, window.CHAR_GROUPS_P2, window.CHAR_GROUPS_P3, window.CHAR_GROUPS_P4, window.CHAR_GROUPS_P5);
+const BATCHES = fs
+  .readdirSync(path.join(ROOT, "data"))
+  .filter((f) => /^chars-\d+\.js$/.test(f))
+  .sort((a, b) => parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10));
+BATCHES.forEach((f) => require(path.join(ROOT, "data", f)));
+const EX = [];
+for (let i = 1; i <= 9; i++) EX.push(...(window["CHAR_GROUPS_P" + i] || []));
 const exChars = new Map(), exEmoji = new Map();
 EX.forEach((g) => g.chars.forEach((c) => { exChars.set(c.c, g.name); if (c.e) exEmoji.set(c.e, c.c); }));
 
