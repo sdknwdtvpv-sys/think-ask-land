@@ -88,7 +88,7 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
     return PASS(Py.TONE_INFO.map((x) => x.name + x.demo).join(" "));
   });
 
-  t("音节索引由字库反推,覆盖全部 400 字", () => {
+  t("音节索引由字库反推,覆盖全部汉字", () => {
     const idx = Py.syllableIndex();
     const bases = Object.keys(idx.byBase);
     if (bases.length < 100) return FAIL("音节数过少 " + bases.length);

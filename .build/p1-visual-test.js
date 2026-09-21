@@ -56,7 +56,7 @@ function check(name, cond, extra) {
       offset0: rings[0] ? rings[0].getAttribute("stroke-dashoffset") : null,
     };
   });
-  check("13 座小岛渲染完整", map.n === 13 && map.rings === 13, map.first);
+  check("小岛渲染完整(≥13 座且每座都有环)", map.n >= 13 && map.rings === map.n, map.first);
   check("小径连线已按实际布局绘制", !!(map.pathD && map.pathD.includes("C")), (map.pathD || "").slice(0, 42) + "…");
   check("小径为虚点线", /px/.test(map.dash || "") || /\d/.test(map.dash || ""), "dash=" + map.dash + " width=" + map.stroke);
   check("小岛 S 形错落排布", map.stagger);
@@ -102,7 +102,8 @@ function check(name, cond, extra) {
       btns: document.querySelectorAll(".learn-actions .btn .ico").length,
     };
   });
-  check("字表 30 格", learn.tiles === 30);
+  const g0n = await page.evaluate(() => window.CharDB.GROUPS[0].chars.length);
+  check("字表格数与字库第1岛一致", learn.tiles === g0n, learn.tiles + " / " + g0n);
   check("字块为田字格(虚线框 + 十字线)", learn.dashed && learn.cross);
   check("已学字有矢量对勾角标", learn.check);
   check("顶部进度环存在", learn.ring);

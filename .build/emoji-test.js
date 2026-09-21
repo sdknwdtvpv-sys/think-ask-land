@@ -66,7 +66,7 @@ t("同一座岛内配图唯一(看图题不会出现两个正确答案)", () => 
       else seen[rec.e] = c.c;
     });
   });
-  return bad.length ? FAIL(bad.slice(0, 4).join(" | ")) : PASS("13 座岛全部唯一");
+  return bad.length ? FAIL(bad.slice(0, 4).join(" | ")) : PASS(DB.GROUPS.length + " 座岛全部唯一");
 });
 
 t("配图都是真实 emoji(非空、非纯文字)", () => {

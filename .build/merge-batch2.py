@@ -100,9 +100,9 @@ def main():
     lines.append("];")
     out_js = "\n".join(lines) + "\n"
 
-    dest_dir = ROOT if apply else STAGE
-    if not apply:
-        os.makedirs(STAGE, exist_ok=True)
+    # ⚠️ --apply 必须写进 data/ ,不是仓库根目录(写成根目录会导致字库根本没变)
+    dest_dir = os.path.join(ROOT, "data") if apply else STAGE
+    os.makedirs(dest_dir, exist_ok=True)
     open(os.path.join(dest_dir, "chars-7.js"), "w", encoding="utf-8").write(out_js)
     open(os.path.join(dest_dir, "chars.js"), "w", encoding="utf-8").write(CHARS_JS)
 

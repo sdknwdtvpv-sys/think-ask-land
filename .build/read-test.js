@@ -1,6 +1,6 @@
 /* 思问岛 · 读一读(分级短文 + 阅读中找字) 测试(jsdom)
    覆盖:
-     1) 内容质量:每篇短文的字全部来自 400 字字库(最关键的约束!)
+     1) 内容质量:每篇短文的字全部来自字库(最关键的约束!)
      2) 篇幅:句数与字数在幼儿可读范围内;标点合法;id 唯一
      3) 找字任务:每篇至少有一个出现 ≥2 次的字可作目标
      4) 难度排序:列表按"最深的一座岛"递进,不是随机顺序
@@ -77,7 +77,7 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
     return PASS("L1 最长 " + max1 + " 字 / L2 最短 " + min2 + " 字(有重叠是正常的,以句式为界)");
   });
 
-  t("每一篇的用字都在 400 字字库内(最关键的约束)", () => {
+  t("每一篇的用字都在字库内(最关键的约束)", () => {
     const bad = [];
     PS.forEach((p) => {
       const unknown = Array.from(new Set(RD.charsOf(p).filter((c) => !DB.BY_CHAR[c])));

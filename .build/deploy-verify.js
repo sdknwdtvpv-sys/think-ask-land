@@ -67,7 +67,8 @@ function check(name, cond, extra) {
   check("角色/场景/入口卡渲染", info.mascot && info.scene && info.cards >= 5 && info.taskCard,
     info.cards + " 个入口卡" + (info.taskCard ? " + 今日任务卡" : ""));
   check("显示字体从服务器加载成功", info.font, info.fonts.join(", "));
-  check("字库与笔顺数据完整", info.chars === 400 && info.strokes === 400, info.chars + " 字 / " + info.strokes + " 份笔顺");
+  check("字库与笔顺数据完整(每字都有笔顺)", info.chars >= 400 && info.strokes >= info.chars,
+    info.chars + " 字 / " + info.strokes + " 份笔顺");
 
   if (await page.$("#modal-ok")) { await page.click("#modal-ok"); await sleep(300); }
 
@@ -89,7 +90,7 @@ function check(name, cond, extra) {
   // 真实点击走一圈
   await page.tap('[data-go="#/groups"]'); await sleep(700);
   const islands = await page.evaluate(() => ({ hash: location.hash, n: document.querySelectorAll(".group-card.island").length, path: !!document.querySelector("#map-path path") }));
-  check("选关页:小岛地图正常", islands.hash === "#/groups" && islands.n === 13 && islands.path, islands.n + " 座岛");
+  check("选关页:小岛地图正常", islands.hash === "#/groups" && islands.n >= 13 && islands.path, islands.n + " 座岛");
   await page.tap('.group-card[data-g="0"]'); await sleep(700);
   const tiles = await page.evaluate(() => document.querySelectorAll(".char-tile").length);
   await page.tap(".char-tile"); await sleep(1200);

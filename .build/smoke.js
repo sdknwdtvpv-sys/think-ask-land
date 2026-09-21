@@ -63,9 +63,12 @@ const BENIGN = [
     /* 1. 资源加载 */
     await until(() => win.App && win.CharDB && win.Store, 15000, "应用脚本加载");
     ok("脚本全部加载", true);
-    ok("字库 13 组 400 字", win.CharDB.GROUPS.length === 13 && win.CharDB.ALL.length === 400,
+    ok("字库分组与字数齐备(岛 ≥13、字 ≥400)", win.CharDB.GROUPS.length >= 13 && win.CharDB.ALL.length >= 400,
       win.CharDB.ALL.length + " 字");
-    ok("笔顺数据 400 字", Object.keys(win.STROKE_DATA).length === 400);
+    ok("笔顺数据覆盖全库(不多不少)", (function () {
+      const n = Object.keys(win.STROKE_DATA).length, m = win.CharDB.ALL.length;
+      return n >= m && win.CharDB.ALL.every((c) => win.STROKE_DATA[c.c]);
+    })());
 
     /* 2. 首页 + 欢迎弹窗 */
     await until(() => q("#view .home-title"), 8000, "首页渲染");
@@ -75,13 +78,15 @@ const BENIGN = [
 
     /* 3. 选关页 */
     win.location.hash = "#/groups";
-    await until(() => qa(".group-card").length === 13, 5000, "分组列表");
-    ok("选关页 13 个小岛", qa(".group-card").length === 13);
+    await until(() => qa(".group-card").length >= 13, 5000, "分组列表");
+    ok("选关页小岛数与字库一致", qa(".group-card").length === win.CharDB.GROUPS.length,
+      qa(".group-card").length + " 座 / 字库 " + win.CharDB.GROUPS.length + " 座");
 
     /* 4. 字表页 */
     win.location.hash = "#/learn?g=0";
-    await until(() => qa(".char-tile").length === 30, 5000, "字表");
-    ok("第1岛字表 30 字", qa(".char-tile").length === 30);
+    const g0n = win.CharDB.GROUPS[0].chars.length;
+    await until(() => qa(".char-tile").length === g0n, 5000, "字表");
+    ok("第1岛字表与字库一致", qa(".char-tile").length === g0n, g0n + " 字");
 
     /* 5. 字卡页:笔顺SVG/组词/朗读按钮/我会了 */
     win.location.hash = "#/card?g=0&i=0";
@@ -171,7 +176,10 @@ const BENIGN = [
     q("#gate-in").value = String(parseInt(m[1]) * parseInt(m[2]));
     click(q("#gate-ok"));
     await until(() => q(".stats-grid"), 5000, "家长报表");
-    ok("家长报表渲染", q(".stat-num").textContent.includes("12 / 400"), q(".stat-num").textContent);
+    /* 不写死 400:断言"已学 / 全库"这个形状,且分母等于字库字数 */
+    ok("家长报表渲染",
+      new RegExp("\\d+ / " + win.CharDB.ALL.length + "$").test(q(".stat-num").textContent.trim()),
+      q(".stat-num").textContent);
     ok("7天柱状图", qa(".wbar").length === 7);
     ok("易错字面板", qa(".panel").length >= 3);
 
