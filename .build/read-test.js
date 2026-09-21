@@ -72,7 +72,7 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
      目前有 3 个历史标题越界(果子/河里的鱼/龟和兔),它们会随批 2 扩字自动合规
      (批 2 新增「的」「和」;「子」已提案补充),在那之前用白名单放行。 */
   t("标题只用字库内的字(新内容硬性要求)", () => {
-    const KNOWN = { p06: "子", p08: "的", p14: "和" };   // 批 2 扩字后应清空这个白名单
+    const KNOWN = { p08: "的", p14: "和" };   // 「的/和」在批 2 扩字后合规;届时清空本白名单
     const bad = [];
     PS.forEach((p) => {
       const out = Array.from(new Set(Array.from(p.title).filter((c) => /[\u4e00-\u9fff]/.test(c) && !DB.BY_CHAR[c])));
