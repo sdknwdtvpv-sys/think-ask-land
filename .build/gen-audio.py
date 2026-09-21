@@ -538,7 +538,7 @@ def main():
             keys = sorted(json.load(open(cfg_file, encoding="utf-8")).get("voices", {}).keys()) or keys
         total = done = 0
         for vk in keys:
-            for kind in ("z", "w", "s"):
+            for kind in ("p", "z", "w", "s"):
                 d = os.path.join(OUT, vk, kind)
                 if not os.path.isdir(d):
                     continue
@@ -605,7 +605,7 @@ def main():
     for vi, voice in enumerate(voices):
         vkey = voice["key"]
         vdir = os.path.join(OUT, vkey)
-        for kind in ("z", "w", "s"):
+        for kind in ("p", "z", "w", "s"):
             os.makedirs(os.path.join(vdir, kind), exist_ok=True)
 
         errs = []
