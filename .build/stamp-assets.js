@@ -106,6 +106,26 @@ self.addEventListener("fetch", function (e) {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;         /* 站外资源不接管 */
 
+  /* 页面导航(HTML)走"网络优先":
+     否则发版后,老用户第一次打开拿到的还是缓存里的旧 index.html ——
+     页面是旧的、引用的还是旧版 JS,感觉像"更新没生效"(部署后的自动验收也栽在这上面)。
+     断网时回落到缓存,离线可用性不受影响。
+     资源文件仍用"缓存优先":它们的 URL 带版本戳,新版本一定是新 URL。 */
+  if (req.mode === "navigate") {
+    e.respondWith(
+      fetch(req).then(function (res) {
+        if (res && res.ok) {
+          const copy = res.clone();
+          e.waitUntil(caches.open(CACHE).then(function (c) { return c.put("index.html", copy); }));
+        }
+        return res;
+      }).catch(function () {
+        return caches.match("index.html").then(function (hit) { return hit || caches.match("./"); });
+      })
+    );
+    return;
+  }
+
   /* 音频包体积大且按需取用:命中缓存就直接用,没命中就走网络并回填 */
   e.respondWith(
     caches.match(req, { ignoreSearch: false }).then(function (hit) {

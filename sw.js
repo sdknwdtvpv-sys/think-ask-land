@@ -4,47 +4,47 @@
      - 取用:缓存优先,网络回填 —— 断网也能完整学习,联网时静默更新
      - 版本:VERSION 与 index.html 的 app-version 同步,发版即换缓存桶,旧的自动清理
      - 绝不缓存:非 GET 请求(如匿名统计上报),避免把数据写进缓存 */
-const VERSION = "1.10.0";
+const VERSION = "1.10.1";
 const CACHE = "siwendao-" + VERSION;
 const ASSETS = [
   "./",
-  "audio/config.json?v=1.10.0",
-  "audio/tc-403000/index.json?v=1.10.0",
-  "audio/tc-502007/index.json?v=1.10.0",
-  "css/style.css?v=1.10.0",
-  "css/style2.css?v=1.10.0",
-  "css/v2.css?v=1.10.0",
-  "data/chars-1.js?v=1.10.0",
-  "data/chars-2.js?v=1.10.0",
-  "data/chars-3.js?v=1.10.0",
-  "data/chars-4.js?v=1.10.0",
-  "data/chars-5.js?v=1.10.0",
-  "data/chars-6.js?v=1.10.0",
-  "data/chars.js?v=1.10.0",
-  "data/emoji-extra.js?v=1.10.0",
-  "data/hanzi-parts.js?v=1.10.0",
-  "data/passages.js?v=1.10.0",
-  "data/quests.js?v=1.10.0",
-  "data/strokes.js?v=1.10.0",
+  "audio/config.json?v=1.10.1",
+  "audio/tc-403000/index.json?v=1.10.1",
+  "audio/tc-502007/index.json?v=1.10.1",
+  "css/style.css?v=1.10.1",
+  "css/style2.css?v=1.10.1",
+  "css/v2.css?v=1.10.1",
+  "data/chars-1.js?v=1.10.1",
+  "data/chars-2.js?v=1.10.1",
+  "data/chars-3.js?v=1.10.1",
+  "data/chars-4.js?v=1.10.1",
+  "data/chars-5.js?v=1.10.1",
+  "data/chars-6.js?v=1.10.1",
+  "data/chars.js?v=1.10.1",
+  "data/emoji-extra.js?v=1.10.1",
+  "data/hanzi-parts.js?v=1.10.1",
+  "data/passages.js?v=1.10.1",
+  "data/quests.js?v=1.10.1",
+  "data/strokes.js?v=1.10.1",
   "fonts/kuaile-subset.woff2",
   "index.html",
-  "js/app.js?v=1.10.0",
-  "js/audio.js?v=1.10.0",
-  "js/beacon.js?v=1.10.0",
-  "js/games.js?v=1.10.0",
-  "js/icons.js?v=1.10.0",
-  "js/mascot.js?v=1.10.0",
-  "js/pinyin.js?v=1.10.0",
-  "js/report.js?v=1.10.0",
-  "js/speech.js?v=1.10.0",
-  "js/store.js?v=1.10.0",
-  "js/sw-register.js?v=1.10.0",
-  "js/ui.js?v=1.10.0",
-  "js/views2.js?v=1.10.0",
-  "js/views3.js?v=1.10.0",
-  "js/views4.js?v=1.10.0",
-  "js/writer.js?v=1.10.0",
-  "vendor/hanzi-writer.min.js?v=1.10.0"
+  "js/app.js?v=1.10.1",
+  "js/audio.js?v=1.10.1",
+  "js/beacon.js?v=1.10.1",
+  "js/games.js?v=1.10.1",
+  "js/icons.js?v=1.10.1",
+  "js/mascot.js?v=1.10.1",
+  "js/pinyin.js?v=1.10.1",
+  "js/report.js?v=1.10.1",
+  "js/speech.js?v=1.10.1",
+  "js/store.js?v=1.10.1",
+  "js/sw-register.js?v=1.10.1",
+  "js/ui.js?v=1.10.1",
+  "js/views2.js?v=1.10.1",
+  "js/views3.js?v=1.10.1",
+  "js/views4.js?v=1.10.1",
+  "js/writer.js?v=1.10.1",
+  "vendor/hanzi-writer.min.js?v=1.10.1"
 ];
 
 self.addEventListener("install", function (e) {
@@ -73,6 +73,26 @@ self.addEventListener("fetch", function (e) {
   if (req.method !== "GET") return;                       /* 统计上报等一律直连 */
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;         /* 站外资源不接管 */
+
+  /* 页面导航(HTML)走"网络优先":
+     否则发版后,老用户第一次打开拿到的还是缓存里的旧 index.html ——
+     页面是旧的、引用的还是旧版 JS,感觉像"更新没生效"(部署后的自动验收也栽在这上面)。
+     断网时回落到缓存,离线可用性不受影响。
+     资源文件仍用"缓存优先":它们的 URL 带版本戳,新版本一定是新 URL。 */
+  if (req.mode === "navigate") {
+    e.respondWith(
+      fetch(req).then(function (res) {
+        if (res && res.ok) {
+          const copy = res.clone();
+          e.waitUntil(caches.open(CACHE).then(function (c) { return c.put("index.html", copy); }));
+        }
+        return res;
+      }).catch(function () {
+        return caches.match("index.html").then(function (hit) { return hit || caches.match("./"); });
+      })
+    );
+    return;
+  }
 
   /* 音频包体积大且按需取用:命中缓存就直接用,没命中就走网络并回填 */
   e.respondWith(
