@@ -105,9 +105,21 @@
         if (window.SFX) SFX.click();
         self.back();
       });
-      /* 首次触摸:解锁 iOS 语音与音效 */
-      var unlock = function () { window.Speech.warmup(); };
-      document.addEventListener("pointerdown", unlock, { once: true });
+      /* 音频解锁:必须"在手势里"完成三件事(音效 / <audio> / TTS)。
+         不用 { once:true } —— iOS 从后台切回来时音频会话会重新挂起,
+         保留监听,每次点按都补一次解锁(已经解锁时是空操作,不产生额外开销)。 */
+      var unlock = function () {
+        if (window.Speech._warmed && window.AudioPack && window.AudioPack.isUnlocked()) return;
+        window.Speech.warmup();
+      };
+      document.addEventListener("pointerdown", unlock, true);
+      /* 从后台恢复(iOS 独立 APP 常见):音频会话可能被系统挂起,重新武装 */
+      document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState !== "visible") return;
+        if (window.AudioPack && window.AudioPack.isUnlocked && !window.AudioPack.isUnlocked()) {
+          if (window.Speech._warmed) window.Speech._warmed = false;
+        }
+      });
       window.Store.on(function () { self.refreshStars(); });
       /* 只在「宽度」变化时重渲染(横竖屏切换等)。
          手机地址栏收起/展开只改高度却同样触发 resize —— 若照样重渲染,
@@ -124,6 +136,42 @@
       if (window.Beacon) Beacon.track("open");
       this.render();
       this.welcome();
+      this.soundGate();
+    },
+
+    /* ---------- 主屏幕 APP 的"点一下开始"门 ----------
+       为什么需要:从主屏幕图标启动时,iOS 不允许页面自动出声(没有用户激活上下文),
+       孩子点字卡听到的会是"静默"。浏览器标签页里不存在这个问题,所以只在独立模式出现。
+       这一下点击同时完成:解锁音频 + 打招呼(让孩子立刻听到声音,知道"有声音了")。 */
+    soundGate: function () {
+      var self = this;
+      var standalone = false;
+      try {
+        standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+          window.navigator.standalone === true;
+      } catch (e) { /* 忽略 */ }
+      if (!standalone) return;                       // 浏览器标签页:保持原有体验,不打扰
+      if (document.getElementById("sound-gate")) return;
+      var box = document.createElement("div");
+      box.id = "sound-gate";
+      box.className = "sound-gate";
+      box.innerHTML =
+        '<div class="sg-card">' +
+          '<div class="sg-mascot">' + Mascot.trio("idle", 72) + "</div>" +
+          '<div class="sg-title">点一下,开始玩</div>' +
+          '<button class="sg-btn" id="sg-go" aria-label="点一下开始">🔊</button>' +
+          '<div class="sg-note">从主屏幕打开时需要先点一下<br>才能播放声音(手机的规矩)</div>' +
+        "</div>";
+      document.body.appendChild(box);
+      box.querySelector("#sg-go").addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        window.Speech.warmup();
+        if (window.SFX) SFX.click();
+        box.classList.add("gone");
+        setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 260);
+        setTimeout(function () { window.Speech.speak("你好呀,我们一起来认字吧", 0.88); }, 320);
+        if (window.Beacon) Beacon.track("evt", { n: "sound_gate" });
+      });
     },
 
     welcome: function () {

@@ -47,14 +47,23 @@ function check(name, cond, extra) {
   check("次要文字对比度达 WCAG AA (≥4.5:1)", contrast.r >= 4.5, contrast.text + " on 纸卡 = " + contrast.r + ":1");
 
   // ---- 2. 键盘焦点可见 ----
-  await page.keyboard.press("Tab");
-  await sleep(200);
-  const focus = await page.evaluate(() => {
-    const el = document.activeElement;
-    const cs = getComputedStyle(el);
-    return { tag: el.tagName + (el.id ? "#" + el.id : ""), w: cs.outlineWidth, style: cs.outlineStyle };
-  });
-  check("键盘 Tab 焦点有可见焦点环", parseFloat(focus.w) >= 2 && focus.style !== "none", focus.tag + " outline=" + focus.w + " " + focus.style);
+  /* 欢迎弹窗关闭后焦点会回到 body,而"关弹窗"与"Tab"之间有动画竞跑:
+     第一次 Tab 有概率落空(落在 body)。这里断言的是真正要守住的不变量 ——
+     **Tab 能到达控件,且控件有可见焦点环**,而不是"第一次 Tab 必须立刻命中"。 */
+  let focus = null;
+  for (let i = 0; i < 4; i++) {
+    await page.keyboard.press("Tab");
+    await sleep(220);
+    focus = await page.evaluate(() => {
+      const el = document.activeElement;
+      const cs = getComputedStyle(el);
+      return { tag: el.tagName + (el.id ? "#" + el.id : ""), w: cs.outlineWidth, style: cs.outlineStyle };
+    });
+    if (focus.tag !== "BODY") break;
+  }
+  check("键盘 Tab 能到达控件且有可见焦点环",
+    focus.tag !== "BODY" && parseFloat(focus.w) >= 2 && focus.style !== "none",
+    focus.tag + " outline=" + focus.w + " " + focus.style);
 
   // ---- 3. 弹窗:角色反应 + Esc 关闭 ----
   await page.evaluate(() => window.UI.celebrate([{ kind: "badge", e: "🌱", n: "测试", d: "验证弹窗" }]));

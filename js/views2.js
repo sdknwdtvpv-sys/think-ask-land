@@ -555,6 +555,22 @@
         inp.addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
       }
 
+      /* 把自检结果翻译成"该怎么办"(家长不需要看懂 API) */
+      function sndAdvice(d, ap) {
+        if (ap.state !== 2 && !d.ttsSupported) {
+          return "⚠️ 这台设备两条发声通道都不可用:预置音频没加载成功,浏览器也不支持朗读。请先连一次网络再打开本页,让音频配置加载进来。";
+        }
+        if (ap.state === 2 && !ap.unlocked) {
+          return "在屏幕上任意点一下,声音就会被激活 —— 主屏幕 APP 需要先有一次点击才能播放。";
+        }
+        if (ap.state !== 2 && d.ttsZh === 0) {
+          return "⚠️ 预置音频没加载,而且系统里没有中文朗读音色。建议:连一次网络重新打开本页;或在系统设置里安装中文语音包。";
+        }
+        if (ap.state !== 2) return "预置音频暂不可用,当前回退到浏览器朗读。连一次网络后重新打开本页即可恢复。";
+        if (d.ttsZh === 0) return "预置音频正常 ✓ 系统没有中文朗读音色,但常用字都有预置音频,基本不影响使用。";
+        return "两条通道都正常 ✓ 预置音频优先,没有预置的条目会自动用浏览器朗读兜底。";
+      }
+
       function renderDash(v) {
         App.setTopbar("家长中心", true);
         var st = window.Store.state;
@@ -734,6 +750,27 @@
             '<button class="btn btn-sky" id="pr-cards">🃏 识字卡</button>' +
             '<button class="btn btn-ghost" id="pr-write">✍️ 描红练习纸</button>' +
           "</div></div>";
+
+        /* ---- 声音自检:手机上"没声音"时,这张表能直接指出是哪一环断了 ---- */
+        var snd = window.Speech.diag();
+        var sndAp = snd.audio || { state: -1, stateName: "未加载", entries: 0, unlocked: false, lastError: "" };
+        var yn = function (ok, yes, no) { return '<span class="' + (ok ? "snd-ok" : "snd-bad") + '">' + (ok ? yes : no) + "</span>"; };
+        html += '<div class="panel"><h4>' + Icons.svg("speak") + "声音自检</h4>" +
+          '<div class="snd-grid">' +
+            '<div class="snd-row"><span>打开方式</span><span>' + (snd.standalone ? "主屏幕 APP" : "浏览器") + "</span></div>" +
+            '<div class="snd-row"><span>预置朗读音频</span><span>' + esc(sndAp.stateName) +
+              (sndAp.entries ? " · " + sndAp.entries + " 条 · " + esc(sndAp.label || sndAp.voice || "") : "") + "</span></div>" +
+            '<div class="snd-row"><span>音频解锁</span><span>' + yn(sndAp.unlocked, "已解锁 ✓", "未解锁(点一下屏幕即可)") + "</span></div>" +
+            '<div class="snd-row"><span>浏览器朗读</span><span>' + yn(snd.ttsSupported, "支持", "不支持(该浏览器没有语音合成)") + "</span></div>" +
+            '<div class="snd-row"><span>可用中文音色</span><span>' + (snd.ttsZh ? snd.ttsZh + " 个" : yn(false, "", "0 个(需要在系统里装中文语音包)")) + "</span></div>" +
+            '<div class="snd-row"><span>网络</span><span>' + (snd.online ? "在线" : yn(false, "", "离线(预置音频仍可用)")) + "</span></div>" +
+            (sndAp.lastError ? '<div class="snd-row"><span>最近一次异常</span><span class="snd-bad">' + esc(sndAp.lastError) + "</span></div>" : "") +
+          "</div>" +
+          '<div class="backup-btns">' +
+            '<button class="btn btn-sky" id="snd-test">🔊 测试播放</button>' +
+            '<button class="btn btn-ghost" id="snd-recheck">重新检测</button>' +
+          "</div>" +
+          '<p class="parent-note" id="snd-tip">' + sndAdvice(snd, sndAp) + "</p></div>";
 
         /* ---- 朗读声音:换更自然的音色 ---- */
         var voices = window.Speech.supported ? window.Speech.listVoices() : [];
@@ -943,6 +980,30 @@
             if (!ur.ok) { window.UI.toast(ur.err); return; }
             window.UI.toast("已恢复到导入前的进度");
             rerender();
+          });
+        }
+
+        var sndTest = v.querySelector("#snd-test");
+        if (sndTest) {
+          sndTest.addEventListener("click", function () {
+            /* 依次验证两条通道:先试预置音频(读「山」),没命中就由 TTS 接手。
+               哪条没响,配合上面的「最近一次异常」就能定位。 */
+            window.Speech.warmup();
+            var tip = v.querySelector("#snd-tip");
+            var handled = window.AudioPack ? window.AudioPack.play("山", null, null, "") : false;
+            window.Speech.speak("山", 0.8, function () {
+              if (!tip) return;
+              tip.textContent = handled === false
+                ? "刚才走的是浏览器朗读(这条预置音频没找到)。完全没声音的话,请看上面的「最近一次异常」。"
+                : "刚才播放的是预置音频。没听到声音,请先确认手机音量,再点「重新检测」。";
+            });
+          });
+        }
+        var sndRe = v.querySelector("#snd-recheck");
+        if (sndRe) {
+          sndRe.addEventListener("click", function () {
+            window.Speech.warmup();
+            App.after(600, function () { renderDash(v); });
           });
         }
 

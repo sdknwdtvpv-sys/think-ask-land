@@ -164,10 +164,14 @@
     },
 
 
-    /* 解锁 iOS 音频:首次触摸时调用 */
+    /* 解锁 iOS 音频:首次触摸时调用。
+       三件事都要做,少一件就会出现"某个设备上没声音":
+         ① AudioContext(音效) ② <audio> 元素(预置朗读音频) ③ speechSynthesis(兜底 TTS) */
     warmup: function () {
       /* 音效解锁与「是否支持朗读」无关:不能因为浏览器没有 TTS,就把音效一起跳过 */
       SFX.unlock();
+      if (window.AudioPack && window.AudioPack.unlock) window.AudioPack.unlock();
+      this._warmed = true;
       if (!this.supported) return;
       try {
         if (!this.voice) this.autoPick();
@@ -177,6 +181,28 @@
         if (this.voice) u.voice = this.voice;
         window.speechSynthesis.speak(u);
       } catch (e) { /* 忽略 */ }
+    },
+
+    /* 声音自检:把"这台设备到底能不能出声"拆开说清楚(家长端面板直接展示) */
+    diag: function () {
+      var vs = [];
+      try { vs = window.speechSynthesis ? (window.speechSynthesis.getVoices() || []) : []; } catch (e) { vs = []; }
+      var zh = vs.filter(function (v) { return /^zh|cmn|Chinese/i.test(v.lang || ""); });
+      var ap = (window.AudioPack && window.AudioPack.diag) ? window.AudioPack.diag() : null;
+      var standalone = false;
+      try {
+        standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+          window.navigator.standalone === true;
+      } catch (e) { /* 忽略 */ }
+      return {
+        standalone: standalone,
+        online: (typeof navigator !== "undefined" && "onLine" in navigator) ? navigator.onLine : true,
+        ttsSupported: this.supported,
+        ttsVoices: vs.length,
+        ttsZh: zh.length,
+        voice: this.voice ? (this.voice.name + " · " + this.voice.lang) : "(未选定)",
+        audio: ap
+      };
     },
 
     stop: function () {

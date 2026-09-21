@@ -51,7 +51,23 @@ while ((mm = re.exec(html)) !== null) if (refs.indexOf(mm[1]) < 0) refs.push(mm[
 fs.readdirSync(path.join(ROOT, "fonts")).forEach(function (fn) {
   if (/\.(woff2?|ttf|otf)$/i.test(fn) && refs.indexOf("fonts/" + fn) < 0) refs.push("fonts/" + fn);
 });
-const assets = ["./", "index.html"].concat(refs).sort();
+/* 音频"配置与索引"必须一起预缓存:
+   它们只有几十 KB,却是预置朗读的入口 —— 缺了它们,audio 模块会整体降级到浏览器 TTS,
+   而 iOS 主屏幕 APP 的 TTS 常常不出声(表现就是"APP 里没声音")。mp3 本身不预缓存,
+   按需播放时再进缓存(见 sw.js 的运行时回填)。 */
+const audioJson = [];
+try {
+  const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, "audio", "config.json"), "utf8"));
+  audioJson.push("audio/config.json?v=" + V);
+  const dirs = {};
+  Object.keys(cfg.voices || {}).forEach(function (k) { dirs[cfg.voices[k].dir || k] = 1; });
+  /* 默认音色 + 角色用到的音色:进页面就可能被点到 */
+  Object.keys(cfg.roles || {}).forEach(function (r) { const k = cfg.roles[r]; if (cfg.voices[k]) dirs[cfg.voices[k].dir || k] = 1; });
+  Object.keys(dirs).forEach(function (d) { audioJson.push("audio/" + d + "/index.json?v=" + V); });
+} catch (e) {
+  console.log("  ℹ️ 未找到 audio/config.json,跳过音频索引预缓存");
+}
+const assets = ["./", "index.html"].concat(refs, audioJson).sort();
 
 const sw = `/* 思问岛 · Service Worker(离线可用) —— 由 .build/stamp-assets.js 自动生成,请勿手改
    策略:

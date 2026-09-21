@@ -42,6 +42,37 @@
     return el;
   }
 
+  /* ---------- 音频解锁(iOS 主屏幕 APP 的关键) ----------
+     背景:iOS 上 <audio> 元素必须"在用户手势里成功播放过一次",之后才允许由代码随时播放。
+     浏览器标签页里,孩子点卡片时触发的播放天然落在手势的激活窗口内,所以一直是好的;
+     但**从主屏幕图标启动的独立 APP** 没有这个上下文,首次自动播放会被拒绝 —— 表现就是"没声音"。
+     这里在首次点按时播一段 50ms 静音把元素"点亮",之后所有点读就正常了。 */
+  var SILENT = "data:audio/wav;base64,UklGRrQBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YZABAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA";
+  var unlocked = false, lastError = "";
+  function unlock() {
+    if (unlocked) return true;
+    var a = ensureEl();
+    if (!a) return false;
+    try {
+      a.src = SILENT;
+      a.muted = false;
+      a.volume = 1;
+      var pr = a.play();
+      if (pr && typeof pr.then === "function") {
+        pr.then(function () {
+          unlocked = true;
+          try { a.pause(); a.currentTime = 0; } catch (e) { /* 忽略 */ }
+        }).catch(function (err) {
+          lastError = "解锁被拒:" + ((err && err.name) || err);
+        });
+      } else {
+        unlocked = true;
+      }
+    } catch (e) { lastError = "解锁异常:" + e.message; }
+    return unlocked;
+  }
+  function isUnlocked() { return unlocked; }
+
   function fetchJson(url) {
     return window.fetch(url, { cache: "force-cache" }).then(function (r) {
       if (!r.ok) throw new Error("HTTP " + r.status);
@@ -149,7 +180,12 @@
       a.src = "audio/" + dirOf(key) + "/" + idx[text];
       a.currentTime = 0;
       var pr = a.play();
-      if (pr && typeof pr.catch === "function") pr.catch(function () { done(false); });
+      if (pr && typeof pr.catch === "function") pr.catch(function (err) {
+        /* 记下原因:家长端"声音自检"要能说出为什么没声音,而不是默默回退 */
+        lastError = "播放被拒:" + ((err && err.name) || err || "");
+        done(false);
+      });
+      else if (pr && typeof pr.then === "function") pr.then(function () { lastError = ""; });
     } catch (e) { done(false); }
     return true;
   }
@@ -160,8 +196,21 @@
     try { el.pause(); el.currentTime = 0; } catch (e) { /* 忽略 */ }
   }
 
+  var STATE_NAME = { "-1": "不可用(配置或索引没取到)", "0": "未开始", "1": "加载中", "2": "就绪" };
+  function diag() {
+    return {
+      state: state, stateName: STATE_NAME[String(state)] || "未知",
+      voice: activeVoice, label: (config && config.voices && config.voices[activeVoice] && config.voices[activeVoice].label) || "",
+      engine: (config && config.voices && config.voices[activeVoice] && config.voices[activeVoice].engine) || "",
+      entries: index ? Object.keys(index).length : 0,
+      voices: config ? Object.keys(config.voices || {}) : [],
+      unlocked: unlocked, lastError: lastError
+    };
+  }
+
   window.AudioPack = {
     load: load, play: play, stop: stop, has: has, ready: ready, count: count,
+    unlock: unlock, isUnlocked: isUnlocked, diag: diag, ensureEl: ensureEl,
     setVoice: setVoice, voices: voices, currentVoice: currentVoice, kindOf: kindOf, useRoles: useRoles,
   };
   load();   // 尽早取配置与索引,首次点读就能命中

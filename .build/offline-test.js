@@ -30,6 +30,11 @@ const check = (n, c, e) => checks.push({ name: n, pass: !!c, extra: e || "" });
   check("预缓存清单覆盖页面引用的全部资源", missing.length === 0,
     refs.length + " 个引用,缺 " + missing.length + (missing.length ? ":" + missing.slice(0, 3).join(",") : ""));
   check("字体也在预缓存里(字卡字形依赖它)", /fonts\/kuaile-subset\.woff2/.test(sw), "woff2 已缓存");
+  /* 音频配置/索引必须预缓存:否则主屏幕 APP 一断网就整体降级到浏览器 TTS,
+     而 iOS 独立模式的 TTS 常常不出声 —— 这正是"APP 里没声音"的常见成因 */
+  check("音频配置已预缓存", /"audio\/config\.json\?v=/.test(sw), "config.json 在清单里");
+  check("音色索引已预缓存(默认音色 + 角色音色)", (sw.match(/"audio\/[^"]+\/index\.json\?v=/g) || []).length >= 2,
+    (sw.match(/"audio\/[^"]+\/index\.json/g) || []).length + " 个索引文件");
   check("sw.js 版本与 app-version 一致", new RegExp('VERSION = "' + ver + '"').test(sw), "v=" + ver);
   check("缓存桶按版本隔离", /siwendao-" \+ VERSION/.test(sw), "siwendao-<version>");
   check("不接管非 GET 请求(统计上报不被缓存)", /req\.method !== "GET"/.test(sw));
