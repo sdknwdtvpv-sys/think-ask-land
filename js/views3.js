@@ -317,33 +317,67 @@
       .sort(function (a, b) { return cnt[b] - cnt[a]; }).slice(0, n || 1);
   }
 
+  /* 分级定义:与《分级阅读体系设计》一致。门槛做"提示"而不是"锁" ——
+     孩子想读哪篇都行,达不到门槛时只温柔提示一句,不挡着他。 */
+  var LEVELS = [
+    { id: "L1", name: "看图读句", hint: "2~4 句,每句很短", need: 30 },
+    { id: "L2", name: "短句成篇", hint: "4~5 句,能讲一件小事", need: 60 },
+    { id: "L3", name: "小故事", hint: "5 句,有小情节", need: 120 },
+    { id: "L4", name: "对话故事", hint: "有对话,能问答", need: 250 },
+    { id: "L5", name: "桥梁阅读", hint: "分段长故事", need: 400 }
+  ];
+  function levelMeta(id) {
+    for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i].id === id) return LEVELS[i];
+    return LEVELS[0];
+  }
+
   App.register("read", {
     render: function (p, view) {
       App.setTopbar("读一读", true);
       var learned = learnedSet();
+      var learnedN = window.Store.learnedList().length;
       var list = passages().map(function (x) {
         var cs = charsOf(x);
-        var known = cs.filter(function (c) { return learned[c]; }).length;
-        var uniq = Object.keys(cs.reduce(function (m, c) { m[c] = 1; return m; }, {})).length;
-        return { p: x, total: uniq, known: Object.keys(cs.reduce(function (m, c) { m[c] = 1; return m; }, {}))
-          .filter(function (c) { return learned[c]; }).length, lvl: levelOf(x), read: window.Store.hasRead(x.id) };
-      }).sort(function (a, b) { return a.lvl - b.lvl; });
+        var uniq = {};
+        cs.forEach(function (c) { uniq[c] = 1; });
+        var keys = Object.keys(uniq);
+        return {
+          p: x, total: keys.length,
+          known: keys.filter(function (c) { return learned[c]; }).length,
+          lvl: x.lvl || "L1", read: window.Store.hasRead(x.id)
+        };
+      });
 
       var html = '<div class="screen">' +
-        '<div class="practice-intro">📖 每篇短文都<b>只用你已经学过的字</b>。点字能听读音,读完了还能玩找字游戏。' +
-        '已读完 <b>' + window.Store.readCount() + "</b> / " + list.length + " 篇。</div>" +
-        '<div class="read-list">';
-      list.forEach(function (r) {
-        var pct = Math.round(r.known / Math.max(1, r.total) * 100);
-        html += '<button class="read-card' + (r.read ? " done" : "") + '" data-id="' + r.p.id + '">' +
-          '<span class="rc-emoji">' + r.p.emoji + "</span>" +
-          '<span class="rc-body"><span class="rc-title">' + esc(r.p.title) +
-            (r.read ? '<span class="rc-badge">✅ 读过</span>' : "") + "</span>" +
-            '<span class="rc-meta">' + r.total + " 个不同的字 · 已学 " + r.known + " 个 · 第 " + r.lvl + " 岛难度</span>" +
-            '<span class="rc-bar"><i style="width:' + pct + '%"></i></span>' +
-          "</span><span class=\"scope-go\">›</span></button>";
+        '<div class="practice-intro">📖 短文按<b>级别</b>分好了。点字能听读音,读完了还能玩找字游戏。' +
+        '已读完 <b>' + window.Store.readCount() + "</b> / " + list.length + " 篇 · 已学 <b>" + learnedN + "</b> 字。</div>";
+
+      LEVELS.forEach(function (lv) {
+        var rows = list.filter(function (r) { return r.lvl === lv.id; });
+        if (!rows.length) return;
+        rows.sort(function (a, b) { return (a.read ? 1 : 0) - (b.read ? 1 : 0) || a.total - b.total; });
+        var doneN = rows.filter(function (r) { return r.read; }).length;
+        var locked = learnedN < lv.need;
+        html += '<div class="lvl-head"><span class="lvl-tag">' + lv.id + "</span>" +
+          "<span class=\"lvl-name\">" + esc(lv.name) + "</span>" +
+          '<span class="lvl-meta">' + esc(lv.hint) + " · " + doneN + "/" + rows.length + " 篇" + "</span></div>";
+        if (locked && lv.id !== "L1") {
+          html += '<div class="lvl-note">💡 建议学过 ' + lv.need + " 个字再来读这一级(现在 " + learnedN + " 个)。想读也可以直接点。</div>";
+        }
+        html += '<div class="read-list">';
+        rows.forEach(function (r) {
+          var pct = Math.round(r.known / Math.max(1, r.total) * 100);
+          html += '<button class="read-card' + (r.read ? " done" : "") + '" data-id="' + r.p.id + '">' +
+            '<span class="rc-emoji">' + r.p.emoji + "</span>" +
+            '<span class="rc-body"><span class="rc-title">' + esc(r.p.title) +
+              (r.read ? '<span class="rc-badge">✅ 读过</span>' : "") + "</span>" +
+              '<span class="rc-meta">' + r.total + " 个不同的字 · 已学 " + r.known + " 个</span>" +
+              '<span class="rc-bar"><i style="width:' + pct + '%"></i></span>' +
+            "</span><span class=\"scope-go\">›</span></button>";
+        });
+        html += "</div>";
       });
-      html += "</div></div>";
+      html += "</div>";
       view.innerHTML = html;
       view.querySelectorAll(".read-card").forEach(function (b) {
         b.addEventListener("click", function () {
@@ -377,7 +411,8 @@
 
       view.innerHTML = '<div class="screen">' +
         '<div class="story-head"><span class="sh-emoji">' + story.emoji + "</span>" +
-          '<span class="sh-title">' + esc(story.title) + "</span></div>" +
+          '<span class="sh-title">' + esc(story.title) + "</span>" +
+          '<span class="lvl-tag">' + esc(story.lvl || "L1") + "</span></div>" +
         '<div class="story-body">' + body + "</div>" +
         '<div class="rd-tip" id="rd-tip">点一个字,听它怎么读</div>' +
         '<div class="story-actions">' +
@@ -457,5 +492,5 @@
     }
   });
 
-  window.ReadDrill = { findTargets: findTargets, levelOf: levelOf, charsOf: charsOf };
+  window.ReadDrill = { findTargets: findTargets, levelOf: levelOf, charsOf: charsOf, LEVELS: LEVELS };
 })();

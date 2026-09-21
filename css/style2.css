@@ -498,3 +498,18 @@
 .bi-name { font-size: 16px; font-weight: 900; }
 .bi-pick small { font-size: 12px; font-weight: 700; color: var(--ink-light); }
 .bi-voice.on .bi-name::after { content: " ✓"; color: var(--sky-deep); }
+
+/* ---------- 阅读列表:分级标题 ---------- */
+.lvl-head { display: flex; align-items: baseline; gap: 8px; margin: 16px 2px 8px; flex-wrap: wrap; }
+.lvl-head:first-of-type { margin-top: 4px; }
+.lvl-tag {
+  font-size: 12px; font-weight: 900; color: #fff; background: var(--sky-deep);
+  border-radius: 8px; padding: 2px 8px; letter-spacing: .5px;
+}
+.lvl-name { font-size: 16px; font-weight: 900; color: var(--ink); }
+.lvl-meta { font-size: 12px; font-weight: 700; color: var(--ink-light); }
+.lvl-note {
+  font-size: 12px; font-weight: 700; color: var(--ink-light);
+  background: #fff8e6; border-radius: 12px; padding: 8px 12px; margin-bottom: 8px;
+}
+.sh-title + .lvl-tag { align-self: center; }

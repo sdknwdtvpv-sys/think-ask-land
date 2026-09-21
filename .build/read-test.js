@@ -57,7 +57,25 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const doc = win.document;
 
-  t("短文数量够用", () => PS.length >= 12 ? PASS(PS.length + " 篇") : FAIL("只有 " + PS.length + " 篇"));
+  t("短文数量够用", () => PS.length >= 30 ? PASS(PS.length + " 篇") : FAIL("只有 " + PS.length + " 篇"));
+
+  t("每篇都有合法级别,且级别分布在 L1/L2", () => {
+    const LVS = (win.ReadDrill && win.ReadDrill.LEVELS) ? win.ReadDrill.LEVELS.map((x) => x.id) : ["L1", "L2", "L3", "L4", "L5"];
+    const noLvl = PS.filter((p) => LVS.indexOf(p.lvl) < 0);
+    if (noLvl.length) return FAIL("级别非法/缺失:" + noLvl.slice(0, 3).map((p) => p.id + "=" + p.lvl).join(","));
+    const dist = {};
+    PS.forEach((p) => { dist[p.lvl] = (dist[p.lvl] || 0) + 1; });
+    if (!dist.L1 || !dist.L2) return FAIL("缺少某一级:" + JSON.stringify(dist));
+    return PASS(PS.length + " 篇:" + Object.keys(dist).sort().map((k) => k + " " + dist[k] + "篇").join(" / "));
+  });
+
+  t("级别与篇幅自洽(L1 更短)", () => {
+    const L1 = PS.filter((p) => p.lvl === "L1"), L2 = PS.filter((p) => p.lvl === "L2");
+    const max1 = Math.max.apply(null, L1.map((p) => RD.charsOf(p).length));
+    const min2 = Math.min.apply(null, L2.map((p) => RD.charsOf(p).length));
+    if (max1 > 30) return FAIL("L1 最长 " + max1 + " 字,超出 30 字上限");
+    return PASS("L1 最长 " + max1 + " 字 / L2 最短 " + min2 + " 字(有重叠是正常的,以句式为界)");
+  });
 
   t("每一篇的用字都在 400 字字库内(最关键的约束)", () => {
     const bad = [];
@@ -112,7 +130,7 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
   t("id 唯一且格式统一", () => {
     const ids = PS.map((p) => p.id);
     if (new Set(ids).size !== ids.length) return FAIL("有重复 id");
-    const bad = ids.filter((i) => !/^p\d{2}$/.test(i));
+    const bad = ids.filter((i) => !/^[pn]\d{2}$/.test(i));   // p=批1, n=批2(第一波)
     return bad.length ? FAIL("格式异常 " + bad.join(",")) : PASS(ids.length + " 个 id 唯一");
   });
 
@@ -142,13 +160,22 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
   /* ---------- 交互 ---------- */
   await win.App.navigate("#/read");
   await sleep(700);
-  t("列表渲染出全部短文且按难度排序", () => {
-    const cards = doc.querySelectorAll(".read-card");
+  t("列表按级别分组渲染全部短文", () => {
+    const cards = Array.from(doc.querySelectorAll(".read-card"));
     if (cards.length !== PS.length) return FAIL("卡片数 " + cards.length + " ≠ " + PS.length);
-    const ids = Array.from(cards).map((c) => c.getAttribute("data-id"));
-    const lvls = ids.map((id) => RD.levelOf(PS.filter((p) => p.id === id)[0]));
-    for (let i = 1; i < lvls.length; i++) if (lvls[i - 1] > lvls[i]) return FAIL("未按难度排序:" + lvls.join(","));
-    return PASS(cards.length + " 篇,难度 " + lvls[0] + "→" + lvls[lvls.length - 1]);
+    const heads = Array.from(doc.querySelectorAll(".lvl-head .lvl-tag")).map((x) => x.textContent.trim());
+    if (!heads.length) return FAIL("没有分级标题");
+    /* 顺序必须是 LEVELS 的顺序(L1 在前),且每篇的级别与它所在分组一致 */
+    const order = heads.map((h) => ["L1", "L2", "L3", "L4", "L5"].indexOf(h));
+    for (let i = 1; i < order.length; i++) if (order[i - 1] >= order[i]) return FAIL("分级顺序不对:" + heads.join(","));
+    const ids = cards.map((c) => c.getAttribute("data-id"));
+    const byLvl = {};
+    PS.forEach((p) => { (byLvl[p.lvl] = byLvl[p.lvl] || []).push(p.id); });
+    for (const lv of Object.keys(byLvl)) {
+      const cnt = ids.filter((id) => byLvl[lv].indexOf(id) > -1).length;
+      if (cnt !== byLvl[lv].length) return FAIL(lv + " 分组缺少短文");
+    }
+    return PASS(cards.length + " 篇,分组 " + heads.join(" → "));
   });
 
   const firstId = doc.querySelector(".read-card").getAttribute("data-id");
