@@ -68,6 +68,22 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
     return bad.length ? FAIL(bad.join(" | ")) : PASS(PS.length + " 篇逐字校验通过");
   });
 
+  /* 标题也会显示给孩子,所以标题同样只能用字库里的字。
+     目前有 3 个历史标题越界(果子/河里的鱼/龟和兔),它们会随批 2 扩字自动合规
+     (批 2 新增「的」「和」;「子」已提案补充),在那之前用白名单放行。 */
+  t("标题只用字库内的字(新内容硬性要求)", () => {
+    const KNOWN = { p06: "子", p08: "的", p14: "和" };   // 批 2 扩字后应清空这个白名单
+    const bad = [];
+    PS.forEach((p) => {
+      const out = Array.from(new Set(Array.from(p.title).filter((c) => /[\u4e00-\u9fff]/.test(c) && !DB.BY_CHAR[c])));
+      if (!out.length) return;
+      const allowed = KNOWN[p.id] || "";
+      const real = out.filter((c) => allowed.indexOf(c) < 0);
+      if (real.length) bad.push(p.id + "「" + p.title + "」→" + real.join(""));
+    });
+    return bad.length ? FAIL(bad.join(" | ")) : PASS(PS.length + " 篇标题合规(白名单 " + Object.keys(KNOWN).length + " 个待批 2 扩字解决)");
+  });
+
   t("篇幅适合幼儿:2~6 句、每句 ≤ 14 字、全篇 ≤ 60 字", () => {
     const bad = [];
     PS.forEach((p) => {

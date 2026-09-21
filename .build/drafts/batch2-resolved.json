@@ -1,0 +1,1078 @@
+{
+ "rows": [
+  {
+   "group": "数字与基础",
+   "char": "两",
+   "pinyin": "liǎng"
+  },
+  {
+   "group": "数字与基础",
+   "char": "双",
+   "pinyin": "shuāng"
+  },
+  {
+   "group": "数字与基础",
+   "char": "群",
+   "pinyin": "qún"
+  },
+  {
+   "group": "数字与基础",
+   "char": "些",
+   "pinyin": "xiē"
+  },
+  {
+   "group": "数字与基础",
+   "char": "各",
+   "pinyin": "gè"
+  },
+  {
+   "group": "数字与基础",
+   "char": "每",
+   "pinyin": "měi"
+  },
+  {
+   "group": "数字与基础",
+   "char": "第",
+   "pinyin": "dì"
+  },
+  {
+   "group": "数字与基础",
+   "char": "更",
+   "pinyin": "gèng"
+  },
+  {
+   "group": "数字与基础",
+   "char": "最",
+   "pinyin": "zuì"
+  },
+  {
+   "group": "数字与基础",
+   "char": "太",
+   "pinyin": "tài"
+  },
+  {
+   "group": "自然与天气",
+   "char": "江",
+   "pinyin": "jiāng"
+  },
+  {
+   "group": "自然与天气",
+   "char": "湖",
+   "pinyin": "hú"
+  },
+  {
+   "group": "自然与天气",
+   "char": "洋",
+   "pinyin": "yáng"
+  },
+  {
+   "group": "自然与天气",
+   "char": "岛",
+   "pinyin": "dǎo"
+  },
+  {
+   "group": "自然与天气",
+   "char": "岸",
+   "pinyin": "àn"
+  },
+  {
+   "group": "自然与天气",
+   "char": "峰",
+   "pinyin": "fēng"
+  },
+  {
+   "group": "自然与天气",
+   "char": "泉",
+   "pinyin": "quán"
+  },
+  {
+   "group": "自然与天气",
+   "char": "潮",
+   "pinyin": "cháo"
+  },
+  {
+   "group": "自然与天气",
+   "char": "虹",
+   "pinyin": "hóng"
+  },
+  {
+   "group": "自然与天气",
+   "char": "雾",
+   "pinyin": "wù"
+  },
+  {
+   "group": "我的身体",
+   "char": "骨",
+   "pinyin": "gǔ"
+  },
+  {
+   "group": "我的身体",
+   "char": "血",
+   "pinyin": "xuè"
+  },
+  {
+   "group": "我的身体",
+   "char": "胃",
+   "pinyin": "wèi"
+  },
+  {
+   "group": "我的身体",
+   "char": "颈",
+   "pinyin": "jǐng"
+  },
+  {
+   "group": "我的身体",
+   "char": "腰",
+   "pinyin": "yāo"
+  },
+  {
+   "group": "我的身体",
+   "char": "掌",
+   "pinyin": "zhǎng"
+  },
+  {
+   "group": "我的身体",
+   "char": "拳",
+   "pinyin": "quán"
+  },
+  {
+   "group": "我的身体",
+   "char": "臂",
+   "pinyin": "bì"
+  },
+  {
+   "group": "我的身体",
+   "char": "腹",
+   "pinyin": "fù"
+  },
+  {
+   "group": "我的身体",
+   "char": "睛",
+   "pinyin": "jīng"
+  },
+  {
+   "group": "家庭与人物",
+   "char": "舅",
+   "pinyin": "jiù"
+  },
+  {
+   "group": "家庭与人物",
+   "char": "姑",
+   "pinyin": "gū"
+  },
+  {
+   "group": "家庭与人物",
+   "char": "嫂",
+   "pinyin": "sǎo"
+  },
+  {
+   "group": "家庭与人物",
+   "char": "孙",
+   "pinyin": "sūn"
+  },
+  {
+   "group": "家庭与人物",
+   "char": "祖",
+   "pinyin": "zǔ"
+  },
+  {
+   "group": "家庭与人物",
+   "char": "亲",
+   "pinyin": "qīn"
+  },
+  {
+   "group": "家庭与人物",
+   "char": "邻",
+   "pinyin": "lín"
+  },
+  {
+   "group": "家庭与人物",
+   "char": "民",
+   "pinyin": "mín"
+  },
+  {
+   "group": "家庭与人物",
+   "char": "童",
+   "pinyin": "tóng"
+  },
+  {
+   "group": "家庭与人物",
+   "char": "幼",
+   "pinyin": "yòu"
+  },
+  {
+   "group": "动物朋友",
+   "char": "豹",
+   "pinyin": "bào"
+  },
+  {
+   "group": "动物朋友",
+   "char": "狮",
+   "pinyin": "shī"
+  },
+  {
+   "group": "动物朋友",
+   "char": "猩",
+   "pinyin": "xīng"
+  },
+  {
+   "group": "动物朋友",
+   "char": "鲸",
+   "pinyin": "jīng"
+  },
+  {
+   "group": "动物朋友",
+   "char": "鲨",
+   "pinyin": "shā"
+  },
+  {
+   "group": "动物朋友",
+   "char": "蟹",
+   "pinyin": "xiè"
+  },
+  {
+   "group": "动物朋友",
+   "char": "虾",
+   "pinyin": "xiā"
+  },
+  {
+   "group": "动物朋友",
+   "char": "蜗",
+   "pinyin": "wō"
+  },
+  {
+   "group": "动物朋友",
+   "char": "蛛",
+   "pinyin": "zhū"
+  },
+  {
+   "group": "动物朋友",
+   "char": "骆",
+   "pinyin": "luò"
+  },
+  {
+   "group": "植物与食物",
+   "char": "稻",
+   "pinyin": "dào"
+  },
+  {
+   "group": "植物与食物",
+   "char": "麦",
+   "pinyin": "mài"
+  },
+  {
+   "group": "植物与食物",
+   "char": "谷",
+   "pinyin": "gǔ"
+  },
+  {
+   "group": "植物与食物",
+   "char": "枣",
+   "pinyin": "zǎo"
+  },
+  {
+   "group": "植物与食物",
+   "char": "梨",
+   "pinyin": "lí"
+  },
+  {
+   "group": "植物与食物",
+   "char": "橙",
+   "pinyin": "chéng"
+  },
+  {
+   "group": "植物与食物",
+   "char": "莓",
+   "pinyin": "méi"
+  },
+  {
+   "group": "植物与食物",
+   "char": "菇",
+   "pinyin": "gū"
+  },
+  {
+   "group": "植物与食物",
+   "char": "葱",
+   "pinyin": "cōng"
+  },
+  {
+   "group": "植物与食物",
+   "char": "蒜",
+   "pinyin": "suàn"
+  },
+  {
+   "group": "颜色与样子",
+   "char": "鲜",
+   "pinyin": "xiān"
+  },
+  {
+   "group": "颜色与样子",
+   "char": "浓",
+   "pinyin": "nóng"
+  },
+  {
+   "group": "颜色与样子",
+   "char": "淡",
+   "pinyin": "dàn"
+  },
+  {
+   "group": "颜色与样子",
+   "char": "艳",
+   "pinyin": "yàn"
+  },
+  {
+   "group": "颜色与样子",
+   "char": "素",
+   "pinyin": "sù"
+  },
+  {
+   "group": "颜色与样子",
+   "char": "净",
+   "pinyin": "jìng"
+  },
+  {
+   "group": "颜色与样子",
+   "char": "脏",
+   "pinyin": "zàng"
+  },
+  {
+   "group": "颜色与样子",
+   "char": "滑",
+   "pinyin": "huá"
+  },
+  {
+   "group": "颜色与样子",
+   "char": "糙",
+   "pinyin": "cāo"
+  },
+  {
+   "group": "颜色与样子",
+   "char": "扁",
+   "pinyin": "biǎn"
+  },
+  {
+   "group": "动作行为",
+   "char": "抓",
+   "pinyin": "zhuā"
+  },
+  {
+   "group": "动作行为",
+   "char": "握",
+   "pinyin": "wò"
+  },
+  {
+   "group": "动作行为",
+   "char": "推",
+   "pinyin": "tuī"
+  },
+  {
+   "group": "动作行为",
+   "char": "拉",
+   "pinyin": "lā"
+  },
+  {
+   "group": "动作行为",
+   "char": "提",
+   "pinyin": "tí"
+  },
+  {
+   "group": "动作行为",
+   "char": "举",
+   "pinyin": "jǔ"
+  },
+  {
+   "group": "动作行为",
+   "char": "扔",
+   "pinyin": "rēng"
+  },
+  {
+   "group": "动作行为",
+   "char": "接",
+   "pinyin": "jiē"
+  },
+  {
+   "group": "动作行为",
+   "char": "踢",
+   "pinyin": "tī"
+  },
+  {
+   "group": "动作行为",
+   "char": "追",
+   "pinyin": "zhuī"
+  },
+  {
+   "group": "感觉与状态",
+   "char": "困",
+   "pinyin": "kùn"
+  },
+  {
+   "group": "感觉与状态",
+   "char": "麻",
+   "pinyin": "má"
+  },
+  {
+   "group": "感觉与状态",
+   "char": "晕",
+   "pinyin": "yūn"
+  },
+  {
+   "group": "感觉与状态",
+   "char": "疲",
+   "pinyin": "pí"
+  },
+  {
+   "group": "感觉与状态",
+   "char": "慌",
+   "pinyin": "huāng"
+  },
+  {
+   "group": "感觉与状态",
+   "char": "闷",
+   "pinyin": "mèn"
+  },
+  {
+   "group": "感觉与状态",
+   "char": "爽",
+   "pinyin": "shuǎng"
+  },
+  {
+   "group": "感觉与状态",
+   "char": "吵",
+   "pinyin": "chǎo"
+  },
+  {
+   "group": "感觉与状态",
+   "char": "稳",
+   "pinyin": "wěn"
+  },
+  {
+   "group": "感觉与状态",
+   "char": "缓",
+   "pinyin": "huǎn"
+  },
+  {
+   "group": "日常生活",
+   "char": "柜",
+   "pinyin": "guì"
+  },
+  {
+   "group": "日常生活",
+   "char": "箱",
+   "pinyin": "xiāng"
+  },
+  {
+   "group": "日常生活",
+   "char": "桶",
+   "pinyin": "tǒng"
+  },
+  {
+   "group": "日常生活",
+   "char": "盆",
+   "pinyin": "pén"
+  },
+  {
+   "group": "日常生活",
+   "char": "壶",
+   "pinyin": "hú"
+  },
+  {
+   "group": "日常生活",
+   "char": "碟",
+   "pinyin": "dié"
+  },
+  {
+   "group": "日常生活",
+   "char": "叉",
+   "pinyin": "chā"
+  },
+  {
+   "group": "日常生活",
+   "char": "剪",
+   "pinyin": "jiǎn"
+  },
+  {
+   "group": "日常生活",
+   "char": "针",
+   "pinyin": "zhēn"
+  },
+  {
+   "group": "日常生活",
+   "char": "毯",
+   "pinyin": "tǎn"
+  },
+  {
+   "group": "时间与季节",
+   "char": "曾",
+   "pinyin": "céng"
+  },
+  {
+   "group": "时间与季节",
+   "char": "将",
+   "pinyin": "jiāng"
+  },
+  {
+   "group": "时间与季节",
+   "char": "永",
+   "pinyin": "yǒng"
+  },
+  {
+   "group": "时间与季节",
+   "char": "暂",
+   "pinyin": "zàn"
+  },
+  {
+   "group": "时间与季节",
+   "char": "忽",
+   "pinyin": "hū"
+  },
+  {
+   "group": "时间与季节",
+   "char": "顿",
+   "pinyin": "dùn"
+  },
+  {
+   "group": "时间与季节",
+   "char": "渐",
+   "pinyin": "jiàn"
+  },
+  {
+   "group": "时间与季节",
+   "char": "即",
+   "pinyin": "jí"
+  },
+  {
+   "group": "时间与季节",
+   "char": "龄",
+   "pinyin": "líng"
+  },
+  {
+   "group": "时间与季节",
+   "char": "载",
+   "pinyin": "zài"
+  },
+  {
+   "group": "方位与空间",
+   "char": "侧",
+   "pinyin": "cè"
+  },
+  {
+   "group": "方位与空间",
+   "char": "央",
+   "pinyin": "yāng"
+  },
+  {
+   "group": "方位与空间",
+   "char": "圈",
+   "pinyin": "quān"
+  },
+  {
+   "group": "方位与空间",
+   "char": "环",
+   "pinyin": "huán"
+  },
+  {
+   "group": "方位与空间",
+   "char": "缝",
+   "pinyin": "fèng"
+  },
+  {
+   "group": "方位与空间",
+   "char": "隙",
+   "pinyin": "xì"
+  },
+  {
+   "group": "方位与空间",
+   "char": "端",
+   "pinyin": "duān"
+  },
+  {
+   "group": "方位与空间",
+   "char": "缘",
+   "pinyin": "yuán"
+  },
+  {
+   "group": "方位与空间",
+   "char": "界",
+   "pinyin": "jiè"
+  },
+  {
+   "group": "方位与空间",
+   "char": "隔",
+   "pinyin": "gé"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "怒",
+   "pinyin": "nù"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "悲",
+   "pinyin": "bēi"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "悔",
+   "pinyin": "huǐ"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "慰",
+   "pinyin": "wèi"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "敬",
+   "pinyin": "jìng"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "谦",
+   "pinyin": "qiān"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "诚",
+   "pinyin": "chéng"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "信",
+   "pinyin": "xìn"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "勇",
+   "pinyin": "yǒng"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "盼",
+   "pinyin": "pàn"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "的",
+   "pinyin": "de"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "了",
+   "pinyin": "le"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "在",
+   "pinyin": "zài"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "是",
+   "pinyin": "shì"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "和",
+   "pinyin": "hé"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "就",
+   "pinyin": "jiù"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "都",
+   "pinyin": "dōu dū"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "很",
+   "pinyin": "hěn"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "把",
+   "pinyin": "bǎ"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "被",
+   "pinyin": "bèi"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "从",
+   "pinyin": "cóng"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "到",
+   "pinyin": "dào"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "着",
+   "pinyin": "zhe"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "过",
+   "pinyin": "guò"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "没",
+   "pinyin": "méi"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "别",
+   "pinyin": "bié"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "还",
+   "pinyin": "hái"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "跟",
+   "pinyin": "gēn"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "因",
+   "pinyin": "yīn"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "为",
+   "pinyin": "wèi"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "所",
+   "pinyin": "suǒ"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "以",
+   "pinyin": "yǐ"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "但",
+   "pinyin": "dàn"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "而",
+   "pinyin": "ér"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "或",
+   "pinyin": "huò"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "如",
+   "pinyin": "rú"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "比",
+   "pinyin": "bǐ"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "像",
+   "pinyin": "xiàng"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "吗",
+   "pinyin": "ma"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "地",
+   "pinyin": "de dì"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "得",
+   "pinyin": "dé"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "呢",
+   "pinyin": "ne"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "吧",
+   "pinyin": "ba"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "要",
+   "pinyin": "yào"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "会",
+   "pinyin": "huì"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "能",
+   "pinyin": "néng"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "用",
+   "pinyin": "yòng"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "叫",
+   "pinyin": "jiào"
+  },
+  {
+   "group": "学校与学习",
+   "char": "同",
+   "pinyin": "tóng"
+  },
+  {
+   "group": "学校与学习",
+   "char": "习",
+   "pinyin": "xí"
+  },
+  {
+   "group": "学校与学习",
+   "char": "课",
+   "pinyin": "kè"
+  },
+  {
+   "group": "学校与学习",
+   "char": "室",
+   "pinyin": "shì"
+  },
+  {
+   "group": "学校与学习",
+   "char": "包",
+   "pinyin": "bāo"
+  },
+  {
+   "group": "学校与学习",
+   "char": "册",
+   "pinyin": "cè"
+  },
+  {
+   "group": "学校与学习",
+   "char": "页",
+   "pinyin": "yè"
+  },
+  {
+   "group": "学校与学习",
+   "char": "题",
+   "pinyin": "tí"
+  },
+  {
+   "group": "学校与学习",
+   "char": "答",
+   "pinyin": "dá"
+  },
+  {
+   "group": "学校与学习",
+   "char": "问",
+   "pinyin": "wèn"
+  },
+  {
+   "group": "学校与学习",
+   "char": "考",
+   "pinyin": "kǎo"
+  },
+  {
+   "group": "学校与学习",
+   "char": "字",
+   "pinyin": "zì"
+  },
+  {
+   "group": "学校与学习",
+   "char": "词",
+   "pinyin": "cí"
+  },
+  {
+   "group": "学校与学习",
+   "char": "句",
+   "pinyin": "jù"
+  },
+  {
+   "group": "学校与学习",
+   "char": "袋",
+   "pinyin": "dài"
+  },
+  {
+   "group": "学校与学习",
+   "char": "尺",
+   "pinyin": "chǐ"
+  },
+  {
+   "group": "学校与学习",
+   "char": "橡",
+   "pinyin": "xiàng"
+  },
+  {
+   "group": "学校与学习",
+   "char": "墨",
+   "pinyin": "mò"
+  },
+  {
+   "group": "学校与学习",
+   "char": "座",
+   "pinyin": "zuò"
+  },
+  {
+   "group": "学校与学习",
+   "char": "排",
+   "pinyin": "pái"
+  },
+  {
+   "group": "学校与学习",
+   "char": "组",
+   "pinyin": "zǔ"
+  },
+  {
+   "group": "学校与学习",
+   "char": "队",
+   "pinyin": "duì"
+  },
+  {
+   "group": "交通与出行",
+   "char": "交",
+   "pinyin": "jiāo"
+  },
+  {
+   "group": "交通与出行",
+   "char": "通",
+   "pinyin": "tōng"
+  },
+  {
+   "group": "交通与出行",
+   "char": "铁",
+   "pinyin": "tiě"
+  },
+  {
+   "group": "交通与出行",
+   "char": "机",
+   "pinyin": "jī"
+  },
+  {
+   "group": "交通与出行",
+   "char": "场",
+   "pinyin": "chǎng"
+  },
+  {
+   "group": "交通与出行",
+   "char": "港",
+   "pinyin": "gǎng"
+  },
+  {
+   "group": "交通与出行",
+   "char": "航",
+   "pinyin": "háng"
+  },
+  {
+   "group": "交通与出行",
+   "char": "票",
+   "pinyin": "piào"
+  },
+  {
+   "group": "交通与出行",
+   "char": "骑",
+   "pinyin": "qí"
+  },
+  {
+   "group": "交通与出行",
+   "char": "驾",
+   "pinyin": "jià"
+  },
+  {
+   "group": "交通与出行",
+   "char": "驶",
+   "pinyin": "shǐ"
+  },
+  {
+   "group": "交通与出行",
+   "char": "轮",
+   "pinyin": "lún"
+  },
+  {
+   "group": "交通与出行",
+   "char": "停",
+   "pinyin": "tíng"
+  },
+  {
+   "group": "交通与出行",
+   "char": "道",
+   "pinyin": "dào"
+  },
+  {
+   "group": "交通与出行",
+   "char": "线",
+   "pinyin": "xiàn"
+  },
+  {
+   "group": "交通与出行",
+   "char": "号",
+   "pinyin": "hào"
+  },
+  {
+   "group": "交通与出行",
+   "char": "途",
+   "pinyin": "tú"
+  },
+  {
+   "group": "交通与出行",
+   "char": "旅",
+   "pinyin": "lǚ"
+  },
+  {
+   "group": "交通与出行",
+   "char": "行",
+   "pinyin": "xíng"
+  },
+  {
+   "group": "交通与出行",
+   "char": "送",
+   "pinyin": "sòng"
+  },
+  {
+   "group": "交通与出行",
+   "char": "迎",
+   "pinyin": "yíng"
+  },
+  {
+   "group": "交通与出行",
+   "char": "约",
+   "pinyin": "yuē"
+  }
+ ],
+ "multi": [
+  {
+   "char": "都",
+   "group": "常用字与连接",
+   "readings": "dōu dū"
+  },
+  {
+   "char": "地",
+   "group": "常用字与连接",
+   "readings": "de dì"
+  }
+ ],
+ "existing": 400,
+ "total": 612
+}
