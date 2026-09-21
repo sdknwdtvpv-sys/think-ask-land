@@ -23,6 +23,19 @@ html = html.replace(/(href|src)="((?:css|js|data|vendor)\/[^"?]+)(?:\?v=[^"]*)?"
 fs.writeFileSync(htmlPath, html);
 console.log("  index.html: " + n + " 处资源已打版本戳 v=" + V);
 
+/* 1b) 其它顶层 HTML 页面(隐私说明等):同样打版本戳 */
+fs.readdirSync(ROOT).filter(function (f) { return /\.html$/i.test(f) && f !== "index.html"; }).forEach(function (fn) {
+  const fp = path.join(ROOT, fn);
+  let h = fs.readFileSync(fp, "utf8");
+  const before = h;
+  let c = 0;
+  h = h.replace(/(href|src)="((?:css|js|data|vendor)\/[^"?]+)(?:\?v=[^"]*)?"/g, function (_, attr, p) {
+    c++;
+    return attr + '="' + p + "?v=" + V + '"';
+  });
+  if (h !== before) { fs.writeFileSync(fp, h); console.log("  " + fn + ": " + c + " 处资源已打版本戳"); }
+});
+
 /* 2) css 内引用的字体文件(字体更新时同样会被浏览器缓存) */
 let f = 0;
 fs.readdirSync(path.join(ROOT, "css")).filter((x) => x.endsWith(".css")).forEach(function (file) {
@@ -67,7 +80,9 @@ try {
 } catch (e) {
   console.log("  ℹ️ 未找到 audio/config.json,跳过音频索引预缓存");
 }
-const assets = ["./", "index.html"].concat(refs, audioJson).sort();
+/* 顶层页面全部预缓存:隐私说明等子页面离线也要能打开 */
+const pages = fs.readdirSync(ROOT).filter(function (f) { return /\.html$/i.test(f); });
+const assets = ["./"].concat(pages, refs, audioJson).sort();
 
 const sw = `/* 思问岛 · Service Worker(离线可用) —— 由 .build/stamp-assets.js 自动生成,请勿手改
    策略:
@@ -120,7 +135,10 @@ self.addEventListener("fetch", function (e) {
         }
         return res;
       }).catch(function () {
-        return caches.match("index.html").then(function (hit) { return hit || caches.match("./"); });
+        /* 离线:先找当前这一页(隐私说明等子页面也要能打开),再回退首页 */
+        return caches.match(req, { ignoreSearch: true }).then(function (hit) {
+          return hit || caches.match("index.html").then(function (h2) { return h2 || caches.match("./"); });
+        });
       })
     );
     return;

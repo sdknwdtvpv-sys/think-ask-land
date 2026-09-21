@@ -11,6 +11,8 @@ const ASSETS = [
   "audio/config.json?v=1.11.0",
   "audio/tc-403000/index.json?v=1.11.0",
   "audio/tc-502007/index.json?v=1.11.0",
+  "audio/xiaoyi/index.json?v=1.11.0",
+  "audio/yunxia/index.json?v=1.11.0",
   "css/style.css?v=1.11.0",
   "css/style2.css?v=1.11.0",
   "css/v2.css?v=1.11.0",
@@ -31,6 +33,7 @@ const ASSETS = [
   "js/app.js?v=1.11.0",
   "js/audio.js?v=1.11.0",
   "js/beacon.js?v=1.11.0",
+  "js/contact.js?v=1.11.0",
   "js/games.js?v=1.11.0",
   "js/icons.js?v=1.11.0",
   "js/mascot.js?v=1.11.0",
@@ -44,6 +47,7 @@ const ASSETS = [
   "js/views3.js?v=1.11.0",
   "js/views4.js?v=1.11.0",
   "js/writer.js?v=1.11.0",
+  "privacy.html",
   "vendor/hanzi-writer.min.js?v=1.11.0"
 ];
 
@@ -88,7 +92,10 @@ self.addEventListener("fetch", function (e) {
         }
         return res;
       }).catch(function () {
-        return caches.match("index.html").then(function (hit) { return hit || caches.match("./"); });
+        /* 离线:先找当前这一页(隐私说明等子页面也要能打开),再回退首页 */
+        return caches.match(req, { ignoreSearch: true }).then(function (hit) {
+          return hit || caches.match("index.html").then(function (h2) { return h2 || caches.match("./"); });
+        });
       })
     );
     return;

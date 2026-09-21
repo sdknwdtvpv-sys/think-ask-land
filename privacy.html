@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>隐私说明 · 思问岛</title>
+<meta name="description" content="思问岛隐私说明:孩子的学习记录只保存在本机浏览器,我们不上传、不收集个人信息;匿名统计不含 IP 与设备信息,可一键关闭。">
+<meta name="theme-color" content="#8ec9f0">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css?v=1.11.0">
+<link rel="stylesheet" href="css/style2.css?v=1.11.0">
+<link rel="stylesheet" href="css/v2.css?v=1.11.0">
+<style>
+  body { background: var(--paper); }
+  .doc { max-width: 660px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top)) 16px calc(44px + env(safe-area-inset-bottom)); }
+  .doc-back { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; color: var(--ink-light); font-weight: 700; text-decoration: none; font-size: 15px; }
+  .doc-back:hover { color: var(--action); }
+  .doc h1 { font-family: var(--display); font-size: 27px; letter-spacing: 1px; margin: 2px 0 4px; }
+  .doc .meta { color: var(--ink-light); font-size: 13px; margin: 0 0 16px; line-height: 1.7; }
+  .doc .panel { margin-bottom: 14px; }
+  .doc .panel h4 { display: flex; align-items: center; gap: 7px; }
+  .doc p { font-size: 14.5px; line-height: 1.85; margin: 6px 0; }
+  .doc ul { margin: 6px 0; padding-left: 20px; }
+  .doc li { font-size: 14.5px; line-height: 1.85; margin: 4px 0; }
+  .doc .key { color: var(--mint); font-weight: 800; }
+  .doc .warn { color: var(--warm-wrong); font-weight: 800; }
+  .doc code { background: var(--paper-2); border-radius: 6px; padding: 1px 6px; font-size: 13px; }
+  .doc a { color: var(--action-deep); }
+</style>
+</head>
+<body>
+<div class="doc">
+  <a class="doc-back" href="index.html">‹ 回到思问岛</a>
+  <h1>隐私说明</h1>
+  <p class="meta">思问岛 · 幼儿识字启蒙　｜　最近更新：2026-09-21</p>
+
+  <div class="panel">
+    <h4>🌱 一句话</h4>
+    <p><span class="key">思问岛不收集你的个人信息。</span>孩子的学习记录只保存在<strong>这台设备的浏览器</strong>里，
+    我们没有账号系统、没有服务器保存这些数据，也看不到孩子学过什么。</p>
+  </div>
+
+  <div class="panel">
+    <h4>📦 存在你设备上的数据</h4>
+    <p>以下内容保存在浏览器的本地存储（localStorage）中，<strong>不会上传到任何地方</strong>：</p>
+    <ul>
+      <li>学习进度：哪些字标记了「我会了」、记忆盒等级、上次复习时间</li>
+      <li>奖励记录：星星、贴纸、勋章、连续打卡天数</li>
+      <li>孩子档案：你给孩子起的<strong>昵称</strong>（不是真实姓名，可以随便填）</li>
+      <li>偏好设置：朗读音色、是否关闭动画</li>
+    </ul>
+    <p>清除浏览器数据、卸载或换设备都会让这些记录消失。想搬走请用
+    <strong>家长中心 → 备份与换手机 → 导出存档</strong>，它生成的是一份 JSON 文件，存在你自己手里。</p>
+  </div>
+
+  <div class="panel">
+    <h4>📊 匿名使用统计（默认开启，可一键关闭）</h4>
+    <p>为了知道「哪一步孩子容易放弃、哪类题容易错」，应用会发送极少量<strong>匿名</strong>信息：</p>
+    <ul>
+      <li><strong>会发送</strong>：事件名（打开了哪个页面、答了几题、对错）、应用版本号、一个<strong>每天更换</strong>的匿名标识</li>
+      <li><span class="warn">绝不发送</span>：IP 地址、设备型号、浏览记录、孩子姓名 / 头像 / 语音、以及任何能定位到具体人的信息</li>
+      <li>服务端只记录四列日志，<strong>字段里就没有 IP 与 User-Agent</strong>；匿名标识每天重新生成，无法跨天追踪同一个孩子</li>
+      <li>关闭方式：<strong>家长中心 → 帮助改进（匿名统计）</strong>，关掉即不再发送；也可以随时更换匿名标识</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h4>🚫 我们不做的几件事</h4>
+    <ul>
+      <li>不要手机号、不要实名、不要注册登录</li>
+      <li>没有广告，没有第三方统计 SDK，没有社交功能</li>
+      <li>字体、笔顺数据、朗读音频全部放在本站，<strong>不请求第三方 CDN</strong></li>
+      <li>不做用户画像，不做推荐算法，不做任何形式的自动化决策</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h4>🔊 关于朗读声音</h4>
+    <p>应用优先播放<strong>事先合成好的语音文件</strong>，它们随站点一起分发，播放时<strong>不联网请求任何服务</strong>。
+    这些语音由语音合成服务在发布前批量生成（腾讯云语音合成）。</p>
+    <p>当某个字没有预置音频时，会退回使用<strong>浏览器自带</strong>的语音合成，这部分由你的操作系统与浏览器提供，我们不接管。</p>
+  </div>
+
+  <div class="panel">
+    <h4>👨‍👩‍👧 给家长的建议</h4>
+    <ul>
+      <li>建议 3~6 岁孩子在<strong>家长陪同下</strong>使用，每次 10 分钟左右</li>
+      <li>本应用没有社交、没有用户生成内容、没有外链广告，孩子不会接触到陌生人</li>
+      <li>答错时用的是暖橙色与温柔提示音，不做惩罚式反馈</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h4>✉️ 联系与变更</h4>
+    <p>对内容、朗读、体验有任何疑问或建议，欢迎通过 <strong>家长中心 → 意见反馈</strong> 告诉作者，
+    或写信到 <a href="mailto:919500973@qq.com">919500973@qq.com</a>。</p>
+    <p>本说明如有变更，会随版本更新，并在应用内提示。</p>
+  </div>
+
+  <p class="meta" style="text-align:center;margin-top:18px">思问岛 · 陪着孩子，一起把问题变成答案</p>
+</div>
+</body>
+</html>

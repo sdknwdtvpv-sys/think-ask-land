@@ -299,7 +299,8 @@
               '<span class="menu-sub">学习报告 · 复习设置</span></span>' +
               '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
           "</div>" +
-          '<div class="home-foot">陪着孩子,一起把问题变成答案<br>适合 3~6 岁 · 每天 10 分钟 · 🔊 打开声音</div>' +
+          '<div class="home-foot">陪着孩子,一起把问题变成答案<br>适合 3~6 岁 · 每天 10 分钟 · 🔊 打开声音<br>' +
+            '<a class="foot-link" href="privacy.html" target="_blank" rel="noopener">隐私说明</a></div>' +
         "</div>";
       view.querySelectorAll("[data-go]").forEach(function (b) {
         b.addEventListener("click", function () {

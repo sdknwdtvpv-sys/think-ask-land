@@ -201,6 +201,9 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 .know-btn { flex: 1; }
 .quiz-done-tip { font-size: 13px; color: #2fae86; font-weight: 800; margin-top: 6px; min-height: 18px; }
 
+.home-foot .foot-link { color: var(--ink-light); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.home-foot .foot-link:hover { color: var(--action); }
+
 /* ---------- 矮视口(笔记本浏览器窗口)紧凑布局:保证首页 5 张卡片与字卡主按钮都在首屏 ---------- */
 @media (max-height: 820px) {
   .home-hero { padding: 2px 0; }

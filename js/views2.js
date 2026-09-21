@@ -835,6 +835,18 @@
           "</div>";
 
         /* 匿名使用数据:可关闭、可重置标识(隐私优先) */
+        var fb = window.CONTACT || {};
+        html +=
+          '<div class="panel"><h4>' + Icons.svg("speak") + '意见反馈</h4>' +
+            '<p class="parent-note">内容有错字或读音不对、用着不顺手、想要什么功能，都欢迎直接告诉作者。' +
+            '孩子的体验最重要，你的反馈会直接决定下一版做什么。</p>' +
+            '<button class="btn btn-coral" id="btn-feedback" style="width:100%;min-height:48px">' +
+              (fb.url ? (fb.urlLabel || "打开反馈问卷") : (fb.label || "给作者写信")) +
+            '</button>' +
+            '<button class="btn btn-ghost" id="btn-feedback-copy" style="width:100%;min-height:44px;font-size:15px;margin-top:8px">复制联系方式</button>' +
+            '<p class="parent-note" id="fb-hint" style="margin-top:8px"></p>' +
+          "</div>";
+
         var tracking = window.Beacon ? Beacon.on() : false;
         html +=
           '<div class="panel"><h4>' + Icons.svg("chart") + '帮助改进(匿名统计)</h4>' +
@@ -855,7 +867,8 @@
         backupPanel() +
         '<div class="panel danger-zone"><h4>' + Icons.svg("lock") + '数据管理</h4>' +
           '<button class="btn btn-danger" id="btn-reset">清空当前孩子的学习记录</button></div>' +
-          '<p class="parent-note" style="text-align:center;margin-top:2px">思问岛 v' + VER + ' · 数据保存在本机浏览器</p>' +
+          '<p class="parent-note" style="text-align:center;margin-top:2px">思问岛 v' + VER + ' · 数据保存在本机浏览器 · ' +
+            '<a class="foot-link" href="privacy.html" target="_blank" rel="noopener">隐私说明</a></p>' +
         "</div>";
         v.innerHTML = html;
 
@@ -1090,6 +1103,42 @@
             App.navigate("#/run?scope=c:" + drillBtn.getAttribute("data-cause"));
           });
         }
+
+        /* ---------- 意见反馈:打开邮件/问卷 + 复制联系方式 ---------- */
+        var fbHint = v.querySelector("#fb-hint");
+        var fbSay = function (msg, ok) {
+          if (!fbHint) return;
+          fbHint.textContent = msg;
+          fbHint.style.color = ok ? "var(--mint)" : "var(--ink-light)";
+        };
+        var fbTarget = fb.url || ("mailto:" + (fb.email || ""));
+        var fbBtn = v.querySelector("#btn-feedback");
+        if (fbBtn) fbBtn.addEventListener("click", function () {
+          if (window.SFX) SFX.click();
+          if (!fbTarget || fbTarget === "mailto:") { fbSay("尚未配置反馈渠道(见 js/contact.js)", false); return; }
+          var href = fbTarget;
+          if (!fb.url) {
+            href += "?subject=" + encodeURIComponent(fb.subject || "思问岛 · 意见反馈") +
+                    "&body=" + encodeURIComponent("\n\n\n————\n应用版本：v" + VER + "\n(请描述遇到的问题或想法)");
+          }
+          try {
+            if (fb.url) window.open(href, "_blank", "noopener");
+            else window.location.href = href;
+          } catch (e) { fbSay("没能打开，请手动写信到 " + (fb.email || ""), false); }
+        });
+        var fbCopy = v.querySelector("#btn-feedback-copy");
+        if (fbCopy) fbCopy.addEventListener("click", function () {
+          var text = fb.url || fb.email || "";
+          if (!text) { fbSay("尚未配置反馈渠道", false); return; }
+          if (window.SFX) SFX.click();
+          var done = function () { fbSay("已复制：" + text, true); };
+          var fail = function () { fbSay("复制失败，请手动记下：" + text, false); };
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(text).then(done).catch(fail);
+            } else { fail(); }
+          } catch (e) { fail(); }
+        });
 
         var trackBtn = v.querySelector("#btn-track");
         if (trackBtn && window.Beacon) {
