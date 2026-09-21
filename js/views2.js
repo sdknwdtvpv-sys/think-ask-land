@@ -221,7 +221,9 @@
         window.UI.burst(r.left + r.width / 2, r.top + r.height / 2, 26);
         fb.textContent = ["太棒了!", "答对啦!", "真厉害!", "完全正确!", "好聪明!"][(Math.random() * 5) | 0] + " ⭐+1";
         fb.classList.add("good");
-        window.Speech.speak(combo >= 3 ? "连对" + combo + "个,太厉害了" : "答对了,真棒", 0.9);
+        /* 固定句而非"连对N个":动态拼接无法预置音频,而表扬声恰恰最不能在
+           iOS 独立 APP 里静默。连对的数字继续显示在上方 HUD 里。 */
+        window.Speech.speak(combo >= 3 ? "连对啦,太厉害了!" : "答对了,真棒", 0.9);
         if (combo === 3 || combo === 5 || combo === 8) {
           window.UI.wordFlash("连对 " + combo + "!");
           window.UI.burst(window.innerWidth / 2, window.innerHeight * 0.42, 34);

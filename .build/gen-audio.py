@@ -130,6 +130,24 @@ def load_chars():
             })
     return chars
 
+def load_phrases():
+    """App 口播文案(data/phrases.js):打招呼/表扬/任务完成。
+       它们只有十几条、百来个字,却决定"孩子答对时能不能听到声音",
+       所以和字库一起做成预置音频(kind = p)。"""
+    path = os.path.join(ROOT, "data", "phrases.js")
+    if not os.path.exists(path):
+        return []
+    src = open(path, encoding="utf-8").read()
+    m = re.search(r"window\.APP_PHRASES\s*=\s*\[(.*?)\]", src, re.S)
+    if not m:
+        return []
+    out = []
+    for x in re.findall(r'"([^"]+)"', m.group(1)):
+        if x not in out:
+            out.append(x)
+    return out
+
+
 def text_hash(text):
     """文件名用「文本哈希」保证唯一：同音字（一/衣、一个/衣服）不能让两个键指向同一个文件"""
     return hashlib.sha1(text.encode("utf-8")).hexdigest()[:8]
@@ -146,6 +164,9 @@ def build_tasks(chars, limit=None, group=None, engine="edge", voice="", only=Non
     if limit:
         chars = chars[:limit]
     tasks = []
+    # 先排口播:它们条目少、优先级高(表扬声断不得)
+    for phrase in load_phrases():
+        tasks.append(("p", "p-%s" % text_hash(phrase), phrase, phrase))
     for ch in chars:
         c, py = ch["c"], pinyin_key(ch["p"])
         if engine == "tencent":
