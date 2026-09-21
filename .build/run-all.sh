@@ -25,6 +25,7 @@ SUITES=(
   content-qc
   games-pinyin-test
   phrase-test
+  gen-guard-test
   pinyin-teach-test
   zili-test
   read-test

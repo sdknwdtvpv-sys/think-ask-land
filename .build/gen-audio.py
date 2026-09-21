@@ -602,6 +602,9 @@ def main():
         paths[rel] = key
 
     reg = {}
+    failed_total = [0]      # 本批次失败条目数(用完要能一眼看出没成功)
+    success_total = [0]
+
     for vi, voice in enumerate(voices):
         vkey = voice["key"]
         vdir = os.path.join(OUT, vkey)
@@ -650,6 +653,7 @@ def main():
                 if done[0] % 200 == 0 or done[0] == len(uniq):
                     print("   进度 %d/%d" % (done[0], len(uniq)))
 
+        generated_this_run = len(index)          # 本次真正生成成功的条数
         idx_path = os.path.join(vdir, "index.json")
         if only and os.path.exists(idx_path):
             # --only 是部分更新：只补这几条，不能把已有的上千条索引覆盖掉
@@ -673,6 +677,8 @@ def main():
         }
         if errs:
             print("   ⚠️ 失败 %d 条（前 3 条）: %s" % (len(errs), " | ".join(errs[:3])))
+            failed_total[0] += len(errs)
+        success_total[0] += generated_this_run
         if warn_trim:
             print("   ℹ️ %d 条未能去静音（已保留原文件）: %s" % (len(warn_trim), "、".join(warn_trim[:4])))
 
@@ -718,9 +724,24 @@ def main():
 
     size = sum(os.path.getsize(os.path.join(dp, f))
                for dp, _, fs in os.walk(OUT) for f in fs)
+
+    # 失败必须"看得见":以前全部失败也会打印"完成",让人以为成功了
+    # (与前端那次"预置音频静默降级"是同一类问题:失败被当成成功最危险)
+    if failed_total[0]:
+        print("\n❌ 本次有 %d 条失败、%d 条成功。" % (failed_total[0], success_total[0]))
+        if success_total[0] == 0:
+            print("   一条都没成功 —— 多半是密钥不对或免费额度没领。")
+            print("   密钥: https://console.cloud.tencent.com/cam/capi")
+            print("   额度: https://console.cloud.tencent.com/tts/resourcebundle")
+        else:
+            print("   已成功的部分不用重做:再跑一次同样的命令(--resume)会只补失败的。")
+        return 3
+
     print("\n完成：本次生成 %d 个音色，注册表共 %d 个；audio/ 合计 %.1f MB" % (len(reg), len(cfg["voices"]), size / 1048576))
     print("   当前默认音色: %s（切换: python3 .build/gen-audio.py --set-default <音色>）" % (cfg["default"] or "（无）"))
 
 
 if __name__ == "__main__":
-    main()
+    # 必须 sys.exit():main() 的返回值就是"本次是否全部成功"的退出码,
+    # 直接 main() 会把失败悄悄吞掉(CI/向导就看不到失败了)
+    sys.exit(main())
