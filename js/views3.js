@@ -15,12 +15,20 @@
   }
 
   /* ---------- 拼读题:声母 + 韵母(带调) = 音节 ---------- */
+  function pyBase(p) { return Py.base ? Py.base(p) : String(p || "").replace(/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/g, ""); }
+
   function buildBlend() {
     var DB = window.CharDB;
     var idx = Py.syllableIndex();
     var learned = DB.learnedPool();
+    /* 整体认读音节**不能**当拼读目标:
+       把 zhi 教成「zh + ī」是错的 —— 这 16 个音节存在的意义就是"不要拼"。
+       它们由拼音小课堂的「整体认读音节」面板单独教(见上)。 */
+    var ztMap = {};
+    (Py.ZHENGTI || []).forEach(function (x) { ztMap[x] = 1; });
     var pool = (learned.length >= 4 ? learned : DB.ALL).filter(function (c) {
       var pa = Py.parts(c.p);
+      if (ztMap[pyBase(c.p)]) return false;
       return pa.initial && Py.variants(c.p).length >= 2;
     });
     if (!pool.length) return null;
@@ -125,6 +133,21 @@
         html += "</div>";
       });
       html += "</div>";
+
+      /* ---------- 整体认读音节 ---------- */
+      var zt = Py.zhengtiSamples ? Py.zhengtiSamples(DB.ALL) : [];
+      if (zt.length) {
+        html += '<div class="panel"><h4>' + Icons.svg("book") + '整体认读音节(16 个)</h4>' +
+          '<p class="parent-note">这 16 个音节<b>不用拼</b> —— 看到就直接读出来。' +
+          '每个音节后面配了一个他学过的字，点一下听声音。</p>' +
+          '<div class="zt-grid">' + zt.map(function (x) {
+            return '<button class="zt-cell' + (x.char && learnedSet[x.char] ? " learned" : "") +
+              '" data-say="' + esc(x.char || x.sy) + '">' +
+              '<span class="zt-sy">' + esc(x.sy) + "</span>" +
+              (x.char ? '<span class="zt-char kai">' + esc(x.char) + "</span>" : "") +
+              "</button>";
+          }).join("") + "</div></div>";
+      }
 
       /* ---------- 声调 ---------- */
       html += '<div class="panel"><h4>' + Icons.svg("sparkle") + '四个声调</h4>' +

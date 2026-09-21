@@ -5,7 +5,7 @@
 /* ---------- 显示字体:站酷快乐体(OFL 开源,本地子集 70KB,离线可用) ---------- */
 @font-face {
   font-family: "KuaiLe";
-  src: url("../fonts/kuaile-subset.woff2?v=2.8.0") format("woff2");
+  src: url("../fonts/kuaile-subset.woff2?v=2.9.0") format("woff2");
   font-display: swap;
   font-weight: 400;
 }
@@ -784,3 +784,25 @@ body::after { /* 全局纸纹,极淡 */
   .pack-sec { break-inside: avoid; }
   .cert-box { border-color: #b8860b; }
 }
+
+/* ================= 整词听写(选项是词,不是单字) ================= */
+.opt.word-opt { font-size: 21px; letter-spacing: 2px; }
+.opt.word-opt .kai { font-size: 21px; }
+@media (max-width: 360px) {
+  .opt.word-opt, .opt.word-opt .kai { font-size: 19px; letter-spacing: 1px; }
+}
+
+/* ================= 整体认读音节(16 个,不用拼) ================= */
+.zt-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (max-width: 400px) { .zt-grid { grid-template-columns: repeat(3, 1fr); } }
+.zt-cell {
+  cursor: pointer; border: 2px solid transparent; border-radius: var(--r-sm);
+  background: var(--paper-2); padding: 8px 4px; box-shadow: 0 3px 0 var(--shadow-ink);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  transition: transform .12s, background .12s, border-color .12s;
+}
+.zt-cell:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--shadow-ink); }
+.zt-cell.learned { background: rgba(67, 201, 155, .16); border-color: var(--mint); }
+.zt-sy { font-size: 15px; font-weight: 800; color: var(--ink); letter-spacing: .5px; }
+.zt-char { font-size: 20px; font-weight: 900; color: var(--ink-light); }
+.zt-cell.learned .zt-char { color: var(--ink); }

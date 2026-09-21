@@ -160,7 +160,7 @@ t("轻声字不出辨调题", () => {
 
 /* ---------- 3) 全题型结构不变式 ---------- */
 t("全题型不变式(≥4 选项/答案唯一/kind 合法)", () => {
-  const KINDS = { char: 1, py: 1, emoji: 1, parts: 1 };
+  const KINDS = { char: 1, py: 1, emoji: 1, parts: 1, word: 1 };   /* word = 整词听写 */
   const bad = [], seen = {};
   ALL.forEach((c) => {
     for (let i = 0; i < 40; i++) {

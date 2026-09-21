@@ -90,12 +90,99 @@
     return out.filter(function (d) { if (used[d.c]) return false; used[d.c] = 1; return true; }).slice(0, count);
   }
 
+  /* ---------- 整词听写 ----------
+     为什么要有它:
+       单字听写只听一个音节;真实语言里孩子要一次留住两三个音节。
+       词听写难一档,而且是"组词"这个学习动作的直接检验。
+     干扰项怎么挑(质量的关键):
+       不是随便抓三个词 —— 要挑**听起来接近**的:
+         · 至少有一个音节的相似度高(声母或韵母相同,如「妈妈 màma」vs「马马」…)
+         · 长度相同优先(两个字的词配两个字的词,长短不一孩子能靠"有几个音"蒙对)
+         · 绝不选同音词(听不出来),也绝不让两个选项的拼音完全一样(否则两个答案都对)
+  */
+  var WORD_POOL = null;
+  function wordPool() {
+    if (WORD_POOL) return WORD_POOL;
+    var seen = {}, out = [];
+    ALL.forEach(function (ch) {
+      (ch.w || []).forEach(function (w) {
+        if (!w || w.length < 2 || w.length > 3) return;
+        if (seen[w]) return;
+        /* 每个字都得在库内,否则读不出来 */
+        var ok = true;
+        for (var i = 0; i < w.length; i++) if (!BY_CHAR[w[i]]) { ok = false; break; }
+        if (!ok) return;
+        seen[w] = 1;
+        out.push(w);
+      });
+    });
+    WORD_POOL = out;
+    return out;
+  }
+  function wordPinyin(w) {
+    var out = [];
+    for (var i = 0; i < w.length; i++) out.push(BY_CHAR[w[i]] ? BY_CHAR[w[i]].p : "");
+    return out;
+  }
+  function samePinyin(a, b) {
+    var pa = wordPinyin(a), pb = wordPinyin(b);
+    if (pa.length !== pb.length) return false;
+    for (var i = 0; i < pa.length; i++) if (pa[i] !== pb[i]) return false;
+    return true;
+  }
+  /* 词与词的"听感接近度":逐音节比 likeness,越像越小 */
+  function wordLikeness(a, b) {
+    var pa = wordPinyin(a), pb = wordPinyin(b), Py = window.Py;
+    if (!Py || pa.length !== pb.length) return 9;
+    var s = 0;
+    for (var i = 0; i < pa.length; i++) s += Py.likeness(pa[i], pb[i]);
+    return s;
+  }
+  /* 为某个字挑一个"有教学价值"的词(优先含本字、长度 2) */
+  function wordForDictation(ch) {
+    var ws = (ch.w || []).filter(function (w) { return w.length >= 2 && w.length <= 3; });
+    if (!ws.length) return "";
+    var two = ws.filter(function (w) { return w.length === 2; });
+    return (two[0] || ws[0]);
+  }
+  function pickWordDistractors(target, count) {
+    var ans = wordForDictation(target);
+    if (!ans) return [];
+    var pool = wordPool(), scored = [];
+    for (var i = 0; i < pool.length; i++) {
+      var w = pool[i];
+      if (w === ans) continue;
+      if (samePinyin(w, ans)) continue;              /* 同音词听不出来,不能当干扰项 */
+      var lk = wordLikeness(w, ans);
+      scored.push({ w: w, lk: lk, len: w.length });
+    }
+    /* 同类优先:先"听感最像",同分时长度相同优先 */
+    scored.sort(function (a, b) { return a.lk - b.lk || (a.len === ans.length ? -1 : 1); });
+    var out = [], used = {}, usedPy = {};
+    usedPy[wordPinyin(ans).join(" ")] = 1;
+    for (var k = 0; k < scored.length && out.length < count; k++) {
+      var py = wordPinyin(scored[k].w).join(" ");
+      if (used[scored[k].w] || usedPy[py]) continue;
+      used[scored[k].w] = 1; usedPy[py] = 1;
+      out.push(scored[k].w);
+    }
+    /* 不够就从词池里随便补(仍然排除同音) */
+    for (var m = 0; m < pool.length && out.length < count; m++) {
+      var w2 = pool[m], py2 = wordPinyin(w2).join(" ");
+      if (w2 === ans || used[w2] || usedPy[py2]) continue;
+      used[w2] = 1; usedPy[py2] = 1; out.push(w2);
+    }
+    return out;
+  }
+
   function makeQuestion(target, avoidType, preferType) {
     var types = ["listen", "charPinyin", "pinyinChar"];
     if (target.e) { types.push("charEmoji", "emojiChar"); }
     if (window.Py) {
       types.push("dictation");
       if (window.Py.variants(target.p).length >= 2) types.push("tonePick");
+      /* 词听写:只有当这个字有一个能读的组词、且能凑出 3 个不同音的干扰词时才出 */
+      if (wordForDictation(target) && pickWordDistractors(target, 3).length === 3) types.push("wordDictation");
     }
     var myParts = partsOf(target.c);
     if (myParts && PART_POOL.length >= 8) { types.push("partJoin", "partSplit"); }
@@ -160,6 +247,18 @@
       shuffle(opts5);
       q.options = opts5;
       q.answerIdx = opts5.findIndex(function (o) { return o.ref.c === target.c; });
+
+    } else if (type === "wordDictation") {
+      /* 听一个词 → 从 4 个词里选出听到的那个 */
+      var wans = wordForDictation(target);
+      q.speak = wans;
+      var dw = pickWordDistractors(target, 3);
+      var optsW = dw.map(function (w) { return { kind: "word", value: w }; });
+      optsW.push({ kind: "word", value: wans });
+      shuffle(optsW);
+      q.options = optsW;
+      q.answerIdx = optsW.findIndex(function (o) { return o.value === wans; });
+      q.word = wans;
 
     } else if (type === "dictation") {
       /* 听单字音 → 选出这个字。干扰项按音近程度分级:1只差声调 / 2同韵 / 3同声 / 9无关 */
@@ -333,6 +432,8 @@
   };
   window.Games = {
     buildRound: buildRound, classify: classify, CAUSE_DRILL: CAUSE_DRILL, dimOf: dimOf,
-    _makeQuestion: makeQuestion, _pickBySound: pickBySound
+    _makeQuestion: makeQuestion, _pickBySound: pickBySound,
+    _wordPool: wordPool, _wordForDictation: wordForDictation, _pickWordDistractors: pickWordDistractors,
+    _wordPinyin: wordPinyin, _samePinyin: samePinyin, _wordLikeness: wordLikeness
   };
 })();

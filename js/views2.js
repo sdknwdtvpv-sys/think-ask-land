@@ -162,6 +162,12 @@
         prompt =
           '<div class="prompt-area"><div class="prompt-label">🔍 它是由哪些部件组成的?</div>' +
           '<div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
+      } else if (q.type === "wordDictation") {
+        /* 整词听写:听一个词,选出听到的那个词 */
+        prompt =
+          '<div class="prompt-area"><div class="prompt-label">👂 听一个词,选出听到的</div>' +
+          '<button class="speak-big" id="sp-btn">🔊</button>' +
+          '<div class="prompt-hint">再听一遍就点喇叭</div></div>';
       } else if (q.type === "charEmoji") {
         prompt = '<div class="prompt-area"><div class="prompt-label">这个字是哪幅图呢?</div><div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
       } else if (q.type === "emojiChar") {
@@ -173,8 +179,10 @@
       }
       var opts = '<div class="opts-grid">';
       q.options.forEach(function (o, oi) {
-        var cls = o.kind === "emoji" ? "emoji-opt" : o.kind === "py" ? "py-opt" : o.kind === "parts" ? "parts-opt" : "";
-        var inner = o.kind === "char" ? '<span class="kai">' + esc(o.value) + "</span>" : esc(o.value);
+        var cls = o.kind === "emoji" ? "emoji-opt" : o.kind === "py" ? "py-opt"
+          : o.kind === "parts" ? "parts-opt" : o.kind === "word" ? "word-opt" : "";
+        var inner = (o.kind === "char" || o.kind === "word")
+          ? '<span class="kai">' + esc(o.value) + "</span>" : esc(o.value);
         opts += '<button class="opt ' + cls + '" data-oi="' + oi + '">' + inner + "</button>";
       });
       opts += "</div>";
@@ -188,7 +196,12 @@
           if (b) { b.classList.remove("pulse"); void b.offsetWidth; b.classList.add("pulse"); }
           window.Speech.speak(q.speak, q.type === "listen" ? 0.75 : 0.7);
         };
-        view.querySelector("#sp-btn").addEventListener("click", spk);
+        /* 有 speak 内容就必须有喇叭。但**不能假设它一定在** ——
+           曾经因为漏给「整词听写」加喇叭分支,这里对 null 调 addEventListener,
+           整道题直接崩掉(而且是静默的:只有控制台报错,孩子看到的是点了没反应)。
+           兜底:没有喇叭也照样自动朗读,只是少了"再听一遍"的按钮。 */
+        var spBtn = view.querySelector("#sp-btn");
+        if (spBtn) spBtn.addEventListener("click", spk);
         App.after(350, spk);
       }
 

@@ -177,11 +177,36 @@
     return list.slice(0, n || 3);
   }
 
+  /* ---------- 整体认读音节(16 个) ----------
+     为什么单独讲:
+       这 16 个音节**不用拼**(不能拆成"声母 + 韵母"来读):
+       如 zhi 不是 "zh + i",yuan 也不是 "y + uan"。
+       孩子如果按拼读去读,会读成奇怪的音;所以必须整块记住。
+     教法:给每个音节配一个**字库里已有的字**当"声音样本"
+       (zhi→只、ri→日、yuan→圆…),孩子一听就懂,
+       而且这个字他已经学过或很快会学到,不是新的负担。 */
+  var ZHENGTI = ["zhi", "chi", "shi", "ri", "zi", "ci", "si", "yi", "wu", "yu", "ye", "yue", "yuan", "yin", "yun", "ying"];
+
+  /* 一个音节配一个库内的字:优先浅岛(孩子更可能已经学过),同岛取先出现的 */
+  function zhengtiSamples(chars) {
+    var out = [];
+    ZHENGTI.forEach(function (sy) {
+      var best = null;
+      (chars || []).forEach(function (c) {
+        if (base(c.p) !== sy) return;
+        if (!best || c.gi < best.gi || (c.gi === best.gi && c.i < best.i)) best = c;
+      });
+      out.push({ sy: sy, char: best ? best.c : "", py: best ? best.p : "" });
+    });
+    return out;
+  }
+
   window.Py = {
     base: base, tone: tone, apply: apply, variants: variants,
     sameBase: sameBase, isValid: isPinyin, split: split,
     parts: parts, likeness: likeness,
     TEACH_INITIALS: TEACH_INITIALS, FINAL_GROUPS: FINAL_GROUPS, TONE_INFO: TONE_INFO, toneName: toneName,
-    syllableIndex: syllableIndex, index: index, examplesForInitial: examplesForInitial
+    syllableIndex: syllableIndex, index: index, examplesForInitial: examplesForInitial,
+    ZHENGTI: ZHENGTI, zhengtiSamples: zhengtiSamples
   };
 })();
