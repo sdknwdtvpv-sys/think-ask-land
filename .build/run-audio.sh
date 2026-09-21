@@ -80,7 +80,8 @@ hint_for() {
 say "【1/5】检查当前缺多少条…"
 CHECK_OUT="$(python3 .build/gen-audio.py --check 2>&1)"
 printf "%s\n" "$CHECK_OUT" | tail -4
-if printf "%s" "$CHECK_OUT" | grep -q "覆盖完整"; then
+# 判据用生成器真实打印的"无缺口"(之前 grep 的"覆盖完整"是发布脚本自己的话,永远匹配不到)
+if printf "%s" "$CHECK_OUT" | grep -q "无缺口" && ! printf "%s" "$CHECK_OUT" | grep -q "缺 [0-9]* 条"; then
   say "🎉 音频已经是完整的,不需要生成。"
   line
   read -r -p "仍要重新生成一遍吗?(y/N) " AGAIN
@@ -131,7 +132,7 @@ line
 say "【4/5】校验是否补齐…"
 FINAL_OUT="$(python3 .build/gen-audio.py --check 2>&1)"
 printf "%s\n" "$FINAL_OUT" | tail -4
-if ! printf "%s" "$FINAL_OUT" | grep -q "覆盖完整"; then
+if ! printf "%s" "$FINAL_OUT" | grep -q "无缺口"; then
   say "⚠️ 还有缺口。把上面这几行发我(通常是字库刚改过,再跑一次向导即可)。"
 else
   say "✅ 音频已完整。"

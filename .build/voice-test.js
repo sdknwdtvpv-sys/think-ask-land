@@ -74,22 +74,34 @@ function check(name, cond, extra) {
     window.__spoke = [];
     const orig = window.speechSynthesis.speak.bind(window.speechSynthesis);
     window.speechSynthesis.speak = function (u) { window.__spoke.push({ text: u.text, lang: u.lang, rate: u.rate, pitch: u.pitch, voice: u.voice && u.voice.name }); };
+    /* 也要盯着预置音频通道:口播音频生成好之后,「试听」会走预置 mp3 而不再调用 TTS。
+       断言应该是"有条通道发声了",而不是"必须走 TTS" —— 否则音频补齐反而让测试变红。 */
+    window.__apPlayed = [];
+    const apOrig = window.AudioPack && window.AudioPack.play;
+    if (window.AudioPack) {
+      window.AudioPack.play = function (t) { window.__apPlayed.push(String(t)); return apOrig.apply(this, arguments); };
+    }
     s.value = target.value;
     s.dispatchEvent(new Event("change", { bubbles: true }));
     await new Promise(r => setTimeout(r, 300));
     document.querySelector("#voice-try").click();
     await new Promise(r => setTimeout(r, 300));
     window.speechSynthesis.speak = orig;
+    if (window.AudioPack && apOrig) window.AudioPack.play = apOrig;
     return {
       ok: true,
+      apPlayed: window.__apPlayed,
       picked: target.textContent,
       saved: localStorage.getItem("hanziKids.voice"),
       spoke: window.__spoke,
       nowVoice: window.Speech.voice && window.Speech.voice.name,
     };
   });
-  check("切换音色后立即试听", changed.ok && changed.spoke && changed.spoke.length >= 1,
-    changed.spoke && changed.spoke[0] ? ("说:" + changed.spoke[0].text + " 音色=" + changed.spoke[0].voice + " lang=" + changed.spoke[0].lang + " rate=" + changed.spoke[0].rate + " pitch=" + changed.spoke[0].pitch) : "未发声");
+  const sounded = changed.ok && ((changed.spoke && changed.spoke.length) || (changed.apPlayed && changed.apPlayed.length));
+  check("切换音色后立即试听", sounded,
+    changed.spoke && changed.spoke[0]
+      ? ("预置音频未命中,走 TTS:" + changed.spoke[0].text + " 音色=" + changed.spoke[0].voice)
+      : (changed.apPlayed && changed.apPlayed.length ? ("预置音频发声:" + changed.apPlayed[0]) : "未发声"));
   check("选择已持久化", !!changed.saved, "saved=" + changed.saved);
   check("音色已切换生效", changed.nowVoice === changed.saved, changed.nowVoice);
 

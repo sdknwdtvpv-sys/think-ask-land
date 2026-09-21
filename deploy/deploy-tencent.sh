@@ -24,6 +24,46 @@ touch "$KEYDIR/known_hosts"
 
 SSH="ssh -i $KEYDIR/id_ed25519 -o UserKnownHostsFile=$KEYDIR/known_hosts -o StrictHostKeyChecking=accept-new -o BatchMode=yes"
 
+# 1b) 音频安全闸:本机 audio/ 比线上旧时,rsync --delete 会把线上音频删掉!
+#     背景:音频由 .build/gen-audio.py 生成且不入 git,换台机器部署就可能出现
+#     "本机是旧的、线上是新的" —— 一次部署就能把刚生成的上百条音频清空。
+#     这里在部署前比对各音色条目数,发现本机更旧就停下并给出同步命令。
+if [ -f audio/config.json ] && [ -z "${HZ_SKIP_AUDIO_GUARD:-}" ]; then
+  REMOTE_CFG="${HZ_FAKE_REMOTE_CFG:-}"
+  if [ -z "$REMOTE_CFG" ]; then
+    REMOTE_CFG="$($SSH "$HOST" "cat '$WEBROOT/audio/config.json' 2>/dev/null" || true)"
+  elif [ -f "$REMOTE_CFG" ]; then
+    REMOTE_CFG="$(cat "$REMOTE_CFG")"
+  fi
+  if [ -n "$REMOTE_CFG" ]; then
+    GUARD="$(python3 - "$REMOTE_CFG" <<'PYEOF'
+import json, sys
+try:
+    remote = json.loads(sys.argv[1])
+    local = json.load(open("audio/config.json", encoding="utf-8"))
+except Exception:
+    sys.exit(0)                      # 解析不了就不拦(例如线上还没音频)
+rv = {k: v.get("count", 0) for k, v in (remote.get("voices") or {}).items()}
+lv = {k: v.get("count", 0) for k, v in (local.get("voices") or {}).items()}
+worse = [(k, lv.get(k, 0), rv[k]) for k in rv if rv[k] > lv.get(k, 0) + 5]   # 留 5 条容差
+if worse:
+    print("LOCAL_OLDER")
+    for k, a, b in worse:
+        print("  %s: 本机 %d 条 / 线上 %d 条" % (k, a, b))
+PYEOF
+)"
+    if printf "%s" "$GUARD" | grep -q "LOCAL_OLDER"; then
+      echo "❌ 已阻止部署:本机音频比线上旧,继续部署会把线上音频删掉。"
+      printf "%s\n" "$GUARD" | tail -n +2 | sed 's/^/  /'
+      echo "  先同步回来再部署:"
+      echo "    rsync -az -e \"ssh -i $KEYDIR/id_ed25519 -o UserKnownHostsFile=$KEYDIR/known_hosts\" \\"
+      echo "      $HOST:$WEBROOT/audio/ audio/"
+      echo "  (确认本机才是最新的,可加 HZ_SKIP_AUDIO_GUARD=1 跳过这道闸)"
+      exit 1
+    fi
+  fi
+fi
+
 # 2) 同步到服务器临时目录(先清空中转目录,避免旧残留被二次带上)
 $SSH "$HOST" "rm -rf '$STAGE'"
 cd "$(dirname "$0")/.."

@@ -41,11 +41,15 @@ const idxCount = (dir) => {
 /* ---------- 1. --check 的退出码语义 ---------- */
 t("--check:有缺口返回非 0,完整返回 0", () => {
   const r = run(["--check"]);
-  const complete = /覆盖完整/.test(r.stdout + r.stderr);
-  const code = r.status;
-  if (complete && code !== 0) return FAIL("已覆盖完整却返回 " + code);
-  if (!complete && (code === 0)) return FAIL("有缺口却返回 0(发布脚本会以为音频是全的)");
-  return PASS(complete ? "覆盖完整 → 退出码 0" : "有缺口 → 退出码 " + code + "(预期非 0)");
+  const out = r.stdout + r.stderr;
+  /* 判据用生成器真实打印的文字("无缺口" / "缺 N 条"),并与退出码交叉校验 ——
+     两者必须一致,否则说明"输出说没事、退出码说有事"(或反之),发布脚本会被骗 */
+  const saysComplete = /无缺口/.test(out) && !/缺 \d+ 条/.test(out);
+  const codeOk = (r.status === 0) === saysComplete;
+  if (!codeOk) {
+    return FAIL("输出与退出码矛盾:文字=" + (saysComplete ? "无缺口" : "有缺口") + "，退出码=" + r.status);
+  }
+  return PASS(saysComplete ? "无缺口 → 退出码 0" : "有缺口 → 退出码 " + r.status + "(预期非 0)");
 });
 
 /* ---------- 2. 密钥错误必须失败且可读 ---------- */
