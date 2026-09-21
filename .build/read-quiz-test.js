@@ -16,6 +16,7 @@ const { JSDOM, VirtualConsole } = require("jsdom");
 const { DB } = require("./load-chars");
 const ROOT = path.join(__dirname, "..");
 require(path.join(ROOT, "data/passages.js"));
+require(path.join(ROOT, "data/passages2.js"));
 require(path.join(ROOT, "data/comprehension.js"));
 
 const BASE = process.env.HZ_BASE || "http://127.0.0.1:8023";
@@ -25,7 +26,11 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
 /* 允许"为读顺而补"的字:答案里可以多出这些字,不算违背"能在证据句里找到" */
 const GLUE = ["了", "的", "是"];
 /* 明确说出原因的篇目:只有这些篇目允许出 why 题(宁可少,不可猜) */
-const WHY_OK = ["p02", "p04", "p11", "p16", "n03", "n05", "n09", "n11", "n16"];
+const WHY_OK = [
+  "p02", "p04", "p11", "p16", "n03", "n05", "n09", "n11", "n16",
+  /* 第二波 L3~L5:这些篇目里原因被明确说出来了,才允许出 why 题 */
+  "p17", "p18", "p20", "p23", "p24", "p29", "p31", "p33", "p36"
+];
 
 const PS = window.PASSAGES, RQ = window.READ_QUIZ;
 

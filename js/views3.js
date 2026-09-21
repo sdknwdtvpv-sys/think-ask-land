@@ -319,12 +319,14 @@
 
   /* 分级定义:与《分级阅读体系设计》一致。门槛做"提示"而不是"锁" ——
      孩子想读哪篇都行,达不到门槛时只温柔提示一句,不挡着他。 */
+  /* 级别定义:数值与 .build/level-rule.js 一一对应(有测试守着,见 read-test)
+     改这里必须同时改那份,否则测试会红 —— 这是故意的。 */
   var LEVELS = [
-    { id: "L1", name: "看图读句", hint: "2~4 句,每句很短", need: 30 },
-    { id: "L2", name: "短句成篇", hint: "4~5 句,能讲一件小事", need: 60 },
-    { id: "L3", name: "小故事", hint: "5 句,有小情节", need: 120 },
-    { id: "L4", name: "对话故事", hint: "有对话,能问答", need: 250 },
-    { id: "L5", name: "桥梁阅读", hint: "分段长故事", need: 400 }
+    { id: "L1", name: "看图读句", hint: "2~5 句，每句很短", need: 30 },
+    { id: "L2", name: "短句成篇", hint: "3~7 句，能讲一件小事", need: 60 },
+    { id: "L3", name: "小故事", hint: "5~10 句，有小情节", need: 120 },
+    { id: "L4", name: "对话故事", hint: "有对话，能问答", need: 250 },
+    { id: "L5", name: "桥梁阅读", hint: "能分段讲完一个故事", need: 400 }
   ];
   function levelMeta(id) {
     for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i].id === id) return LEVELS[i];

@@ -12,6 +12,8 @@
 "use strict";
 const { JSDOM, VirtualConsole } = require("jsdom");
 
+const { LEVELS: LV_ORDER, LEVEL_RULE, OK_PUNC } = require("./level-rule");
+
 const BASE = process.env.HZ_BASE || "http://127.0.0.1:8023";
 const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's scrollTo",
   "Not implemented: window.scrollTo", "Not implemented: navigation", "Not implemented: HTMLMediaElement"];
@@ -59,22 +61,44 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
 
   t("短文数量够用", () => PS.length >= 30 ? PASS(PS.length + " 篇") : FAIL("只有 " + PS.length + " 篇"));
 
-  t("每篇都有合法级别,且级别分布在 L1/L2", () => {
-    const LVS = (win.ReadDrill && win.ReadDrill.LEVELS) ? win.ReadDrill.LEVELS.map((x) => x.id) : ["L1", "L2", "L3", "L4", "L5"];
+  t("页面里的级别定义与唯一事实来源(.build/level-rule.js)一致", () => {
+    /* 浏览器里没法 require 那个模块,所以级别表有两份 —— 
+       这份断言就是防止两份偷偷跑偏(改了规则忘了改另一处,分级就会名不副实)。 */
+    const rows = (win.ReadDrill && win.ReadDrill.LEVELS) || [];
+    if (rows.length !== LV_ORDER.length) return FAIL("级别数 " + rows.length + " ≠ " + LV_ORDER.length);
+    const bad = [];
+    LV_ORDER.forEach((id, i) => {
+      const a = rows[i], b = LEVEL_RULE[id];
+      if (!a) return bad.push(id + " 缺失");
+      if (a.id !== id) bad.push("第" + (i + 1) + "项 id " + a.id + " ≠ " + id);
+      if (a.name !== b.name) bad.push(id + " 名称「" + a.name + "」≠「" + b.name + "」");
+      if (a.hint !== b.hint) bad.push(id + " 说明「" + a.hint + "」≠「" + b.hint + "」");
+      if (a.need !== b.need) bad.push(id + " 门槛 " + a.need + " ≠ " + b.need);
+    });
+    return bad.length ? FAIL(bad.slice(0, 4).join(" | ")) : PASS(LV_ORDER.length + " 级定义与规则文件完全一致");
+  });
+
+  t("每篇都有合法级别,且 L1~L5 每一级都有内容", () => {
+    const LVS = (win.ReadDrill && win.ReadDrill.LEVELS) ? win.ReadDrill.LEVELS.map((x) => x.id) : LV_ORDER;
     const noLvl = PS.filter((p) => LVS.indexOf(p.lvl) < 0);
     if (noLvl.length) return FAIL("级别非法/缺失:" + noLvl.slice(0, 3).map((p) => p.id + "=" + p.lvl).join(","));
     const dist = {};
     PS.forEach((p) => { dist[p.lvl] = (dist[p.lvl] || 0) + 1; });
-    if (!dist.L1 || !dist.L2) return FAIL("缺少某一级:" + JSON.stringify(dist));
-    return PASS(PS.length + " 篇:" + Object.keys(dist).sort().map((k) => k + " " + dist[k] + "篇").join(" / "));
+    const missing = LV_ORDER.filter((l) => !dist[l]);
+    if (missing.length) return FAIL("缺少级别:" + missing.join(","));
+    return PASS(PS.length + " 篇:" + LV_ORDER.map((k) => k + " " + dist[k] + "篇").join(" / "));
   });
 
-  t("级别与篇幅自洽(L1 更短)", () => {
-    const L1 = PS.filter((p) => p.lvl === "L1"), L2 = PS.filter((p) => p.lvl === "L2");
-    const max1 = Math.max.apply(null, L1.map((p) => RD.charsOf(p).length));
-    const min2 = Math.min.apply(null, L2.map((p) => RD.charsOf(p).length));
-    if (max1 > 30) return FAIL("L1 最长 " + max1 + " 字,超出 30 字上限");
-    return PASS("L1 最长 " + max1 + " 字 / L2 最短 " + min2 + " 字(有重叠是正常的,以句式为界)");
+  t("级别与篇幅自洽:级别越高,中位篇幅越长", () => {
+    /* 单篇长度可以重叠(有短 L2 也有长 L2),但每一级的**中位数**必须严格递增 —— 
+       否则"分级"就是摆设,家长点进 L4 看到的比 L3 还短。 */
+    const med = (a) => { const b = a.slice().sort((x, y) => x - y); return b.length % 2 ? b[(b.length - 1) / 2] : (b[b.length / 2 - 1] + b[b.length / 2]) / 2; };
+    const rows = LV_ORDER.filter((l) => PS.some((p) => p.lvl === l))
+      .map((l) => ({ l: l, med: med(PS.filter((p) => p.lvl === l).map((p) => RD.charsOf(p).length)) }));
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i].med <= rows[i - 1].med) return FAIL(rows[i - 1].l + " 中位 " + rows[i - 1].med + " ≥ " + rows[i].l + " 中位 " + rows[i].med);
+    }
+    return PASS(rows.map((r) => r.l + "中位" + r.med + "字").join(" < "));
   });
 
   t("每一篇的用字都在字库内(最关键的约束)", () => {
@@ -102,29 +126,32 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
     return bad.length ? FAIL(bad.join(" | ")) : PASS(PS.length + " 篇标题合规(白名单 " + Object.keys(KNOWN).length + " 个待批 2 扩字解决)");
   });
 
-  t("篇幅适合幼儿:2~6 句、每句 ≤ 14 字、全篇 ≤ 60 字", () => {
+  t("分级篇幅合规(句数/单句/全篇上限随级别放宽)", () => {
     const bad = [];
     PS.forEach((p) => {
+      const rule = LEVEL_RULE[p.lvl];
+      if (!rule) return bad.push(p.id + " 级别非法 " + p.lvl);
       const n = RD.charsOf(p).length;
-      if (p.s.length < 2 || p.s.length > 6) bad.push(p.id + " 句数 " + p.s.length);
-      if (n > 60) bad.push(p.id + " 共 " + n + " 字");
-      p.s.forEach((s, i) => { if (RD.charsOf({ s: [s] }).length > 14) bad.push(p.id + " 第" + (i + 1) + "句过长"); });
+      if (p.s.length < rule.minS || p.s.length > rule.maxS) bad.push(p.id + " " + p.lvl + " 句数 " + p.s.length);
+      if (n > rule.maxTotal) bad.push(p.id + " " + p.lvl + " 共 " + n + " 字");
+      p.s.forEach((s, i) => {
+        if (RD.charsOf({ s: [s] }).length > rule.maxLine) bad.push(p.id + " 第" + (i + 1) + "句 " + RD.charsOf({ s: [s] }).length + " 字超限");
+      });
     });
-    return bad.length ? FAIL(bad.slice(0, 4).join(" | ")) : PASS("篇幅全部合规");
+    return bad.length ? FAIL(bad.slice(0, 4).join(" | ")) : PASS(PS.length + " 篇按 " + Object.keys(LEVEL_RULE).length + " 级规则全部合规");
   });
 
-  t("标点只用中文常用标点,标题不为空", () => {
+  t("标点只用全角中文标点(半角一律不接受),标题与封面齐全", () => {
     const bad = [];
-    const OK = "。，、?!?!…—～·";
+    const punc = (s) => s.split("").filter((c) => !/[\u4e00-\u9fff]/.test(c));
     PS.forEach((p) => {
       if (!p.title || !p.emoji) bad.push(p.id + ":缺标题/封面");
-      p.s.join("").split("").forEach((c) => {
-        if (/[\u4e00-\u9fff]/.test(c)) return;
-        if (OK.indexOf(c) < 0) bad.push(p.id + ":非法标点 " + JSON.stringify(c));
+      punc(p.s.join("")).concat(punc(p.title)).forEach((c) => {
+        if (OK_PUNC.indexOf(c) < 0) bad.push(p.id + ":非法标点 " + JSON.stringify(c));
       });
-      if (!/[。!?]$/.test(p.s[p.s.length - 1])) bad.push(p.id + ":末句没有句号");
+      if (!/[。！？]”?$/.test(p.s[p.s.length - 1])) bad.push(p.id + ":末句没有句号");
     });
-    return bad.length ? FAIL(bad.slice(0, 4).join(" | ")) : PASS("标点规范");
+    return bad.length ? FAIL(bad.slice(0, 4).join(" | ")) : PASS("全部为全角标点");
   });
 
   t("id 唯一且格式统一", () => {
@@ -149,12 +176,22 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
     return bad.length ? FAIL(bad.join(" | ")) : PASS("目标全部有效");
   });
 
-  t("难度递进:最深岛号在 8~13 之间且有多档", () => {
+  t("难度递进:用字的岛号覆盖多档,且最浅的一篇很浅", () => {
+    /* 不写死具体档位 —— 字库还会继续扩,写死就会天天红。
+       真正要守的是:有足够多的难度档位,且入门篇确实只用最前面的岛。 */
     const lvls = PS.map((p) => RD.levelOf(p));
     const uniq = Array.from(new Set(lvls)).sort((a, b) => a - b);
+    if (Math.max.apply(null, lvls) < 8) return FAIL("最深的一篇只用到了第 " + Math.max.apply(null, lvls) + " 岛");
     if (Math.min.apply(null, lvls) > 9) return FAIL("最浅的一篇也用到了第 " + Math.min.apply(null, lvls) + " 岛的字");
-    if (uniq.length < 3) return FAIL("难度档位太少:" + uniq.join(","));
-    return PASS("难度档位 " + uniq.join("/"));
+    if (uniq.length < 4) return FAIL("难度档位太少:" + uniq.join(","));
+    const byLvl = {};
+    PS.forEach((p) => { (byLvl[p.lvl] = byLvl[p.lvl] || []).push(RD.levelOf(p)); });
+    const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+    const rows = LV_ORDER.filter((l) => byLvl[l]).map((l) => ({ l: l, a: avg(byLvl[l]) }));
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i].a <= rows[i - 1].a) return FAIL("级别越高用字越浅:" + rows.map((r) => r.l + "均" + r.a.toFixed(1)).join(" "));
+    }
+    return PASS("难度档位 " + uniq.join("/") + " · " + rows.map((r) => r.l + "均岛" + r.a.toFixed(1)).join(" < "));
   });
 
   /* ---------- 交互 ---------- */

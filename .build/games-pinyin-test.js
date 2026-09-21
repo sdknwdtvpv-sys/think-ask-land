@@ -36,13 +36,14 @@ const t = (name, fn) => {
 const brief = (bad, n = 4) => ({ ok: false, why: bad.length + " 处: " + bad.slice(0, n).join(" | ") + (bad.length > n ? " …" : "") });
 const ALL = window.CharDB.ALL;
 
-/* 只为拿到指定题型:反复调用 makeQuestion 直到命中(带次数上限) */
-function forced(target, want, tries = 400) {
-  for (let i = 0; i < tries; i++) {
-    const q = window.Games._makeQuestion(target, null);
-    if (q.type === want) return q;
-  }
-  return null;
+/* 只为拿到指定题型:
+   用 makeQuestion 的第三个参数 preferType 确定性地要,而不是反复随机撞。
+   旧写法(随机撞 N 次)会在"该题型其实不存在"和"运气不好没撞到"之间分不清 ——
+   实测每 12 次全量回归就有 1 次误报(如「下:该出却没出」)。
+   现在只有在题型真的不可用时才返回 null,"该出没出"才是可信的信号。 */
+function forced(target, want) {
+  const q = window.Games._makeQuestion(target, null, want);
+  return q && q.type === want ? q : null;
 }
 
 /* ---------- 1) 拼音工具本身 ---------- */
@@ -127,7 +128,7 @@ const toneable = ALL.filter((c) => Py.variants(c.p).length >= 2);
 t("辨调题只在可辨调字上出现", () => {
   const bad = [];
   ALL.forEach((c) => {
-    const q = forced(c, "tonePick", 60);
+    const q = forced(c, "tonePick");
     const ok = Py.variants(c.p).length >= 2;
     if (ok && !q) bad.push(c.c + ":该出却没出");
     if (!ok && q) bad.push(c.c + ":不该出却出了(" + c.p + ")");
