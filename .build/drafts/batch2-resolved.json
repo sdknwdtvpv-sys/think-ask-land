@@ -501,6 +501,26 @@
    "pinyin": "tǎn"
   },
   {
+   "group": "日常生活",
+   "char": "买",
+   "pinyin": "mǎi"
+  },
+  {
+   "group": "日常生活",
+   "char": "卖",
+   "pinyin": "mài"
+  },
+  {
+   "group": "日常生活",
+   "char": "钱",
+   "pinyin": "qián"
+  },
+  {
+   "group": "日常生活",
+   "char": "店",
+   "pinyin": "diàn"
+  },
+  {
    "group": "时间与季节",
    "char": "曾",
    "pinyin": "céng"
@@ -649,6 +669,31 @@
    "group": "情绪与社交",
    "char": "盼",
    "pinyin": "pàn"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "啊",
+   "pinyin": "ā"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "呀",
+   "pinyin": "ya"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "哇",
+   "pinyin": "wā"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "哦",
+   "pinyin": "ó"
+  },
+  {
+   "group": "情绪与社交",
+   "char": "哎",
+   "pinyin": "āi"
   },
   {
    "group": "常用字与连接",
@@ -839,6 +884,46 @@
    "group": "常用字与连接",
    "char": "叫",
    "pinyin": "jiào"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "这",
+   "pinyin": "zhè"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "那",
+   "pinyin": "nà"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "哪",
+   "pinyin": "nǎ"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "它",
+   "pinyin": "tā"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "什",
+   "pinyin": "shén"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "么",
+   "pinyin": "me yāo"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "怎",
+   "pinyin": "zěn"
+  },
+  {
+   "group": "常用字与连接",
+   "char": "样",
+   "pinyin": "yàng"
   },
   {
    "group": "学校与学习",
@@ -1071,8 +1156,13 @@
    "char": "地",
    "group": "常用字与连接",
    "readings": "de dì"
+  },
+  {
+   "char": "么",
+   "group": "常用字与连接",
+   "readings": "me yāo"
   }
  ],
  "existing": 400,
- "total": 612
+ "total": 629
 }
