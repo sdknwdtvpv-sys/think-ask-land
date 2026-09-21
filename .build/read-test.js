@@ -111,19 +111,15 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
   });
 
   /* 标题也会显示给孩子,所以标题同样只能用字库里的字。
-     目前有 3 个历史标题越界(果子/河里的鱼/龟和兔),它们会随批 2 扩字自动合规
-     (批 2 新增「的」「和」;「子」已提案补充),在那之前用白名单放行。 */
-  t("标题只用字库内的字(新内容硬性要求)", () => {
-    const KNOWN = { p08: "的", p14: "和" };   // 「的/和」在批 2 扩字后合规;届时清空本白名单
+     v2.5.0 起**白名单已清空** —— p08「河里的鱼」的「的」与 p14「龟和兔」的「和」
+     在 v2.0.0 扩字后已经合规,原来那份"待扩字解决"的豁免不再需要。 */
+  t("标题只用字库内的字(无任何豁免)", () => {
     const bad = [];
     PS.forEach((p) => {
       const out = Array.from(new Set(Array.from(p.title).filter((c) => /[\u4e00-\u9fff]/.test(c) && !DB.BY_CHAR[c])));
-      if (!out.length) return;
-      const allowed = KNOWN[p.id] || "";
-      const real = out.filter((c) => allowed.indexOf(c) < 0);
-      if (real.length) bad.push(p.id + "「" + p.title + "」→" + real.join(""));
+      if (out.length) bad.push(p.id + "「" + p.title + "」→" + out.join(""));
     });
-    return bad.length ? FAIL(bad.join(" | ")) : PASS(PS.length + " 篇标题合规(白名单 " + Object.keys(KNOWN).length + " 个待批 2 扩字解决)");
+    return bad.length ? FAIL(bad.join(" | ")) : PASS(PS.length + " 篇标题全部在字库内(0 个豁免)");
   });
 
   t("分级篇幅合规(句数/单句/全篇上限随级别放宽)", () => {

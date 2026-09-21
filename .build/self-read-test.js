@@ -163,14 +163,18 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
     return PASS("朗读「" + c + "」");
   });
 
-  /* 「跟着读」自动逐字走:至少能推进到第 2 句 */
+  /* 「跟着读」自动逐字走:光标本句每个字都要亮过,然后翻到第 2 句。
+     断言写法很重要 —— 旧写法用了 `A || !B` 这种"或"条件,
+     进场第一帧就为真(第 2 个进度点本来就还没点亮),于是 wait 立刻返回,
+     再拿"第 1 句要标记完成"去断言,必然误报。这里只等**真正要等的那件事**。 */
   click(doc.querySelector("#sr-auto"));
-  const ok = await wait(() => doc.querySelector("#sr-stage").textContent === story.s[1] || !doc.querySelectorAll(".sr-dots > i")[1].className.match(/on|done/), 12000);
+  const okDots = await wait(() => /done/.test(doc.querySelectorAll(".sr-dots > i")[0].className), 20000);
   t("「跟着读」会自动逐字推进并翻到下一句", () => {
-    if (!ok) return FAIL("12 秒内没进到第 2 句");
-    const dots = doc.querySelectorAll(".sr-dots > i");
-    if (!dots[0].className.match(/done/)) return FAIL("第 1 句没有标记完成");
-    return PASS("已推进到第 2 句");
+    if (!okDots) return FAIL("20 秒内第 1 句没有走完");
+    if (doc.querySelector("#sr-stage").textContent !== story.s[1]) {
+      return FAIL("第 1 句完成后没有翻到第 2 句,现在是「" + doc.querySelector("#sr-stage").textContent + "」");
+    }
+    return PASS("第 1 句逐字走完并翻到第 2 句");
   });
   click(doc.querySelector("#sr-auto")); /* 暂停 */
   win.Speech.speak = origSpeak;
