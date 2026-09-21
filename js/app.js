@@ -548,7 +548,9 @@
             '<button class="btn btn-sky" id="act-speak">' + Icons.svg("speak") + "读汉字</button>" +
             '<button class="btn btn-grape" id="act-anim">' + Icons.svg("pencil") + "笔顺</button>" +
             '<button class="btn btn-coral" id="act-quiz">' + Icons.svg("grid") + "描一描</button>" +
+            '<button class="btn btn-sun" id="act-rec">🎤 跟我读</button>' +
           "</div>" +
+          '<div class="rec-panel" id="rec-panel" hidden></div>' +
           ziliRow(ch) +
           '<div class="word-row" id="word-row"></div>' +
           '<button class="sent-card" id="sent-card"><span class="sent-ico">📖</span><span>' + hl(ch.s, ch.c) + "</span></button>" +
@@ -599,6 +601,115 @@
 
       /* 自动朗读(进入字卡) */
       App.after(300, speakChar);
+
+      /* ================= 跟我读 =================
+         孩子读一遍自己的声音,比听十遍示范更能发现问题。
+         录音只在本机回放(见 js/recorder.js 的三条硬约束),离开页面自动释放麦克风。 */
+      var recPanel = view.querySelector("#rec-panel");
+      var recBtn = view.querySelector("#act-rec");
+      var recHandle = null, recUrl = "";
+
+      function recMsg(html, cls) {
+        recPanel.hidden = false;
+        recPanel.className = "rec-panel" + (cls ? " " + cls : "");
+        recPanel.innerHTML = html;
+      }
+
+      function recIdle(msg) {
+        recMsg(
+          '<div class="rec-top">🎤 跟我读</div>' +
+          '<div class="rec-sub">' + (msg || "点下面的按钮,读一遍「" + esc(ch.c) + "」,然后听听自己的声音。") + "</div>" +
+          '<div class="rec-actions">' +
+            '<button class="btn btn-sun" id="rec-go">🎤 开始录音</button>' +
+            '<button class="btn btn-ghost" id="rec-model">🔊 先听示范</button>' +
+          "</div>" +
+          '<div class="rec-note">录音只在这台设备上回放,不会上传,也不会保存。</div>'
+        );
+        recPanel.querySelector("#rec-go").addEventListener("click", recBegin);
+        recPanel.querySelector("#rec-model").addEventListener("click", function () {
+          if (window.SFX) SFX.click();
+          speakChar();
+        });
+      }
+
+      function recBegin() {
+        if (window.SFX) SFX.click();
+        if (recUrl) { try { URL.revokeObjectURL(recUrl); } catch (e) {} recUrl = ""; }
+        if (!window.Recorder || !window.Recorder.supported()) {
+          var why = (window.Recorder && window.Recorder.lastError()) ||
+            "这台设备/浏览器不支持录音,或者页面不是安全连接(https)。不影响其它功能,继续学字就好。";
+          recMsg('<div class="rec-top">🎤 跟我读</div><div class="rec-sub">' + esc(why) + "</div>", "rec-off");
+          return;
+        }
+        window.Recorder.start().then(function (h) {
+          recHandle = h;
+          var left = Math.round(h.ms / 1000);
+          recMsg(
+            '<div class="rec-top rec-live">🔴 正在录音… 读吧!</div>' +
+            '<div class="rec-sub">还可以读 <b id="rec-left">' + left + "</b> 秒</div>" +
+            '<div class="rec-actions"><button class="btn btn-mint" id="rec-stop">读好了 ✓</button></div>' +
+            '<div class="rec-note">录音只在这台设备上回放,不会上传。</div>'
+          );
+          recPanel.querySelector("#rec-stop").addEventListener("click", recFinish);
+          /* 倒计时只做展示;到点由 recorder 自动收尾 */
+          var tick = setInterval(function () {
+            var el = recPanel.querySelector("#rec-left");
+            if (!el) { clearInterval(tick); return; }
+            left -= 1;
+            el.textContent = String(Math.max(0, left));
+            if (left <= 0) clearInterval(tick);
+          }, 1000);
+          App.after(h.ms + 50, function () { if (recHandle === h && !recUrl) recFinish(); });
+          h.onAutoStop = function () { if (recHandle === h && !recUrl) recFinish(); };
+        }).catch(function (e) {
+          recMsg('<div class="rec-top">🎤 跟我读</div><div class="rec-sub">' + esc(e.message || String(e)) + "</div>", "rec-off");
+        });
+      }
+
+      function recFinish() {
+        var h = recHandle;
+        if (!h) return;
+        recHandle = null;
+        h.stop().then(function (r) {
+          recUrl = r.url;
+          if (!r.size) {
+            recIdle("这次没有录到声音 —— 可能是麦克风离得远,再读一次试试。");
+            return;
+          }
+          recMsg(
+            '<div class="rec-top">🎉 录好了!听听你读的</div>' +
+            '<div class="rec-actions">' +
+              '<button class="btn btn-sky" id="rec-play">▶ 我的声音</button>' +
+              '<button class="btn btn-ghost" id="rec-model">🔊 听示范</button>' +
+              '<button class="btn btn-sun" id="rec-again">🎤 再录一次</button>' +
+            "</div>" +
+            '<div class="rec-note">录音只在这台设备上回放,不会上传,也不会保存。</div>'
+          );
+          var play = function () {
+            try {
+              var a = new Audio(r.url);
+              a.play().catch(function () {
+                recMsg('<div class="rec-top">🎤 听我的</div><div class="rec-sub">浏览器拦住了自动播放,再点一次「我的声音」试试。</div>');
+                var again = recPanel.querySelector("#rec-play") || recPanel;
+                if (again.addEventListener) again.addEventListener("click", play);
+              });
+            } catch (e) { /* 忽略 */ }
+          };
+          recPanel.querySelector("#rec-play").addEventListener("click", play);
+          recPanel.querySelector("#rec-model").addEventListener("click", function () { speakChar(); });
+          recPanel.querySelector("#rec-again").addEventListener("click", recBegin);
+          play();
+        });
+      }
+
+      recBtn.addEventListener("click", function () {
+        if (window.SFX) SFX.click();
+        if (recHandle) return;                 /* 正在录音:忽略重复点击 */
+        /* 用不了录音时,别给一个点了没反应的按钮 —— 直接说清原因与影响范围 */
+        if (!window.Recorder || !window.Recorder.supported()) { recBegin(); return; }
+        if (recPanel.hidden) recIdle();         /* 第一次点:展开面板 */
+        else recBegin();                        /* 已展开:直接开录 */
+      });
 
       view.querySelector("#py-speak").addEventListener("click", speakChar);
       view.querySelector("#act-speak").addEventListener("click", function () {

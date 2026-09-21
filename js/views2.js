@@ -778,6 +778,21 @@
         var snd = window.Speech.diag();
         var sndAp = snd.audio || { state: -1, stateName: "未加载", entries: 0, unlocked: false, lastError: "" };
         var yn = function (ok, yes, no) { return '<span class="' + (ok ? "snd-ok" : "snd-bad") + '">' + (ok ? yes : no) + "</span>"; };
+        /* ---- 麦克风:跟读录音是唯一需要授权的功能,单独说清"授权/不授权会怎样" ---- */
+        var rc = (window.Recorder && window.Recorder.diag) ? window.Recorder.diag() : null;
+        if (rc) {
+          html += '<div class="panel"><h4>🎤 麦克风(跟我读)</h4>' +
+            '<div class="ab-row"><span class="ab-name">录音能力</span>' +
+              '<span class="ab-val">' + yn(rc.supported, "可用", rc.stateName) + "</span></div>" +
+            '<p class="parent-note">' + (rc.supported
+              ? "孩子可以读一遍自己的声音再听 —— 这是把「认字」变成「会读」的关键一步。"
+              : "这台设备/浏览器用不了录音,或者页面不是 https。<b>不影响其它任何功能</b>,只少了「跟我读」。") +
+            "</p>" +
+            '<p class="parent-note">🔒 录音<b>只在这台设备上回放</b>:不上传、不保存,离开页面立刻释放麦克风。</p>' +
+            (rc.lastError ? '<p class="parent-note">上次失败的原因:' + esc(rc.lastError) + "</p>" : "") +
+            "</div>";
+        }
+
         html += '<div class="panel"><h4>' + Icons.svg("speak") + "声音自检</h4>" +
           '<div class="snd-grid">' +
             '<div class="snd-row"><span>打开方式</span><span>' + (snd.standalone ? "主屏幕 APP" : "浏览器") + "</span></div>" +

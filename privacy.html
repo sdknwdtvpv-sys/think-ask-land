@@ -7,9 +7,9 @@
 <meta name="description" content="思问岛隐私说明:孩子的学习记录只保存在本机浏览器,我们不上传、不收集个人信息;匿名统计不含 IP 与设备信息,可一键关闭。">
 <meta name="theme-color" content="#8ec9f0">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/style.css?v=2.5.0">
-<link rel="stylesheet" href="css/style2.css?v=2.5.0">
-<link rel="stylesheet" href="css/v2.css?v=2.5.0">
+<link rel="stylesheet" href="css/style.css?v=2.6.0">
+<link rel="stylesheet" href="css/style2.css?v=2.6.0">
+<link rel="stylesheet" href="css/v2.css?v=2.6.0">
 <style>
   body { background: var(--paper); }
   .doc { max-width: 660px; margin: 0 auto; padding: calc(14px + env(safe-area-inset-top)) 16px calc(44px + env(safe-area-inset-bottom)); }
@@ -62,6 +62,21 @@
       <li>服务端只记录四列日志，<strong>字段里就没有 IP 与 User-Agent</strong>；匿名标识每天重新生成，无法跨天追踪同一个孩子</li>
       <li>关闭方式：<strong>家长中心 → 帮助改进（匿名统计）</strong>，关掉即不再发送；也可以随时更换匿名标识</li>
     </ul>
+  </div>
+
+  <div class="panel">
+    <h4>🎤 关于麦克风（「跟我读」）</h4>
+    <p>字卡页有一个「跟我读」：孩子读一遍，再听一遍自己的声音。
+    这是应用里<strong>唯一</strong>需要麦克风权限的功能，规则只有三条：</p>
+    <ul>
+      <li><strong>只在本机回放</strong>：录音只在你孩子的这台设备上生成一个临时地址用于播放，
+      立刻就被丢弃</li>
+      <li><span class="warn">不上传、不保存</span>：不会发送到服务器，不会写进本地存储，
+      关掉页面就没了 —— 连「历史录音」这种功能都不存在</li>
+      <li><strong>可以拒绝</strong>：不授权也完全不影响学习功能，只是少了这一项。
+      离开页面时应用会主动释放麦克风（浏览器标签上的录音提示会立刻消失）</li>
+    </ul>
+    <p>上面那条「匿名统计」里也<strong>绝不发送语音</strong> —— 语音无法匿名化，所以干脆一个字节都不发。</p>
   </div>
 
   <div class="panel">
