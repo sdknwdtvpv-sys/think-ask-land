@@ -177,18 +177,23 @@
       } else {
         prompt = '<div class="prompt-area"><div class="prompt-label">看拼音,选汉字</div><div class="prompt-py">' + esc(q.target.p) + "</div></div>";
       }
-      var opts = '<div class="opts-grid">';
+      /* 无障碍:屏幕朗读软件只念可见文字会读成「日」而不说是"第几个选项",
+         所以每个选项补一个 aria-label(说明它是选项、第几个、内容是什么)。 */
+      var opts = '<div class="opts-grid" role="group" aria-label="选项">';
       q.options.forEach(function (o, oi) {
         var cls = o.kind === "emoji" ? "emoji-opt" : o.kind === "py" ? "py-opt"
           : o.kind === "parts" ? "parts-opt" : o.kind === "word" ? "word-opt" : "";
         var inner = (o.kind === "char" || o.kind === "word")
           ? '<span class="kai">' + esc(o.value) + "</span>" : esc(o.value);
-        opts += '<button class="opt ' + cls + '" data-oi="' + oi + '">' + inner + "</button>";
+        var label = "选项" + (oi + 1) + "：" + String(o.value);
+        opts += '<button class="opt ' + cls + '" data-oi="' + oi + '" aria-label="' + esc(label) + '">' + inner + "</button>";
       });
       opts += "</div>";
       area.innerHTML = prompt + opts;
       view.querySelector("#fb").textContent = "";
       view.querySelector("#fb").className = "feedback-line";
+      /* 反馈行对屏幕朗读软件宣告(答对/答错的提示要说出来) */
+      view.querySelector("#fb").setAttribute("aria-live", "polite");
 
       if (q.speak) {
         var spk = function () {
