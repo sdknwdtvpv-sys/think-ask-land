@@ -57,7 +57,8 @@ def load_char_list():
     """用 node 读项目自己的字库,保证生成的数据与线上字库严格对齐"""
     code = (
         "global.window=global;"
-        "[1,2,3,4,5,6].forEach(function(i){require('./data/chars-'+i+'.js')});"
+        "require('fs').readdirSync('./data').filter(function(f){return /^chars-\\d+\\.js$/.test(f)})"
+        ".sort().forEach(function(f){require('./data/'+f)});"
         "require('./data/chars.js');"
         "var a=[];window.CHAR_GROUPS.forEach(function(g){g.chars.forEach(function(c){a.push(c.c)})});"
         "process.stdout.write(a.join(''));"
