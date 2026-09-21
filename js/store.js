@@ -56,6 +56,7 @@
       lastDay: "",
       welcomed: false,
       reads: {},           // 短文 id -> 首次读完时间(阅读启蒙进度)
+      rq: {},              // 短文 id -> { ok, bad, last }:读后理解题作答(理解力,不是识字量)
       dims: dimsZero()     // 能力维度 -> { ok, bad }:听音/拼音/字形/图义
     };
   }
@@ -175,6 +176,21 @@
       }
     }
     out.reads = reads;
+
+    /* 读后理解题作答:只保留 p01 这样的 id,数值字段纠正到合法区间。
+       新增字段但没有升 SCHEMA —— 旧版本读到会忽略它,回滚只是丢掉理解题统计,不会报错。 */
+    var rq = {};
+    if (out.rq && typeof out.rq === "object" && Object.prototype.toString.call(out.rq) !== "[object Array]") {
+      for (var qid in out.rq) {
+        if (!/^p\d{1,3}$/.test(qid)) continue;
+        var qr = out.rq[qid];
+        if (!qr || typeof qr !== "object") continue;
+        var qok = Math.min(9999, nonNeg(qr.ok, 0)), qbad = Math.min(9999, nonNeg(qr.bad, 0));
+        if (!qok && !qbad) continue;
+        rq[qid] = { ok: qok, bad: qbad, last: nonNeg(qr.last, 0), got: !!qr.got || qok > 0 };
+      }
+    }
+    out.rq = rq;
 
     var dims = {};
     DIMS.forEach(function (k) {
@@ -417,6 +433,9 @@
     });
     /* 阅读与记忆保持单独看:它们不是"答题正确率",而是覆盖度 */
     rows.push({ k: "read", name: "短文阅读", ok: reads, bad: 0, n: reads, acc: null, count: reads, unit: "篇" });
+    /* 短文理解单独一行:它才是"读懂没有"的证据(识字量高不等于读得懂) */
+    var rqt = readQuizTotals();
+    if (rqt.n) rows.push({ k: "comprehend", name: "短文理解", ok: rqt.ok, bad: rqt.bad, n: rqt.n, acc: Math.round(rqt.ok / rqt.n * 100), count: rqt.done, unit: "篇" });
     rows.push({ k: "memory", name: "长期记忆", ok: mastered, bad: 0, n: learned, acc: learned ? Math.round(mastered / learned * 100) : null, count: mastered, unit: "字" });
     return rows;
   }
@@ -533,6 +552,40 @@
   }
   function readCount() { return Object.keys(state.reads || {}).length; }
   function hasRead(id) { return !!(state.reads && state.reads[id]); }
+
+  /* 读后理解题一次作答。
+     两个数字要分开,否则家长看到的正确率会骗人:
+       · 正确率(count=true)只记**每道题的第一次作答** —— 错了再试对,不该洗白第一次
+       · 星星(got)只在**第一次答对**时给 —— 之后重答是复习,不再加星
+     correct 为真且还没拿到过星时给 1 颗,并弹贴纸/勋章。 */
+  function readQuizResult(id, correct, count) {
+    touchDay();
+    if (!state.rq) state.rq = {};
+    var r = state.rq[id] || (state.rq[id] = { ok: 0, bad: 0, last: 0, got: false });
+    r.last = Date.now();
+    if (count !== false) {
+      if (correct) r.ok = Math.min(9999, r.ok + 1); else r.bad = Math.min(9999, r.bad + 1);
+      if (!state.dims) state.dims = {};
+      var d = state.dims.meaning || (state.dims.meaning = { ok: 0, bad: 0 });
+      if (correct) d.ok = Math.min(999999, d.ok + 1); else d.bad = Math.min(999999, d.bad + 1);
+      if (correct) state.quizOk += 1; else state.quizBad += 1;
+      todayRec().quiz += 1;
+    }
+    var firstGet = !!(correct && !r.got);
+    if (firstGet) r.got = true;
+    var res = firstGet ? addStars(1) : { stickers: [], badges: [] };
+    save();
+    return { first: firstGet, res: res, rec: { ok: r.ok, bad: r.bad, last: r.last, got: !!r.got } };
+  }
+  function readQuiz(id) { return (state.rq && state.rq[id]) || null; }
+  function readQuizTotals() {
+    var ok = 0, bad = 0, got = 0;
+    for (var k in state.rq || {}) {
+      ok += state.rq[k].ok || 0; bad += state.rq[k].bad || 0;
+      if (state.rq[k].got) got += 1;
+    }
+    return { ok: ok, bad: bad, n: ok + bad, done: got };
+  }
 
   function reset() {
     state = defaultState();
@@ -694,6 +747,7 @@
     hasImportBackup: hasImportBackup, undoImport: undoImport,
     /* 阅读进度 */
     markRead: markRead, readCount: readCount, hasRead: hasRead,
+    readQuizResult: readQuizResult, readQuiz: readQuiz, readQuizTotals: readQuizTotals,
     /* 能力地图 */
     DIMS: DIMS, DIM_NAME: DIM_NAME, abilityMap: abilityMap, abilityAdvice: abilityAdvice
   };

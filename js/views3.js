@@ -474,6 +474,8 @@
           '<button class="btn btn-mint" id="rd-done">读完啦 ✅</button>' +
         "</div>" +
         '<div class="find-hud" id="rd-find-hud" hidden></div>' +
+        /* ---- 读后理解题:读完了问一句,答对才算真读懂 ---- */
+        '<div class="rd-quiz" id="rd-quiz"></div>' +
         '<div class="card-nav" style="position:static;background:none"><button class="btn btn-ghost" id="rd-back">‹ 换一篇</button></div>' +
         /* ---- 自读模式:一句一屏 + 逐字高亮,孩子自己就能读完 ---- */
         '<div class="selfread" id="rd-self" hidden>' +
@@ -552,8 +554,86 @@
         var res = window.Store.markRead(story.id);
         window.UI.toast(res.first ? "读完一篇,读书 +3 ⭐" : "又读了一遍,真棒!");
         if (window.SFX) SFX.correct();
-        App.after(700, function () { App.navigate("#/read"); });
+        /* 读完不急着走:先问一句"读懂了没有"。没有题目的篇目照旧回列表。 */
+        if (!revealQuiz()) App.after(700, function () { App.navigate("#/read"); });
       });
+
+      /* ================= 读后理解题 =================
+         为什么放在"读完"之后而不是页面上来就显示:
+         理解题是检验,不是预习 —— 先读后问,答对才说明真读进去了。
+         答错不扣星、给出证据句、允许重答;答对才记入"短文理解"维度。 */
+      var quizBox = view.querySelector("#rd-quiz");
+      var quizList = (window.READ_QUIZ || {})[story.id] || [];
+      var quizSi = 0;
+      var quizState = {};   /* 本次会话里每题只记一次结果,防止连点刷分 */
+
+      function revealQuiz() {
+        if (!quizList.length) { quizBox.hidden = true; return false; }
+        quizBox.hidden = false;
+        renderQuiz();
+        return true;
+      }
+      quizBox.hidden = true;
+
+      function renderQuiz() {
+        var q = quizList[quizSi];
+        var st = quizState[quizSi] || {};
+        var tip = q.t === "why" ? "为什么" : q.t === "where" ? "在哪里" : "谁 / 什么";
+        quizBox.innerHTML =
+          '<div class="rq-head"><span class="rq-tag">' + tip + '</span>读懂了没有?' +
+            '<button class="rq-say" id="rq-say" aria-label="把题目读给我听">🔊</button></div>' +
+          '<div class="rq-q">' + esc(q.q) + "</div>" +
+          '<div class="rq-opts">' + q.opts.map(function (o, i) {
+            var cls = "rq-opt";
+            if (st.ok && o === q.a) cls += " good";
+            if (st.picked === i && !st.ok) cls += " bad";
+            return '<button class="' + cls + '" data-i="' + i + '">' + esc(o) + "</button>";
+          }).join("") + "</div>" +
+          '<div class="rq-hint" id="rq-hint">' + (st.msg || "") + "</div>";
+
+        quizBox.querySelector("#rq-say").addEventListener("click", function () {
+          if (window.SFX) SFX.click();
+          window.Speech.speak(q.q, 0.68);
+        });
+        quizBox.querySelectorAll(".rq-opt").forEach(function (b) {
+          b.addEventListener("click", function () {
+            var i = parseInt(b.getAttribute("data-i"), 10);
+            if (st.ok) return;
+            answerQuiz(i);
+          });
+        });
+      }
+
+      function answerQuiz(i) {
+        var q = quizList[quizSi];
+        var ok = q.opts[i] === q.a;
+        var first4This = !quizState[quizSi];
+        if (first4This) quizState[quizSi] = {};
+        /* 正确率只记第一次作答;星星在"第一次答对"时给 —— 两者分开,见 store.js */
+        var res = window.Store.readQuizResult(story.id, ok, first4This);
+        quizState[quizSi].picked = i;
+        quizState[quizSi].ok = ok;
+        if (ok) {
+          if (window.SFX) SFX.correct();
+          quizState[quizSi].msg = "🎉 答对啦!读得真仔细。" + (res.first ? " 理解 +1 ⭐" : "");
+          if (window.UI.burst) window.UI.burst(window.innerWidth / 2, window.innerHeight * 0.4, 20);
+        } else {
+          if (window.SFX) SFX.wrong();
+          /* 答错不讲道理,直接把他带回那句话 —— 4 岁的孩子只需要再看一遍 */
+          quizState[quizSi].msg = "再想想~ 回去读这一句:「" + esc(story.s[q.e]) + "」";
+        }
+        renderQuiz();
+        if (ok) {
+          App.after(1100, function () {
+            if (quizSi < quizList.length - 1) { quizSi++; renderQuiz(); return; }
+            if (window.Store.hasRead(story.id)) App.navigate("#/read");
+          });
+        }
+      }
+
+      /* 已经读过的篇目再进来:直接给题(复习场景) */
+      if (window.Store.hasRead(story.id)) revealQuiz();
+
       view.querySelector("#rd-back").addEventListener("click", function () { App.navigate("#/read"); });
 
       /* ================= 自读模式 =================
@@ -632,6 +712,11 @@
         srAutoBtn.classList.remove("playing");
         if (window.SFX) SFX.correct();
         if (window.UI.burst) window.UI.burst(window.innerWidth / 2, window.innerHeight * 0.35, 26);
+        /* 读完自动退出指读,顺势问一句"读懂了没有" */
+        App.after(1500, function () {
+          srExit();
+          if (revealQuiz() && quizBox.scrollIntoView) quizBox.scrollIntoView({ block: "center" });
+        });
       }
 
       function srEnter() {

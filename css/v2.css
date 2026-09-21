@@ -5,7 +5,7 @@
 /* ---------- 显示字体:站酷快乐体(OFL 开源,本地子集 70KB,离线可用) ---------- */
 @font-face {
   font-family: "KuaiLe";
-  src: url("../fonts/kuaile-subset.woff2?v=2.2.0") format("woff2");
+  src: url("../fonts/kuaile-subset.woff2?v=2.3.0") format("woff2");
   font-display: swap;
   font-weight: 400;
 }
@@ -667,3 +667,42 @@ body::after { /* 全局纸纹,极淡 */
 @media (prefers-reduced-motion: reduce) {
   .sr-char.on { transform: none; }
 }
+
+/* ================= 读后理解题 ================= */
+.rd-quiz {
+  margin: 14px 0 4px; padding: 14px;
+  background: var(--paper); border-radius: var(--r-md);
+  box-shadow: 0 3px 0 var(--shadow-ink);
+  animation: fadeIn .25s;
+}
+.rd-quiz[hidden] { display: none; }
+.rq-head {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--display); font-size: 16px; font-weight: 900;
+  color: var(--ink); margin-bottom: 9px;
+}
+.rq-tag {
+  font-size: 12px; font-weight: 800; color: #7a5cd6;
+  background: rgba(167, 139, 250, .18); border-radius: 999px; padding: 2px 9px;
+}
+.rq-say {
+  margin-left: auto; width: 34px; height: 34px; border: none; border-radius: 50%;
+  background: rgba(63, 58, 82, .07); cursor: pointer; font-size: 15px;
+}
+.rq-q {
+  font-family: var(--display); font-size: 21px; font-weight: 900;
+  color: var(--ink); line-height: 1.5; margin-bottom: 11px;
+}
+.rq-opts { display: flex; flex-direction: column; gap: 8px; }
+.rq-opt {
+  width: 100%; text-align: left; cursor: pointer;
+  font-family: var(--display); font-size: 18px; font-weight: 800; color: var(--ink);
+  background: var(--paper-2); border: 2px solid transparent; border-radius: var(--r-sm);
+  padding: 11px 14px; box-shadow: 0 3px 0 var(--shadow-ink);
+  transition: transform .12s, background .12s, border-color .12s;
+}
+.rq-opt:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--shadow-ink); }
+.rq-opt.good { background: rgba(67, 201, 155, .22); border-color: var(--mint); }
+.rq-opt.bad { background: rgba(255, 139, 92, .18); border-color: var(--warm-wrong); }
+.rq-hint { min-height: 20px; margin-top: 10px; font-size: 14px; color: var(--ink-light); line-height: 1.6; }
+.rq-hint:empty { margin-top: 0; min-height: 0; }
