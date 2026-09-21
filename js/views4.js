@@ -70,6 +70,83 @@
           '<button class="btn btn-ghost" id="pr-back">‹ 返回</button>' +
           '<span class="print-hint no-print">建议用 A4 纸,横向打印;沿虚线剪开即可。</span>';
         view.innerHTML = shell(title, "每天抽一张,和孩子一起做", body, bar);
+      } else if (type === "pack") {
+        /* ================= 本周物料包 =================
+           家长的痛点不是"没有物料",而是"要一张张挑、一张张打"。
+           这里按**这周学过的字**自动出一张综合纸:识字卡 + 描红格 + 任务卡 + 奖状区,
+           一次打印,贴冰箱。字数为 0 时给明确指引,不出一张空白纸。 */
+        title = "本周物料包";
+        var ws = window.Store.weekSummary();
+        var wk = window.Store.weekLearnedChars();
+        var wrec = wk.map(function (c) { return window.CharDB.BY_CHAR[c]; }).filter(Boolean);
+        if (!wrec.length) {
+          view.innerHTML = shell(title, "这周还没有新学会的字", '<div class="pack-empty">' +
+            "<p>先在「学汉字」里标记几个「我会了」,这里就会自动生成这周的物料。</p>" +
+            '<p class="pack-empty-sub">也可以直接打印' +
+            '（家长中心 →「识字卡 / 描红练习纸」）按岛屿或我学过的字来出。</p></div>',
+            '<button class="btn btn-ghost" id="pr-back">‹ 返回</button>');
+          view.querySelector("#pr-back").addEventListener("click", function () { App.navigate("#/parent"); });
+          if (window.Beacon) Beacon.track("view", { v: "print" });
+          return;
+        }
+        var questsP = window.QUESTS || [];
+        var qp = questsP.length ? questsP[Math.floor(Date.now() / 86400000) % questsP.length] : null;
+        var nameP = ws.name;
+        var bodyP =
+          '<div class="pack-sec"><div class="pack-h">① 识字卡（这周学的 ' + wrec.length + ' 个字，剪开用）</div>' +
+            '<div class="card-grid">' + wrec.map(function (c) {
+              return '<div class="pcard">' +
+                '<div class="pc-emoji">' + (c.e || "　") + "</div>" +
+                '<div class="pc-char kai">' + esc(c.c) + "</div>" +
+                '<div class="pc-py">' + esc(c.p) + "</div>" +
+                '<div class="pc-word">' + esc((c.w || []).slice(0, 2).join(" · ")) + "</div></div>";
+            }).join("") + "</div></div>" +
+          '<div class="pack-sec"><div class="pack-h">② 描红格（照着写一遍，再自己写一遍）</div>' +
+            '<div class="write-grid">' + wrec.map(function (c) {
+              return '<div class="write-cell">' +
+                '<div class="wc-char">' + esc(c.c) + "</div>" +
+                '<div class="wc-py">' + esc(c.p) + "</div>" +
+                '<div class="wc-grid"><i></i><i></i><i></i><i></i></div></div>';
+            }).join("") + "</div></div>" +
+          (qp ? '<div class="pack-sec"><div class="pack-h">③ 今天一起做一件事</div>' +
+            '<div class="quest-card">' +
+              '<div class="qc-emoji">' + qp.emoji + "</div>" +
+              '<div class="qc-title">' + esc(qp.title) + "</div>" +
+              '<div class="qc-desc">' + esc(qp.desc) + "</div>" +
+              '<div class="qc-foot">约 ' + qp.min + " 分钟 · " + esc(qp.tag) + "</div></div></div>" : "") +
+          '<div class="pack-sec"><div class="pack-h">④ 这周的记录（贴冰箱，下周对比）</div>' +
+            '<div class="cert-stats">' +
+              '<span><b>' + ws.learned + "</b>新字</span>" +
+              '<span><b>' + ws.reads + "</b>篇短文</span>" +
+              '<span><b>' + ws.stars + "</b>颗星</span>" +
+              '<span><b>' + ws.days + "</b>天在学</span>" +
+            "</div>" +
+            '<div class="cert-line">家长签名：____________　　日期：____________</div></div>';
+        var barP = '<button class="btn btn-sky" id="pr-do">🖨️ 打印整包</button>' +
+          '<button class="btn btn-ghost" id="pr-back">‹ 返回</button>' +
+          '<span class="print-hint no-print">建议 A4 纵向；①② 剪开，③④ 让孩子自己拿着。</span>';
+        view.innerHTML = shell(title, nameP + " · " + new Date().getMonth() + 1 + " 月这周", bodyP, barP);
+      } else if (type === "cert") {
+        /* ================= 奖状 =================
+           屏幕上的星星会消失,纸上的奖状会贴在冰箱上很久。
+           这是把"线上进度"变成"线下鼓励"的最短路径。 */
+        title = "奖状";
+        var ws2 = window.Store.weekSummary();
+        var titleC = ws2.learned >= 20 ? "识字小达人" : ws2.learned >= 10 ? "识字小能手" : "识字小新星";
+        var bodyC2 = '<div class="cert-box">' +
+          '<div class="cert-top">思问岛 · 每周奖状</div>' +
+          '<div class="cert-name">' + esc(ws2.name) + "</div>" +
+          '<div class="cert-title">' + titleC + "</div>" +
+          '<div class="cert-say">这周你学会了 <b>' + ws2.learned + "</b> 个字，" +
+            (ws2.reads ? "读完 <b>" + ws2.reads + "</b> 篇短文，" : "") +
+            "一共拿到 <b>" + ws2.stars + "</b> 颗星，有 <b>" + ws2.days + "</b> 天在认真学。</div>" +
+          '<div class="cert-emoji">' + ws2.emoji + "</div>" +
+          '<div class="cert-foot">家长签字：____________　　思问岛</div></div>';
+        var barC2 = '<button class="btn btn-sky" id="pr-do">🖨️ 打印奖状</button>' +
+          '<button class="btn btn-ghost" id="pr-back">‹ 返回</button>' +
+          '<span class="print-hint no-print">建议 A4 纵向；让孩子自己拿着拍照。' +
+          (ws2.learned === 0 ? "（这周还没学新字，先学几个再打更开心）" : "") + "</span>";
+        view.innerHTML = shell(title, "", bodyC2, barC2);
       } else if (type === "write") {
         title = "描红练习纸";
         var list = poolOf(scope, p.g);

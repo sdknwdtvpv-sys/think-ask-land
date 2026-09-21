@@ -790,12 +790,20 @@
             '<p class="parent-note">3~6 岁识字的主战场在家里。这些任务都不用备课,照着念就能做。</p></div>';
         }
 
-        /* ---- 打印物料 ---- */
+        /* ---- 打印物料:第一行是"一次搞定"的整包/奖状,第二行才是单项 ---- */
+        var wsq = window.Store.weekSummary ? window.Store.weekSummary() : { learned: 0 };
         html += '<div class="panel"><h4>' + Icons.svg("book") + "打印物料</h4>" +
-          '<p class="parent-note">屏幕上练,纸上也要练。打印出来贴冰箱、夹绘本里都行。</p>' +
+          '<p class="parent-note">屏幕上练,纸上也要练。<b>懒人做法</b>：直接打「本周物料包」——' +
+            "它会按这周学过的字自动出识字卡 + 描红格 + 今日任务 + 记录表，一次打印贴冰箱。</p>" +
+          '<div class="backup-btns">' +
+            '<button class="btn btn-sun" id="pr-pack">📦 本周物料包' +
+              (wsq.learned ? "（" + wsq.learned + " 字）" : "") + "</button>" +
+            '<button class="btn btn-grape" id="pr-cert">🏆 每周奖状</button>' +
+          "</div>" +
           '<div class="backup-btns">' +
             '<button class="btn btn-sky" id="pr-cards">🃏 识字卡</button>' +
             '<button class="btn btn-ghost" id="pr-write">✍️ 描红练习纸</button>' +
+            '<button class="btn btn-ghost" id="pr-quests">🎲 任务卡</button>' +
           "</div></div>";
 
         /* ---- 声音自检:手机上"没声音"时,这张表能直接指出是哪一环断了 ---- */
@@ -1131,6 +1139,12 @@
           });
         }
 
+        var prPack = v.querySelector("#pr-pack");
+        if (prPack) prPack.addEventListener("click", function () { App.navigate("#/print?type=pack"); });
+        var prCert = v.querySelector("#pr-cert");
+        if (prCert) prCert.addEventListener("click", function () { App.navigate("#/print?type=cert"); });
+        var prQuestBtn = v.querySelector("#pr-quests");
+        if (prQuestBtn) prQuestBtn.addEventListener("click", function () { App.navigate("#/print?type=quests"); });
         var prCards = v.querySelector("#pr-cards");
         if (prCards) prCards.addEventListener("click", function () { App.navigate("#/print?type=cards&scope=learned"); });
         var prWrite = v.querySelector("#pr-write");

@@ -5,7 +5,7 @@
 /* ---------- 显示字体:站酷快乐体(OFL 开源,本地子集 70KB,离线可用) ---------- */
 @font-face {
   font-family: "KuaiLe";
-  src: url("../fonts/kuaile-subset.woff2?v=2.7.0") format("woff2");
+  src: url("../fonts/kuaile-subset.woff2?v=2.8.0") format("woff2");
   font-display: swap;
   font-weight: 400;
 }
@@ -751,3 +751,36 @@ body::after { /* 全局纸纹,极淡 */
 .sb-step.on i { color: var(--action-deep); }
 .sb-step.miss { background: #fff0e9; border-color: var(--warm-wrong); }
 .writer-tip .tip-arrow { font-size: 20px; color: var(--action-deep); }
+
+/* ================= 本周物料包 / 奖状 ================= */
+.pack-sec { margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px dashed var(--line-strong); }
+.pack-sec:last-child { border-bottom: none; }
+.pack-h {
+  font-family: var(--display); font-size: 15px; font-weight: 900; color: var(--ink);
+  margin-bottom: 8px;
+}
+.pack-empty { padding: 18px 6px; text-align: center; color: var(--ink-light); font-size: 15px; line-height: 1.8; }
+.pack-empty-sub { font-size: 13px; }
+.cert-stats { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; color: var(--ink-light); }
+.cert-stats b { font-family: var(--display); font-size: 20px; color: var(--ink); margin-right: 3px; }
+.cert-line { margin-top: 12px; font-size: 14px; color: var(--ink-light); }
+
+.cert-box {
+  border: 3px double var(--action-deep); border-radius: 18px;
+  padding: 26px 22px; text-align: center; background: var(--paper-2);
+}
+.cert-top { font-size: 13px; letter-spacing: 3px; color: var(--ink-light); margin-bottom: 14px; }
+.cert-name { font-family: var(--display); font-size: 30px; font-weight: 900; color: var(--ink); }
+.cert-title {
+  font-family: var(--display); font-size: 26px; font-weight: 900; color: var(--action-deep);
+  margin: 8px 0 16px; letter-spacing: 4px;
+}
+.cert-say { font-size: 16px; line-height: 2; color: var(--ink); }
+.cert-say b { font-family: var(--display); font-size: 22px; color: var(--action-deep); }
+.cert-emoji { font-size: 44px; margin: 14px 0 6px; }
+.cert-foot { font-size: 13px; color: var(--ink-light); margin-top: 16px; letter-spacing: 1px; }
+
+@media print {
+  .pack-sec { break-inside: avoid; }
+  .cert-box { border-color: #b8860b; }
+}

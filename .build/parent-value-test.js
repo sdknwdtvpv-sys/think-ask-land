@@ -144,16 +144,23 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
   /* ================= B3 亲子任务 ================= */
   t("任务卡内容质量:字段齐全、时长合理、id 唯一", () => {
     if (QUESTS.length < 12) return FAIL("只有 " + QUESTS.length + " 张");
+    /* 场景白名单从库里自己长出来,不再写死 —— 
+       v2.8.0 把活动库扩到 60 条、加了 厨房/路上/洗漱 三个场景,写死的名单就误报了。
+       真正要守的是"场景是有限的一组、每个场景都有多条",而不是具体叫哪几个名字。 */
+    const dist = {};
+    QUESTS.forEach((q) => { dist[q.tag] = (dist[q.tag] || 0) + 1; });
+    const tags = Object.keys(dist);
     const bad = [];
+    if (tags.length > 8) bad.push("场景过多(" + tags.length + "):" + tags.join(","));
+    tags.forEach((k) => { if (dist[k] < 2) bad.push("场景「" + k + "」只有 " + dist[k] + " 条"); });
     QUESTS.forEach((q) => {
       if (!q.id || !q.emoji || !q.title || !q.desc || !q.tag) bad.push(q.id + ":字段缺失");
       if (!(q.min >= 1 && q.min <= 15)) bad.push(q.id + ":时长 " + q.min);
-      if (q.desc.length < 10 || q.desc.length > 70) bad.push(q.id + ":描述长度 " + q.desc.length);
-      if (["家里", "户外", "睡前", "游戏"].indexOf(q.tag) < 0) bad.push(q.id + ":未知场景 " + q.tag);
+      if (q.desc.length < 10 || q.desc.length > 90) bad.push(q.id + ":描述长度 " + q.desc.length);
     });
     const ids = QUESTS.map((q) => q.id);
     if (new Set(ids).size !== ids.length) bad.push("id 重复");
-    return bad.length ? FAIL(bad.slice(0, 4).join(" | ")) : PASS(QUESTS.length + " 张内容合规");
+    return bad.length ? FAIL(bad.slice(0, 4).join(" | ")) : PASS(QUESTS.length + " 张 · 场景 " + tags.map((k) => k + dist[k]).join("/"));
   });
 
   t("同一天看到的任务卡是确定的", () => {

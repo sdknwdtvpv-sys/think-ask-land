@@ -590,6 +590,47 @@
     return out;
   }
 
+  /* ---------- 本周物料包/奖状要用的口径 ----------
+     为什么按"本周"而不是"累计":
+       家长需要的是"这周孩子做了什么",累计数字看不出最近有没有在学。
+       一张冰箱上的纸写"累计 200 字"没有行动意义,写"这周学了 12 个字"才有。 */
+  var WEEK_MS = 7 * 24 * 3600 * 1000;
+
+  /* 本周新学会的字(按学会时间从早到晚),给识字卡/描红纸用 */
+  function weekLearnedChars() {
+    var since = Date.now() - WEEK_MS;
+    var out = [];
+    for (var c in state.chars) {
+      var r = state.chars[c];
+      if (r.learned && r.learned >= since) out.push({ c: c, at: r.learned });
+    }
+    out.sort(function (a, b) { return a.at - b.at; });
+    return out.map(function (x) { return x.c; });
+  }
+
+  /* 本周概况:奖状与物料包抬头用 */
+  function weekSummary() {
+    var since = Date.now() - WEEK_MS;
+    var learnedN = weekLearnedChars().length;
+    var stars = 0, quiz = 0, days = 0;
+    for (var d in state.daily) {
+      if (new Date(d.replace(/-/g, "/")).getTime() >= since) {
+        stars += state.daily[d].stars || 0;
+        quiz += state.daily[d].quiz || 0;
+        if ((state.daily[d].stars || 0) + (state.daily[d].learned || 0) + (state.daily[d].quiz || 0) > 0) days += 1;
+      }
+    }
+    var reads = 0;
+    var readsMap = state.reads || {};
+    for (var id in readsMap) if (readsMap[id] >= since) reads += 1;
+    return {
+      learned: learnedN, stars: stars, quiz: quiz, reads: reads, days: days,
+      strokes: state.strokeQuizzes || 0,
+      name: (activeProfile() || {}).name || "宝贝",
+      emoji: (activeProfile() || {}).emoji || "🐻"
+    };
+  }
+
   /* 阅读:标记一篇短文读完(只记第一次),并给星星 */
   function markRead(id) {
     touchDay();
@@ -800,6 +841,7 @@
     /* 阅读进度 */
     markRead: markRead, readCount: readCount, hasRead: hasRead,
     readQuizResult: readQuizResult, readQuiz: readQuiz, readQuizTotals: readQuizTotals,
+    weekLearnedChars: weekLearnedChars, weekSummary: weekSummary,
     /* 能力地图 */
     DIMS: DIMS, DIM_NAME: DIM_NAME, abilityMap: abilityMap, abilityAdvice: abilityAdvice
   };
