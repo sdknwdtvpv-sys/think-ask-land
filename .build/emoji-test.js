@@ -113,12 +113,9 @@ t("看图题(看字选图/看图选字)结构不变式:4 个选项、图不重�
   targets.forEach((c) => {
     const rec = DB.BY_CHAR[c.c];
     ["charEmoji", "emojiChar"].forEach((want) => {
-      let q = null;
-      for (let i = 0; i < 60 && !q; i++) {
-        const cand = global.window.Games._makeQuestion(rec, null);
-        if (cand.type === want) q = cand;
-      }
-      if (!q) { bad.push(c.c + " 出不了 " + want); return; }
+      /* 第三个参数是 preferType,能确定性地要到指定题型 —— 不用靠随机撞 */
+      const q = global.window.Games._makeQuestion(rec, null, want);
+      if (!q || q.type !== want) { bad.push(c.c + " 出不了 " + want + (q ? "(得到 " + q.type + ")" : "")); return; }
       if (q.options.length !== 4) { bad.push(c.c + " " + want + " 选项数 " + q.options.length); return; }
       const vals = q.options.map((o) => o.value);
       if (vals.some((v) => !v)) { bad.push(c.c + " " + want + " 有空选项"); return; }

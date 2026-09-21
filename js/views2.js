@@ -712,6 +712,27 @@
         }
         html += "</div>";
 
+        /* ---- 阅读进度:读一读是唯一"孩子自己就能做"的环节,值得单独给家长看 ---- */
+        var rd = (window.ReadDrill && window.ReadDrill.progress) ? window.ReadDrill.progress() : null;
+        if (rd && rd.total) {
+          html += '<div class="panel"><h4>' + Icons.svg("book") + "阅读进度</h4>" +
+            '<div class="rp-line"><span>已读完 <b>' + rd.read + "</b>/" + rd.total + " 篇</span>" +
+              (rd.week ? '<span class="rp-week">本周 +' + rd.week + " 篇</span>" : "") +
+              (rd.cur ? '<span class="rp-cur">当前 <b>' + rd.cur + "</b> " + esc(rd.curName) + "</span>" : "") +
+            "</div>" +
+            '<div class="rp-bar"><i style="width:' + Math.round(rd.read / Math.max(1, rd.total) * 100) + '%"></i></div>' +
+            '<div class="rp-levels">' + rd.levels.map(function (l) {
+              var full = l.total > 0 && l.read >= l.total;
+              return '<span class="rp-lv' + (full ? " full" : "") + '"><i>' + l.id + "</i>" + l.read + "/" + l.total + "</span>";
+            }).join("") + "</div>" +
+            '<p class="parent-note">💡 ' + (rd.read === 0
+              ? "还没开始读。短文全部用<b>孩子学过的字</b>写成,点「读一读 → 我自己读」,孩子自己就能读完一篇,不需要您在旁边指字。"
+              : (rd.week === 0
+                ? "这周还没读新篇目。每天读一篇就够,重在<b>每天</b>而不是每天读很多。"
+                : "这周读了 <b>" + rd.week + "</b> 篇,保持这个节奏就好。读的时候让孩子<b>指着字读出声</b>,比默读有效得多。")) +
+            "</p></div>";
+        }
+
         /* ---- 能力地图:把"总正确率"拆成不同能力,家长才知道该练什么 ---- */
         var amap = window.Store.abilityMap();
         var amax = 100;

@@ -5,7 +5,7 @@
 /* ---------- 显示字体:站酷快乐体(OFL 开源,本地子集 70KB,离线可用) ---------- */
 @font-face {
   font-family: "KuaiLe";
-  src: url("../fonts/kuaile-subset.woff2?v=2.1.0") format("woff2");
+  src: url("../fonts/kuaile-subset.woff2?v=2.2.0") format("woff2");
   font-display: swap;
   font-weight: 400;
 }
@@ -587,3 +587,83 @@ body::after { /* 全局纸纹,极淡 */
 .report-btns { display: flex; gap: 10px; margin-top: 12px; }
 .report-btns .btn { flex: 1; font-size: 16px; }
 .report-btns .btn .ico { width: 17px; height: 17px; }
+
+/* ================= 阅读进度条(#/read 顶部) ================= */
+.read-progress {
+  margin: 0 2px 12px; padding: 12px 14px;
+  background: var(--paper); border-radius: var(--r-md);
+  box-shadow: 0 3px 0 var(--shadow-ink);
+}
+.rp-line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 15px; color: var(--ink); }
+.rp-line b { font-family: var(--display); font-size: 19px; }
+.rp-week {
+  font-size: 13px; font-weight: 800; color: #1f8f6b;
+  background: rgba(67, 201, 155, .16); border-radius: 999px; padding: 2px 9px;
+}
+.rp-cur { margin-left: auto; font-size: 13px; color: var(--ink-light); }
+.rp-cur b { font-size: 15px; color: var(--ink); }
+.rp-bar {
+  height: 10px; margin: 9px 0 8px; border-radius: 999px; overflow: hidden;
+  background: rgba(63, 58, 82, .09);
+}
+.rp-bar > i {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--mint), var(--sky-top, #8ec9f0));
+  transition: width .5s cubic-bezier(.2, 1, .4, 1);
+}
+.rp-levels { display: flex; gap: 6px; flex-wrap: wrap; }
+.rp-lv {
+  font-size: 12px; font-weight: 700; color: var(--ink-light);
+  background: rgba(63, 58, 82, .06); border-radius: 999px; padding: 3px 9px;
+}
+.rp-lv i { font-style: normal; font-weight: 900; color: var(--ink); margin-right: 4px; }
+.rp-lv.full { background: rgba(67, 201, 155, .18); color: #1f8f6b; }
+.rp-lv.full i { color: #1f8f6b; }
+
+/* ================= 自读模式(一句一屏 + 逐字高亮) ================= */
+.selfread {
+  position: fixed; inset: 0; z-index: 240;
+  display: flex; flex-direction: column;
+  padding: max(14px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, var(--sky-mid) 0%, var(--sky-low) 55%, var(--sky-bot) 100%);
+  animation: fadeIn .25s;
+}
+.sr-top { display: flex; align-items: center; gap: 12px; }
+.sr-dots { display: flex; gap: 7px; flex: 1; }
+.sr-dots > i {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: rgba(255, 255, 255, .75); box-shadow: 0 1px 0 rgba(63, 58, 82, .12);
+  transition: transform .2s, background .2s;
+}
+.sr-dots > i.done { background: var(--mint); }
+.sr-dots > i.on { background: var(--action); transform: scale(1.35); }
+.sr-exit {
+  width: 40px; height: 40px; border: none; border-radius: 50%; cursor: pointer;
+  background: rgba(255, 255, 255, .85); color: var(--ink);
+  font-size: 17px; font-weight: 900; box-shadow: 0 3px 0 var(--shadow-ink);
+}
+.sr-stage {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 4px 2px; align-content: center;
+  padding: 18px 8px; text-align: center;
+}
+.sr-char {
+  border: none; background: none; cursor: pointer; padding: 4px 6px;
+  font-family: var(--display); font-size: clamp(40px, 13vw, 68px); font-weight: 900;
+  color: var(--ink); line-height: 1.28; border-radius: 14px;
+  transition: transform .12s, background .12s, color .12s;
+}
+.sr-char.on {
+  background: var(--sun); color: var(--ink);
+  transform: translateY(-6px) scale(1.08);
+  box-shadow: 0 5px 0 rgba(224, 119, 21, .35);
+}
+.sr-punc { font-family: var(--display); font-size: clamp(30px, 9vw, 48px); color: var(--ink-light); align-self: flex-end; padding-bottom: 12px; }
+.sr-hint { text-align: center; font-size: 15px; color: var(--ink-light); min-height: 22px; margin-bottom: 12px; }
+.sr-actions { display: flex; gap: 10px; }
+.sr-actions .btn { flex: 1; font-size: 16px; padding: 12px 6px; }
+.sr-actions .btn.playing { background: var(--sun); color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sr-char.on { transform: none; }
+}

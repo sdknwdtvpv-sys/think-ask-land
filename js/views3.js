@@ -331,6 +331,44 @@
     return LEVELS[0];
   }
 
+  /* 阅读进度汇总(列表页 / 首页 / 家长中心共用)
+     只读 state.reads 的时间戳,不改存档结构 → 老存档天然兼容 */
+  function progress() {
+    var list = passages();
+    var byLevel = {};
+    LEVELS.forEach(function (lv) {
+      byLevel[lv.id] = { id: lv.id, name: lv.name, need: lv.need, read: 0, total: 0 };
+    });
+    var reads = (window.Store.state && window.Store.state.reads) || {};
+    var now = Date.now(), WEEK = 7 * 24 * 3600 * 1000;
+    var week = 0, readN = 0, topIdx = -1;
+    list.forEach(function (p) {
+      var lv = p.lvl || "L1";
+      if (!byLevel[lv]) byLevel[lv] = { id: lv, name: lv, need: 0, read: 0, total: 0 };
+      byLevel[lv].total++;
+      var ts = reads[p.id];
+      if (!ts) return;
+      byLevel[lv].read++; readN++;
+      if (now - ts < WEEK) week++;
+      for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i].id === lv && i > topIdx) topIdx = i;
+    });
+    /* ready:按"已学字数"够得着的级别(与列表页的温柔提示同一套门槛) */
+    var learnedN = window.Store.learnedList().length, readyIdx = 0;
+    LEVELS.forEach(function (lv, i) { if (learnedN >= lv.need) readyIdx = i; });
+    return {
+      total: list.length,
+      read: readN,
+      week: week,
+      learned: learnedN,
+      /* cur:真正读过的最高级别;ready:门槛上够得着的级别 */
+      cur: topIdx >= 0 ? LEVELS[topIdx].id : "",
+      curName: topIdx >= 0 ? LEVELS[topIdx].name : "",
+      ready: LEVELS[readyIdx].id,
+      readyName: LEVELS[readyIdx].name,
+      levels: LEVELS.map(function (lv) { return byLevel[lv.id]; }).filter(Boolean)
+    };
+  }
+
   App.register("read", {
     render: function (p, view) {
       App.setTopbar("读一读", true);
@@ -351,6 +389,20 @@
       var html = '<div class="screen">' +
         '<div class="practice-intro">📖 短文按<b>级别</b>分好了。点字能听读音,读完了还能玩找字游戏。' +
         '已读完 <b>' + window.Store.readCount() + "</b> / " + list.length + " 篇 · 已学 <b>" + learnedN + "</b> 字。</div>";
+
+      /* 阅读进度条:一篇一篇地看得见(此前只有分组标题里的 x/y) */
+      var pg = progress();
+      html += '<div class="read-progress">' +
+        '<div class="rp-line"><span>📚 已读 <b>' + pg.read + "</b>/" + pg.total + " 篇</span>" +
+          (pg.week ? '<span class="rp-week">本周 +' + pg.week + "</span>" : "") +
+          (pg.cur ? '<span class="rp-cur">当前 <b>' + pg.cur + "</b> " + esc(pg.curName) + "</span>" : "") +
+        "</div>" +
+        '<div class="rp-bar"><i style="width:' + Math.round(pg.read / Math.max(1, pg.total) * 100) + '%"></i></div>' +
+        '<div class="rp-levels">' + pg.levels.map(function (l) {
+          var full = l.total > 0 && l.read >= l.total;
+          return '<span class="rp-lv' + (full ? " full" : "") + '"><i>' + l.id + "</i>" + l.read + "/" + l.total + "</span>";
+        }).join("") + "</div>" +
+        "</div>";
 
       LEVELS.forEach(function (lv) {
         var rows = list.filter(function (r) { return r.lvl === lv.id; });
@@ -417,11 +469,26 @@
         '<div class="rd-tip" id="rd-tip">点一个字,听它怎么读</div>' +
         '<div class="story-actions">' +
           '<button class="btn btn-sky" id="rd-play">🔊 读一遍</button>' +
+          '<button class="btn btn-sun" id="rd-self-btn">🙋 我自己读</button>' +
           (target ? '<button class="btn btn-grape" id="rd-find">🎯 找「' + esc(target) + "」</button>" : "") +
           '<button class="btn btn-mint" id="rd-done">读完啦 ✅</button>' +
         "</div>" +
         '<div class="find-hud" id="rd-find-hud" hidden></div>' +
         '<div class="card-nav" style="position:static;background:none"><button class="btn btn-ghost" id="rd-back">‹ 换一篇</button></div>' +
+        /* ---- 自读模式:一句一屏 + 逐字高亮,孩子自己就能读完 ---- */
+        '<div class="selfread" id="rd-self" hidden>' +
+          '<div class="sr-top">' +
+            '<span class="sr-dots" id="sr-dots"></span>' +
+            '<button class="sr-exit" id="sr-exit" aria-label="退出自读">✕</button>' +
+          "</div>" +
+          '<div class="sr-stage" id="sr-stage"></div>' +
+          '<div class="sr-hint" id="sr-hint">忘了怎么读?点那个字</div>' +
+          '<div class="sr-actions">' +
+            '<button class="btn btn-ghost" id="sr-prev">‹ 上一句</button>' +
+            '<button class="btn btn-sky" id="sr-auto">▶ 跟着读</button>' +
+            '<button class="btn btn-mint" id="sr-done">读完了 ✅</button>' +
+          "</div>" +
+        "</div>" +
         "</div>";
 
       var tip = view.querySelector("#rd-tip");
@@ -488,9 +555,140 @@
         App.after(700, function () { App.navigate("#/read"); });
       });
       view.querySelector("#rd-back").addEventListener("click", function () { App.navigate("#/read"); });
+
+      /* ================= 自读模式 =================
+         为什么做:读短文原来必须家长陪着点字、判断读没读完。
+         自读模式把"指读"这件事交给应用:一句一屏、手指光标逐字走、
+         忘了怎么读就点那个字听一遍。孩子自己就能读完一篇,
+         读完之后**自动记进度**,家长不必一直在旁边。 */
+      var selfBox = view.querySelector("#rd-self");
+      var srStage = view.querySelector("#sr-stage");
+      var srDots = view.querySelector("#sr-dots");
+      var srHint = view.querySelector("#sr-hint");
+      var srAutoBtn = view.querySelector("#sr-auto");
+      var srTimer = null, srSi = 0, srHi = -1, srPlaying = false, srFinished = false;
+      var srSents = story.s.slice();
+
+      function srTick(fn, ms) { srTimer = App.after(ms, fn); }
+
+      function srRenderDots() {
+        srDots.innerHTML = srSents.map(function (_s, i) {
+          return '<i class="' + (i < srSi ? "done" : i === srSi ? "on" : "") + '"></i>';
+        }).join("");
+      }
+
+      function srRender() {
+        var chars = srSents[srSi].split("");
+        srStage.innerHTML = chars.map(function (ch, i) {
+          if (!/[\u4e00-\u9fff]/.test(ch)) return '<span class="sr-punc">' + esc(ch) + "</span>";
+          return '<button class="sr-char' + (i === srHi ? " on" : "") + '" data-i="' + i + '">' + esc(ch) + "</button>";
+        }).join("");
+        srStage.querySelectorAll(".sr-char").forEach(function (b) {
+          b.addEventListener("click", function () {
+            /* 点字 = 求助:停下自动播放,把这个字读给他听,光标留在这里 */
+            srStop();
+            srHi = parseInt(b.getAttribute("data-i"), 10);
+            var c = b.textContent;
+            if (window.SFX) SFX.click();
+            window.Speech.speak(c, 0.62);
+            srHint.textContent = c + " —— 会读了吗?点「▶ 跟着读」继续";
+            srRender();
+          });
+        });
+        srRenderDots();
+      }
+
+      function srStop() {
+        if (srTimer) { clearTimeout(srTimer); srTimer = null; }
+        srPlaying = false;
+        srAutoBtn.textContent = "▶ 跟着读";
+        srAutoBtn.classList.remove("playing");
+      }
+
+      function srStep() {
+        var chars = srSents[srSi].split("");
+        srHi++;
+        /* 跳过标点:光标只停在汉字上 */
+        while (srHi < chars.length && !/[\u4e00-\u9fff]/.test(chars[srHi])) srHi++;
+        if (srHi >= chars.length) {
+          /* 这一句走完了 → 停一下再进下一句 */
+          if (srSi >= srSents.length - 1) { srStop(); srFinish(); return; }
+          srSi++; srHi = -1;
+          srRender();
+          srTick(function () { srStep(); }, 700);
+          return;
+        }
+        window.Speech.speak(chars[srHi], 0.62);
+        srRender();
+        srTick(function () { srStep(); }, 780);
+      }
+
+      function srFinish() {
+        if (srFinished) return;
+        srFinished = true;
+        var res = window.Store.markRead(story.id);
+        srHint.innerHTML = "🎉 这一篇你自己读完啦!" + (res.first ? " 读书 +3 ⭐" : " 又读了一遍,真棒!");
+        srAutoBtn.textContent = "🔁 再读一遍";
+        srAutoBtn.classList.remove("playing");
+        if (window.SFX) SFX.correct();
+        if (window.UI.burst) window.UI.burst(window.innerWidth / 2, window.innerHeight * 0.35, 26);
+      }
+
+      function srEnter() {
+        srSi = 0; srHi = -1; srFinished = false;
+        view.querySelector(".story-head").hidden = true;
+        view.querySelector(".story-body").hidden = true;
+        tip.hidden = true;
+        view.querySelector(".story-actions").hidden = true;
+        findHud.hidden = true;
+        selfBox.hidden = false;
+        srHint.textContent = "忘了怎么读?点那个字";
+        srRender();
+      }
+
+      function srExit() {
+        srStop();
+        selfBox.hidden = true;
+        view.querySelector(".story-head").hidden = false;
+        view.querySelector(".story-body").hidden = false;
+        tip.hidden = false;
+        view.querySelector(".story-actions").hidden = false;
+      }
+
+      view.querySelector("#rd-self-btn").addEventListener("click", function () {
+        if (window.SFX) SFX.click();
+        srEnter();
+      });
+      view.querySelector("#sr-exit").addEventListener("click", function () {
+        if (window.SFX) SFX.click();
+        srExit();
+      });
+      srAutoBtn.addEventListener("click", function () {
+        if (window.SFX) SFX.click();
+        if (srPlaying) { srStop(); return; }
+        if (srFinished) { srFinished = false; srSi = 0; srHi = -1; srRender(); }
+        srPlaying = true;
+        srAutoBtn.textContent = "⏸ 暂停";
+        srAutoBtn.classList.add("playing");
+        srHint.textContent = "跟着光标一个字一个字读";
+        srStep();
+      });
+      view.querySelector("#sr-prev").addEventListener("click", function () {
+        if (window.SFX) SFX.click();
+        srStop();
+        if (srSi > 0) { srSi--; srHi = -1; srRender(); }
+      });
+      view.querySelector("#sr-done").addEventListener("click", function () {
+        if (window.SFX) SFX.click();
+        srStop();
+        var res = window.Store.markRead(story.id);
+        window.UI.toast(res.first ? "读完一篇,读书 +3 ⭐" : "又读了一遍,真棒!");
+        if (window.SFX) SFX.correct();
+        App.after(700, function () { App.navigate("#/read"); });
+      });
       if (window.Beacon) Beacon.track("view", { v: "story" });
     }
   });
 
-  window.ReadDrill = { findTargets: findTargets, levelOf: levelOf, charsOf: charsOf, LEVELS: LEVELS };
+  window.ReadDrill = { findTargets: findTargets, levelOf: levelOf, charsOf: charsOf, LEVELS: LEVELS, progress: progress };
 })();

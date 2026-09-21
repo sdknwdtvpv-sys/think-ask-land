@@ -229,6 +229,8 @@
       var hour = new Date().getHours();
       var mascotState = allDone ? "happy" : ((hour >= 21 || hour < 6) ? "sleep" : "idle");
       var taskGo = tDue > 0 ? "#/review" : (tLearn < gLearn ? "#/groups" : "#/practice");
+      /* 阅读进度上首页:让"读一读"变成一个看得见进度的目标,而不是一个入口按钮 */
+      var rd = (window.ReadDrill && window.ReadDrill.progress) ? window.ReadDrill.progress() : null;
       var chip = function (icon, label, isDone) {
         return '<span class="tt-chip' + (isDone ? " done" : "") + '">' + Icons.svg(isDone ? "check" : icon) + label + "</span>";
       };
@@ -255,6 +257,7 @@
             '<div class="home-meta">' +
               "<span>🔥 连续 <b>" + st.streak + "</b> 天</span>" +
               "<span>📚 已学 <b>" + c.learned + "</b>/" + total + "</span>" +
+              (rd && rd.read ? "<span>📖 读完 <b>" + rd.read + "</b> 篇</span>" : "") +
             "</div>" +
           "</div>" +
           '<button class="today-task" data-go="' + taskGo + '">' +
@@ -287,7 +290,11 @@
               '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
             '<button class="menu-btn c-mint" data-go="#/read">' +
               '<span class="menu-ico">' + Icons.svg("book") + '</span><span class="menu-label">读一读</span>' +
-              '<span class="menu-sub">短故事 · 找字</span>' +
+              '<span class="menu-sub">' + (rd
+                ? (rd.read ? "已读 " + rd.read + "/" + rd.total + " 篇" : "短故事 · 找字") +
+                  (rd.week ? " · 本周 +" + rd.week : "") +
+                  (rd.cur ? " · " + rd.cur : "")
+                : "短故事 · 找字") + '</span>' +
               '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
             '<button class="menu-btn c-lilac" data-go="#/pinyin">' +
               '<span class="menu-ico">' + Icons.svg("speak") + '</span><span class="menu-label">拼音小课堂</span>' +
