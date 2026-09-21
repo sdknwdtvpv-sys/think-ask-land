@@ -543,6 +543,7 @@
             (emojiOf(ch.c) ? '<span class="card-emoji">' + emojiOf(ch.c) + "</span>" : "") +
             '<div class="writer-tip" id="w-tip"></div>' +
           "</div>" +
+          '<div class="stroke-bar" id="stroke-bar" hidden></div>' +
           '<div class="quiz-done-tip" id="q-tip"></div>' +
           '<div class="card-actions">' +
             '<button class="btn btn-sky" id="act-speak">' + Icons.svg("speak") + "读汉字</button>" +
@@ -746,6 +747,8 @@
           wMode = "show";
           this.innerHTML = Icons.svg("grid") + "描一描";
           tip.textContent = "";
+          var sb0 = view.querySelector("#stroke-bar");
+          if (sb0) sb0.hidden = true;
           return;
         }
         wMode = "quiz";
@@ -756,19 +759,58 @@
         if (!inst) return;
         tip.textContent = "用手指按笔顺描一描吧!";
         var qtip = view.querySelector("#q-tip");
+        var strokeBar = view.querySelector("#stroke-bar");
+        var missByStroke = {};
+        var totalStrokes = inst.totalStrokes || window.Writing.strokeCount(ch.c);
+
+        /* 笔顺步骤条:点某一笔就单独演那一笔。
+           孩子常见的情况是"第 3 笔看不清楚",让他能反复看第 3 笔,
+           而不是每次都从头播一遍(从头播 6 遍会让他放弃)。 */
+        function renderStrokeBar(cur) {
+          if (!strokeBar || !totalStrokes) return;
+          strokeBar.hidden = false;
+          strokeBar.innerHTML = '<span class="sb-label">笔顺</span>' +
+            Array.from({ length: totalStrokes }).map(function (_x, k) {
+              var d = window.Writing.strokeDir(ch.c, k);
+              return '<button class="sb-step' + (k === cur ? " on" : "") + (missByStroke[k] ? " miss" : "") +
+                '" data-n="' + k + '" aria-label="第' + (k + 1) + '笔' + (d ? " " + d.tip : "") + '">' +
+                (k + 1) + (d ? '<i>' + d.arrow + "</i>" : "") + "</button>";
+            }).join("");
+          strokeBar.querySelectorAll(".sb-step").forEach(function (b) {
+            b.addEventListener("click", function () {
+              if (window.SFX) SFX.click();
+              var n = parseInt(b.getAttribute("data-n"), 10);
+              var d = window.Writing.strokeDir(ch.c, n);
+              if (d) tip.textContent = "第 " + (n + 1) + " 笔要" + d.tip + "写 " + d.arrow;
+              if (inst) inst.playStroke(n);
+            });
+          });
+        }
+
+        renderStrokeBar(0);
         inst.quiz({
           onCorrect: function (n, total) {
             if (window.SFX) SFX.click();
             tip.textContent = "第 " + n + " / " + total + " 笔,写得真棒!";
+            renderStrokeBar(n);
           },
-          onMistake: function () {
+          onMistake: function (idx) {
             if (window.SFX) SFX.wrong();
-            tip.textContent = "这一笔再试试,跟着灰色提示描~";
+            var n = (typeof idx === "number" && idx >= 0) ? idx : 0;
+            missByStroke[n] = (missByStroke[n] || 0) + 1;
+            /* 不说"再试试"就完事:直接告诉他这一笔往哪边走,并把这一笔演一遍 */
+            var mt = window.Writing.mistakeTip(ch.c, n);
+            tip.innerHTML = esc(mt.text) + (mt.arrow ? ' <b class="tip-arrow">' + mt.arrow + "</b>" : "");
+            if (inst) inst.playStroke(n);
+            renderStrokeBar(n);
           },
           onDone: function (sum) {
             if (window.SFX) SFX.correct();
             qtip.textContent = "✅ 描红完成!" + (sum.mistakes === 0 ? "一笔都没错,太厉害啦!" : "");
-            var first = window.Store.noteStrokeQuiz(ch.c);
+            if (strokeBar) strokeBar.hidden = true;
+            var first = window.Store.noteStrokeQuiz(ch.c, {
+              mistakes: sum.mistakes, total: sum.total, byStroke: missByStroke
+            });
             var btn = view.querySelector("#act-quiz");
             if (first) {
               var res = window.Store.addStars(2);

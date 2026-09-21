@@ -712,6 +712,30 @@
         }
         html += "</div>";
 
+        /* ---- 书写:描红做得多不多、写得好不好、哪个字的哪一笔最容易错 ---- */
+        var sr = window.Store.strokeReport ? window.Store.strokeReport() : null;
+        if (sr && sr.runs) {
+          html += '<div class="panel"><h4>' + Icons.svg("pencil") + "书写（描红）</h4>" +
+            '<div class="rp-line"><span>描红 <b>' + sr.runs + "</b> 次</span>" +
+              '<span class="rp-week">练过 ' + sr.practiced + " 个字</span>" +
+              '<span class="rp-cur">平均每遍错 <b>' + sr.perRun + "</b> 笔</span></div>";
+          if (sr.worst.length) {
+            html += '<div class="weak-list">' + sr.worst.map(function (x) {
+              return '<div class="ab-row"><span class="ab-name kai">' + esc(x.c) + "</span>" +
+                '<span class="ab-sub">练 ' + x.runs + " 遍 · 错 " + x.miss + " 笔" +
+                (x.worst >= 0 ? " · 第 " + (x.worst + 1) + " 笔最容易错" : "") + "</span></div>";
+            }).join("") + "</div>";
+            html += '<p class="parent-note">💡 点开这些字卡 →「描一描」，' +
+              "页面上的<b>笔顺条</b>可以单独演那一笔给你看（不用从头播一遍）。</p>";
+          } else {
+            html += '<p class="parent-note">💡 目前每一笔都写得对。可以让他在纸上写一遍试试 —— 屏幕上写得好，纸上是另一回事。</p>';
+          }
+          if (sr.mistakes === 0 && sr.runs >= 3) {
+            html += '<p class="parent-note">描红全对，说明他对手上这支"笔"已经有把握了。</p>';
+          }
+          html += "</div>";
+        }
+
         /* ---- 阅读进度:读一读是唯一"孩子自己就能做"的环节,值得单独给家长看 ---- */
         var rd = (window.ReadDrill && window.ReadDrill.progress) ? window.ReadDrill.progress() : null;
         if (rd && rd.total) {

@@ -47,7 +47,8 @@
       stars: 0,            // 累计星星(=总获得,不消耗)
       chars: {},           // 字 -> { learned:ts, box:1-5, next:ts, ok:n, bad:n, quizDone:bool, err:{音近/形近/义混/声调/生疏} }
       badges: {},          // id -> ts
-      strokeQuizzes: 0,
+      strokeQuizzes: 0,    // 完成描红的次数
+      strokeMistakes: 0,   // 描红累计写错的笔数(与次数分开:次数看不出写得好不好)
       perfectRounds: 0,
       reviewsDone: 0,
       quizOk: 0, quizBad: 0,
@@ -130,6 +131,7 @@
     /* 标量:类型不对就退回默认值,负数一律归零 */
     out.stars = nonNeg(out.stars, 0);
     out.strokeQuizzes = nonNeg(out.strokeQuizzes, 0);
+    out.strokeMistakes = nonNeg(out.strokeMistakes, 0);
     out.perfectRounds = nonNeg(out.perfectRounds, 0);
     out.reviewsDone = nonNeg(out.reviewsDone, 0);
     out.quizOk = nonNeg(out.quizOk, 0);
@@ -152,6 +154,10 @@
           bad: nonNeg(r.bad, 0),
           quizDone: !!r.quizDone,
           seen: nonNeg(r.seen, 0),
+          /* 描红质量:写了几遍 / 一共错几笔 / 错得最多的那一笔(0 起,-1 表示没记录) */
+          strokeRuns: nonNeg(r.strokeRuns, 0),
+          strokeMiss: nonNeg(r.strokeMiss, 0),
+          worstStroke: Math.max(-1, Math.min(99, Math.round(num(r.worstStroke, -1)))),
           err: cleanErr(r.err)
         };
       }
@@ -489,17 +495,62 @@
     return out;
   }
 
-  function noteStrokeQuiz(ch) {
+  /* 描红结果入档。
+     info 可省略(老调用方式继续可用),给了就记质量:
+       · strokeMiss / worstStroke → 家长端能指出"这个字的第 3 笔最容易错"
+       · dims.shape 不再无条件记"对" —— 写错 5 笔还算全对,那个正确率就是假的。
+         现在按"写对的笔数 vs 写错的笔数"计,家长看到的字形维度才有意义。 */
+  function noteStrokeQuiz(ch, info) {
     touchDay();
     state.strokeQuizzes += 1;
+    var mistakes = info && typeof info.mistakes === "number" && info.mistakes >= 0 ? info.mistakes : 0;
+    var total = info && typeof info.total === "number" ? info.total : 0;
+    state.strokeMistakes = Math.min(999999, state.strokeMistakes + mistakes);
     if (!state.dims) state.dims = {};
     var ds = state.dims.shape || (state.dims.shape = { ok: 0, bad: 0 });
-    ds.ok += 1;
+    if (total > 0) {
+      var good = Math.max(0, total - mistakes);
+      ds.ok = Math.min(999999, ds.ok + good);
+      ds.bad = Math.min(999999, ds.bad + mistakes);
+    } else {
+      ds.ok += 1;
+    }
     var r = charRec(ch);
     var first = !r.quizDone;
     r.quizDone = true;
+    if (info) {
+      r.strokeRuns = Math.min(9999, (r.strokeRuns || 0) + 1);
+      r.strokeMiss = Math.min(9999, (r.strokeMiss || 0) + mistakes);
+      /* 记下错得最多的那一笔,家长端据此说"第 n 笔最容易错" */
+      var by = info.byStroke || {};
+      var worst = -1, worstN = 0;
+      for (var k in by) {
+        if (by[k] > worstN) { worstN = by[k]; worst = parseInt(k, 10); }
+      }
+      if (worst >= 0) r.worstStroke = worst;
+    }
     save();
     return first;
+  }
+
+  /* 描红质量汇总:家长端「书写」面板用 */
+  function strokeReport() {
+    var rows = [];
+    for (var c in state.chars) {
+      var r = state.chars[c];
+      if (!r.strokeRuns) continue;
+      rows.push({ c: c, runs: r.strokeRuns, miss: r.strokeMiss || 0, worst: (typeof r.worstStroke === "number" ? r.worstStroke : -1) });
+    }
+    rows.sort(function (a, b) { return b.miss - a.miss || a.c.localeCompare(b.c); });
+    var totalMiss = 0, totalRuns = 0;
+    rows.forEach(function (x) { totalMiss += x.miss; totalRuns += x.runs; });
+    return {
+      runs: state.strokeQuizzes,
+      practiced: rows.length,
+      mistakes: totalMiss,
+      perRun: totalRuns ? Math.round(totalMiss / totalRuns * 10) / 10 : 0,
+      worst: rows.filter(function (x) { return x.miss > 0; }).slice(0, 3)
+    };
   }
 
   function dueChars(now) {
@@ -733,7 +784,8 @@
     load: load, save: save, on: on, dayStr: dayStr, touchDay: touchDay,
     addStars: addStars, counts: counts, stickerCount: stickerCount,
     markLearned: markLearned, reviewResult: reviewResult, quizResult: quizResult,
-    noteStrokeQuiz: noteStrokeQuiz, dueChars: dueChars, learnedList: learnedList,
+    noteStrokeQuiz: noteStrokeQuiz, strokeReport: strokeReport,
+    dueChars: dueChars, learnedList: learnedList,
     weakChars: weakChars, weekActivity: weekActivity, reset: reset,
     CAUSES: CAUSES, CAUSE_NAME: CAUSE_NAME,
     errorSummary: errorSummary, topCause: topCause, charsByCause: charsByCause,

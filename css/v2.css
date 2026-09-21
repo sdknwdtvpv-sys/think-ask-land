@@ -5,7 +5,7 @@
 /* ---------- 显示字体:站酷快乐体(OFL 开源,本地子集 70KB,离线可用) ---------- */
 @font-face {
   font-family: "KuaiLe";
-  src: url("../fonts/kuaile-subset.woff2?v=2.6.0") format("woff2");
+  src: url("../fonts/kuaile-subset.woff2?v=2.7.0") format("woff2");
   font-display: swap;
   font-weight: 400;
 }
@@ -727,3 +727,27 @@ body::after { /* 全局纸纹,极淡 */
 @media (prefers-reduced-motion: reduce) {
   .rec-top.rec-live { animation: none; }
 }
+
+/* ================= 笔顺步骤条(描红时点某一笔单独看) ================= */
+.stroke-bar {
+  margin: 10px 0 2px; padding: 9px 10px;
+  background: var(--paper); border-radius: var(--r-sm);
+  box-shadow: 0 3px 0 var(--shadow-ink);
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.stroke-bar[hidden] { display: none; }
+.sb-label { font-size: 12px; font-weight: 800; color: var(--ink-light); margin-right: 2px; }
+.sb-step {
+  position: relative; cursor: pointer; border: 2px solid transparent;
+  min-width: 34px; height: 34px; padding: 0 6px; border-radius: 10px;
+  background: var(--paper-2); color: var(--ink);
+  font-family: var(--display); font-size: 15px; font-weight: 900;
+  box-shadow: 0 2px 0 var(--shadow-ink);
+  transition: transform .12s, background .12s, border-color .12s;
+}
+.sb-step i { font-style: normal; font-size: 11px; margin-left: 2px; color: var(--ink-light); }
+.sb-step:active { transform: translateY(2px); box-shadow: 0 0 0 var(--shadow-ink); }
+.sb-step.on { background: var(--sun); border-color: var(--action-deep); }
+.sb-step.on i { color: var(--action-deep); }
+.sb-step.miss { background: #fff0e9; border-color: var(--warm-wrong); }
+.writer-tip .tip-arrow { font-size: 20px; color: var(--action-deep); }
