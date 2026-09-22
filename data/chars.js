@@ -17,7 +17,8 @@ window.CHAR_GROUPS = (function () {
     .concat(window.CHAR_GROUPS_P4 || [])
     .concat(window.CHAR_GROUPS_P5 || [])
     .concat(window.CHAR_GROUPS_P6 || [])
-    .concat(window.CHAR_GROUPS_P7 || []);
+    .concat(window.CHAR_GROUPS_P7 || [])
+    .concat(window.CHAR_GROUPS_P8 || []);
   var out = [], byName = {};
   src.forEach(function (g) {
     if (!g || !g.name || !g.chars) return;

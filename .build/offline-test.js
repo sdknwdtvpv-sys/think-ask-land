@@ -71,6 +71,20 @@ const check = (n, c, e) => checks.push({ name: n, pass: !!c, extra: e || "" });
   });
   check("首屏资源已写入缓存", cached.n >= 25, cached.n + " 个 · " + cached.sample.join(","));
 
+  /* 拿基线前先让新 SW 接管并重载一次。
+     为什么必须这样:Service Worker 的更新是「下一次导航才生效」——
+     首次 goto 很可能被**上一轮测试遗留的旧缓存**服务,
+     于是在扩容版本上会拿旧版本的 629 字去比新版本的 761 字,误报「断网后不一致」。
+     这条曾经真的误报过一次(v2.11.0 扩到 761 字时)。 */
+  await page.evaluate(() => new Promise((res) => {
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) return res(true);
+    if (!navigator.serviceWorker) return res(false);
+    navigator.serviceWorker.addEventListener("controllerchange", () => res(true), { once: true });
+    setTimeout(() => res(false), 4000);
+  }));
+  await page.reload({ waitUntil: "networkidle2" });
+  await page.waitForFunction("window.Store && window.CharDB && window.CharDB.ALL.length >= 400", { timeout: 20000 });
+
   const before = await page.evaluate(() => ({ chars: window.CharDB.ALL.length, strokes: Object.keys(window.STROKE_DATA || {}).length }));
 
   /* ---------- 3) 真断网 ---------- */

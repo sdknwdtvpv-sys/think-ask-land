@@ -62,6 +62,39 @@ const CANDIDATES = {
   "座": ["🪑"],              /* 我找到了自己的[座]位 */
   "组": ["👥"],              /* 我们小[组]一起做手工 */
   "队": ["🚩"],              /* [队]伍排得真整齐 */
+  /* —— 批 3(v2.11.0):132 个新字里"能配图"的那些。
+        只有具体名词/清晰动作才配 —— 本批以功能字为主,所以能配图的很少,这是正常的。 —— */
+  "乌": ["🐦‍⬛"],            /* [乌]鸦 */
+  "鸦": ["🐦‍⬛", "🪶"],       /* [鸦]:乌鸦 */
+  "窝": ["🪹", "🏠"],         /* 鸟[窝] */
+  "壳": ["🐚"],              /* 龟[壳] */
+  "莲": ["🪷"],              /* [莲]花 */
+  "竹": ["🎋", "🎍"],        /* [竹]子 */
+  "粥": ["🥣"],              /* 米[粥] */
+  "脑": ["🧠"],              /* 大[脑] */
+  "湿": ["💦"],              /* 鞋子[湿]了 */
+  "厂": ["🏭"],              /* [厂]房 */
+  "医": ["🏥"],              /* [医]院 */
+  "金": ["🪙"],              /* [金]色 */
+  "贝": ["🐚", "🦪"],        /* [贝]壳 */
+  "表": ["⌚"],              /* 手[表] */
+  "旗": ["🚩"],              /* [旗]子 */
+  "国": ["🇨🇳"],             /* [国]旗 */
+  "工": ["🔧"],              /* [工]人 */
+  "公": ["🐓"],              /* [公]鸡 */
+  "球": ["⚽"],              /* 皮[球] */
+  "墙": ["🧱"],              /* [墙]上 */
+  "刷": ["🪥"],              /* [刷]牙 */
+  "吹": ["💨"],              /* [吹]泡泡 */
+  "浇": ["🚿"],              /* [浇]水 */
+  "晒": ["☀️"],              /* [晒]太阳 */
+  "敲": ["🥁"],              /* [敲]鼓 */
+  "贴": ["🏷️"],              /* [贴]纸 */
+  "挂": ["🪝"],              /* [挂]上 */
+  "带": ["👜"],              /* [带]来 */
+  "步": ["👣"],              /* 走一[步] */
+  "棋": ["♟️"],              /* 下[棋] */
+
   /* —— 岛16 交通与出行 —— */
   "交": ["🚦"],              /* 过马路要看[交]通灯 */
   "通": ["🛣️", "🚥"],        /* [通]:交通/通行 */
@@ -84,13 +117,22 @@ function islandIndex(char) {
 }
 
 function plan() {
-  /* 岛内已占用的图 */
+  /* 关键:占位只认**字库自带的 e 字段**,不认补充表本身。
+     旧写法用 emojiOf()(含补充表),于是"上一轮已经补过的字"被当成"已有图"跳过,
+     重新生成时就把它们从自动分节里抹掉了 —— 实测把 v2.1.0 的 50 条覆盖成了 30 条,
+     有效配图从 475 掉到 455。现在改成"每次从头算完整集合",
+     结果由候选表顺序与字库自带图唯一决定,所以重跑是幂等的(不会越跑越少)。 */
+  /* ⚠️ 必须读**原始字库记录**(DB.GROUPS[gi].chars),
+     不能读 DB.BY_CHAR[c].e —— games.js 建索引时已经把补充表并进去了,
+     所以 BY_CHAR 上的 e 是"合并后"的值,拿它判断会以为补充表里的图是字库自带的。 */
+  const rawOf = (ch) => {
+    const gi = islandIndex(ch);
+    if (gi < 0) return null;
+    return DB.GROUPS[gi].chars.filter((x) => x.c === ch)[0] || null;
+  };
   const usedBy = DB.GROUPS.map((g) => {
     const m = {};
-    g.chars.forEach((c) => {
-      const e = emojiOf(DB.BY_CHAR[c.c]);
-      if (e) m[e] = c.c;
-    });
+    g.chars.forEach((c) => { if (c.e) m[c.e] = c.c; });
     return m;
   });
 
@@ -98,8 +140,8 @@ function plan() {
   for (const ch of Object.keys(CANDIDATES)) {
     const gi = islandIndex(ch);
     if (gi < 0) { unknown.push(ch); continue; }
-    const rec = DB.BY_CHAR[ch];
-    if (emojiOf(rec)) { skipped.push(ch + "(已有图)"); continue; }
+    const raw = rawOf(ch);
+    if (raw && raw.e) { skipped.push(ch + "(字库自带图)"); continue; }
     const pick = CANDIDATES[ch].find((e) => !usedBy[gi][e]);
     if (!pick) { skipped.push(ch + "(候选都被本岛占用)"); continue; }
     usedBy[gi][pick] = ch;
@@ -146,7 +188,7 @@ function apply(added) {
 }
 
 const { added, skipped, unknown } = plan();
-console.log(`可补充配图 ${added.length} 个:`);
+console.log(`自动分节内容 ${added.length} 条（每次从头算完整集合,幂等）:`);
 added.forEach((a) => console.log(`  ✔ 岛${a.island}(${a.name}) ${a.ch} → ${a.e}`));
 if (skipped.length) console.log(`\n跳过 ${skipped.length} 个: ${skipped.join(", ")}`);
 if (unknown.length) console.log(`\n⚠️ 候选表里有字库不存在的字: ${unknown.join("")}`);

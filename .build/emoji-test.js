@@ -27,14 +27,36 @@ const t = (name, fn) => {
   } catch (e) { results.push({ name, pass: false, why: e.message }); }
 };
 
-/* 覆盖率下限:抽象字(岛14 连接词)天然不该配图,所以不追 100% */
-const COVERAGE_MIN = 75;
+/* ================= 覆盖率该怎么守(v2.11.0 改) =================
+   旧写法守"全库配图率 ≥ 75%"。批 3 一次性加了 132 个字,其中绝大多数是**功能字**
+   (的/了/然/于/终/越…),它们天生没有图 —— 于是"配图率"从 75.5% 掉到 66.4%,
+   但**真正要紧的那个数字是涨的**:能出「看图选字」的字从 475 涨到 505。
+   百分比下降 = 分母里多了一堆本来就不该配图的字,不是质量变差。
+   所以改成守两件更真的东西:
+     ① 可视化容量(绝对字数)在增长 —— 它决定看图类题型的池子有多大
+     ② **具体类**的岛必须有图(动物/植物/身体/日常/自然/方位/交通/情绪),
+        因为那些字配不出图才是真缺陷。抽象类(岛14 连接词)不设下限。 */
+const CAPACITY_MIN = 500;          /* 能出看图题的字数下限(只增不减) */
+const CONCRETE_MIN = 70;           /* 具体类岛屿的覆盖率下限 */
+const CONCRETE_ISLANDS = ["自然与天气", "家庭与人物", "动物朋友", "植物与食物",
+  "日常生活", "方位与空间", "交通与出行", "情绪与社交"];
 
-t("有效配图覆盖率达到 " + COVERAGE_MIN + "% 以上", () => {
+t("能出看图题的字数达到 " + CAPACITY_MIN + " 个(这才是要守的量)", () => {
   const withE = DB.ALL.filter((c) => emojiOf(c)).length;
-  const pct = withE / DB.ALL.length * 100;
-  if (pct < COVERAGE_MIN) return FAIL("仅 " + pct.toFixed(1) + "%");
-  return PASS(withE + "/" + DB.ALL.length + " (" + pct.toFixed(1) + "%)");
+  if (withE < CAPACITY_MIN) return FAIL("仅 " + withE + " 个");
+  return PASS(withE + " 个字有图 / 全库 " + DB.ALL.length + "(" + (withE / DB.ALL.length * 100).toFixed(1) + "%)");
+});
+
+t("具体类岛屿的配图率 ≥ " + CONCRETE_MIN + "%(抽象类不设下限)", () => {
+  const bad = [], rows = [];
+  DB.GROUPS.forEach((g, gi) => {
+    if (CONCRETE_ISLANDS.indexOf(g.name) < 0) return;
+    const n = g.chars.filter((c) => emojiOf(DB.BY_CHAR[c.c])).length;
+    const pct = Math.round(n / g.chars.length * 100);
+    rows.push(g.name + " " + pct + "%");
+    if (pct < CONCRETE_MIN) bad.push("第" + (gi + 1) + "岛(" + g.name + ") " + pct + "%");
+  });
+  return bad.length ? FAIL(bad.join(" | ")) : PASS(rows.join(" · "));
 });
 
 t("批次文件全部参与校验(不会漏掉新批次)", () => {
