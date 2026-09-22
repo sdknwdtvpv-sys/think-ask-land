@@ -730,6 +730,27 @@
         }
         html += "</div>";
 
+        /* ---- 说一说(口语表达):产品从"认字"走到"表达"的第一步 ---- */
+        var tk = window.Store.talkReport ? window.Store.talkReport() : null;
+        if (tk && tk.runs) {
+          html += '<div class="panel"><h4>🗣️ 说一说（看图说话）</h4>' +
+            '<div class="rp-line"><span>说过 <b>' + tk.scenes + "</b> 个场景</span>" +
+              '<span class="rp-week">共 ' + tk.runs + " 次</span>" +
+              (tk.week ? '<span class="rp-cur">本周 <b>' + tk.week + "</b> 个</span>" : "") +
+            "</div>" +
+            '<div class="rp-levels">' +
+              '<span class="rp-lv">说完整了 ' + tk.marks.full + "</span>" +
+              '<span class="rp-lv">用上新词 ' + tk.marks.word + "</span>" +
+              '<span class="rp-lv">说得清楚 ' + tk.marks.clear + "</span>" +
+            "</div>" +
+            '<p class="parent-note">💡 <b>这里不打分</b> —— 好听的不好听的，爸爸妈妈说了算。' +
+              '3~6 岁最该练的是「敢说」，所以第一次说完就给他两颗星。' +
+              '孩子说完，陪他一起听一遍录音，比任何评分都有用。</p>' +
+            '<p class="parent-note">🎤 想练得更细：让他照着「有谁 → 在哪里 → 在做什么」三问往下说；' +
+              '说完了您再补一句「还想到什么？」，话就长了。</p>' +
+            "</div>";
+        }
+
         /* ---- 书写:描红做得多不多、写得好不好、哪个字的哪一笔最容易错 ---- */
         var sr = window.Store.strokeReport ? window.Store.strokeReport() : null;
         if (sr && sr.runs) {

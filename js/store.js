@@ -58,6 +58,8 @@
       welcomed: false,
       reads: {},           // 短文 id -> 首次读完时间(阅读启蒙进度)
       rq: {},              // 短文 id -> { ok, bad, last }:读后理解题作答(理解力,不是识字量)
+      talk: {},            // 场景 id -> { runs, last, full, word, clear }:看图说话(口语表达)
+      talkRuns: 0,         // 说过的总次数
       dims: dimsZero()     // 能力维度 -> { ok, bad }:听音/拼音/字形/图义
     };
   }
@@ -132,6 +134,7 @@
     out.stars = nonNeg(out.stars, 0);
     out.strokeQuizzes = nonNeg(out.strokeQuizzes, 0);
     out.strokeMistakes = nonNeg(out.strokeMistakes, 0);
+    out.talkRuns = nonNeg(out.talkRuns, 0);
     out.perfectRounds = nonNeg(out.perfectRounds, 0);
     out.reviewsDone = nonNeg(out.reviewsDone, 0);
     out.quizOk = nonNeg(out.quizOk, 0);
@@ -197,6 +200,23 @@
       }
     }
     out.rq = rq;
+
+    /* 看图说话:场景 id 形如 t01;自评三项是家长标的人工判断,不是机器判分 */
+    var talk = {};
+    if (out.talk && typeof out.talk === "object" && Object.prototype.toString.call(out.talk) !== "[object Array]") {
+      for (var tid in out.talk) {
+        if (!/^t\d{2}$/.test(tid)) continue;
+        var tr = out.talk[tid];
+        if (!tr || typeof tr !== "object") continue;
+        var runs = Math.min(9999, nonNeg(tr.runs, 0));
+        if (!runs) continue;
+        talk[tid] = {
+          runs: runs, last: nonNeg(tr.last, 0),
+          full: nonNeg(tr.full, 0), word: nonNeg(tr.word, 0), clear: nonNeg(tr.clear, 0)
+        };
+      }
+    }
+    out.talk = talk;
 
     var dims = {};
     DIMS.forEach(function (k) {
@@ -670,6 +690,51 @@
     return { first: firstGet, res: res, rec: { ok: r.ok, bad: r.bad, last: r.last, got: !!r.got } };
   }
   function readQuiz(id) { return (state.rq && state.rq[id]) || null; }
+
+  /* ---------- 看图说话(口语表达) ----------
+     刻意**不记"对错"**,只记:
+       · runs  说了几次(激励"敢说",不是"说对")
+       · full/word/clear  家长勾的三项(家长就是判分者,这是人工判断,不是机器打分)
+     第一次说完给 2 颗星 —— 奖的是"开口",不是"说得好"。
+     3~6 岁最该被鼓励的是"我愿意说",不是"我说得对"。 */
+  function noteTalk(id, marks) {
+    touchDay();
+    if (!state.talk) state.talk = {};
+    var r = state.talk[id] || (state.talk[id] = { runs: 0, last: 0, full: 0, word: 0, clear: 0 });
+    var first = !r.runs;
+    r.runs = Math.min(9999, r.runs + 1);
+    r.last = Date.now();
+    state.talkRuns = Math.min(99999, (state.talkRuns || 0) + 1);
+    ["full", "word", "clear"].forEach(function (k) {
+      if (marks && marks[k]) r[k] = Math.min(9999, (r[k] || 0) + 1);
+    });
+    todayRec().quiz += 1;
+    var res = first ? addStars(2) : { stickers: [], badges: [] };
+    save();
+    return { first: first, res: res, rec: { runs: r.runs, last: r.last, full: r.full, word: r.word, clear: r.clear } };
+  }
+  function talk(id) { return (state.talk && state.talk[id]) || null; }
+  function talkCount() {
+    var n = 0;
+    for (var k in state.talk || {}) if (state.talk[k].runs) n += 1;
+    return n;
+  }
+  /* 家长端汇总:说过几个场景 / 总次数 / 三项自评各占多少 */
+  function talkReport() {
+    var rows = [], total = 0;
+    var sum = { full: 0, word: 0, clear: 0 };
+    for (var k in state.talk || {}) {
+      var r = state.talk[k];
+      if (!r.runs) continue;
+      rows.push({ id: k, runs: r.runs, last: r.last });
+      total += r.runs;
+      sum.full += r.full || 0; sum.word += r.word || 0; sum.clear += r.clear || 0;
+    }
+    rows.sort(function (a, b) { return b.last - a.last; });
+    var since = Date.now() - 7 * 24 * 3600 * 1000;
+    var week = rows.filter(function (x) { return x.last >= since; }).length;
+    return { scenes: rows.length, runs: total, week: week, marks: sum, recent: rows.slice(0, 5) };
+  }
   function readQuizTotals() {
     var ok = 0, bad = 0, got = 0;
     for (var k in state.rq || {}) {
@@ -841,6 +906,7 @@
     /* 阅读进度 */
     markRead: markRead, readCount: readCount, hasRead: hasRead,
     readQuizResult: readQuizResult, readQuiz: readQuiz, readQuizTotals: readQuizTotals,
+    noteTalk: noteTalk, talk: talk, talkCount: talkCount, talkReport: talkReport,
     weekLearnedChars: weekLearnedChars, weekSummary: weekSummary,
     /* 能力地图 */
     DIMS: DIMS, DIM_NAME: DIM_NAME, abilityMap: abilityMap, abilityAdvice: abilityAdvice

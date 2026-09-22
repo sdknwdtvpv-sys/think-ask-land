@@ -296,6 +296,11 @@
                   (rd.cur ? " · " + rd.cur : "")
                 : "短故事 · 找字") + '</span>' +
               '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
+            '<button class="menu-btn c-peach" data-go="#/talk">' +
+              '<span class="menu-ico">' + Icons.svg("speak") + '</span><span class="menu-label">说一说</span>' +
+              '<span class="menu-sub">' + (window.Store.talkCount && window.Store.talkCount()
+                ? "说过 " + window.Store.talkCount() + " 个场景" : "看图说话 · 录下来听听") + '</span>' +
+              '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
             '<button class="menu-btn c-lilac" data-go="#/pinyin">' +
               '<span class="menu-ico">' + Icons.svg("speak") + '</span><span class="menu-label">拼音小课堂</span>' +
               '<span class="menu-sub">声母 · 韵母 · 声调</span>' +

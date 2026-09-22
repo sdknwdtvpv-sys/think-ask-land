@@ -97,7 +97,8 @@
 
   /* 开始录音 → resolve 一个句柄 {stop, cancel, ms}
      不在这里播示范音:调用方先播完再调,或者边录边听孩子读。 */
-  function start() {
+  function start(opts) {
+    var maxMs = (opts && opts.maxMs) ? Math.max(1000, Math.min(20000, opts.maxMs)) : MAX_MS;
     if (!supported()) {
       lastError = friendly({});
       return Promise.reject(new Error(lastError));
@@ -113,7 +114,7 @@
       rec.start();
       recording = true;
       var h = {
-        ms: MAX_MS,
+        ms: maxMs,
         stop: function () {
           return new Promise(function (resolve) {
             var done = false;
@@ -141,7 +142,7 @@
         cancel: function () { release(); }
       };
       /* 到点自动停:孩子不知道什么叫"停止录音" */
-      timer = setTimeout(function () { if (h.onAutoStop) h.onAutoStop(); }, MAX_MS);
+      timer = setTimeout(function () { if (h.onAutoStop) h.onAutoStop(); }, maxMs);
       return h;
     }).catch(function (e) {
       lastError = friendly(e);

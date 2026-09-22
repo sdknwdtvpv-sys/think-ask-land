@@ -39,6 +39,7 @@ const SPEAK_TYPES = { listen: 1, dictation: 1, wordDictation: 1, tonePick: 1 };
 const ROUTES = [
   "#/home", "#/groups", "#/learn?g=0", "#/card?g=0&i=0", "#/practice", "#/run?scope=learned",
   "#/review", "#/runcards", "#/rewards", "#/parent", "#/pinyin", "#/read",
+  "#/talk", "#/talk?id=" + ((window.TALK_SCENES || [])[0] || {}).id,
   "#/story?id=" + ((window.PASSAGES || [])[0] || {}).id,
   "#/print?type=cards", "#/print?type=write", "#/print?type=quests",
   "#/print?type=pack", "#/print?type=cert"
@@ -307,6 +308,21 @@ const ROUTES = [
     const missing = PS.filter((p) => !RQ[p.id]).map((p) => p.id);
     if (missing.length) bad.push("缺题:" + missing.slice(0, 4).join(","));
     return bad.length ? brief(bad, 5) : PASS(Object.keys(RQ).length + " 篇题目全部合规");
+  });
+
+  t("看图说话:场景只用库内字,且模块里不许出现判分词", () => {
+    const S = win.TALK_SCENES || [];
+    const bad = [];
+    S.forEach((x) => {
+      const out = Array.from(new Set(((x.scene + x.more + x.words.join("")).match(/[\u4e00-\u9fff]/g) || []).filter((c) => !BY_CHAR[c])));
+      if (out.length) bad.push(x.id + " 库外字 " + out.join(""));
+      if ((x.words || []).length < 3) bad.push(x.id + " 词不足 3");
+      if (!x.emoji || !x.more) bad.push(x.id + " 字段缺失");
+    });
+    const ids = S.map((x) => x.id);
+    if (new Set(ids).size !== ids.length) bad.push("id 重复");
+    if (S.length < 20) bad.push("场景只有 " + S.length + " 个");
+    return bad.length ? brief(bad, 5) : PASS(S.length + " 个场景全部合规");
   });
 
   t("活动库:字段齐全、时长 1~15、场景有限且每类≥2 条", () => {
