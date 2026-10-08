@@ -143,17 +143,17 @@
       if (q.type === "listen") {
         prompt =
           '<div class="prompt-area"><div class="prompt-label">👂 听一听,是哪个字?</div>' +
-          '<button class="speak-big" id="sp-btn">🔊</button></div>';
+          '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button></div>';
       } else if (q.type === "dictation") {
         prompt =
           '<div class="prompt-area"><div class="prompt-label">👂 听写:听到的是哪个字?</div>' +
-          '<button class="speak-big" id="sp-btn">🔊</button>' +
+          '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button>' +
           '<div class="prompt-hint">仔细听声调哦</div></div>';
       } else if (q.type === "tonePick") {
         prompt =
           '<div class="prompt-area"><div class="prompt-label">🎵 听一听,声调对吗?</div>' +
           '<div class="prompt-char-row"><div class="prompt-char kai">' + esc(q.target.c) + "</div>" +
-          '<button class="speak-big small" id="sp-btn">🔊</button></div></div>';
+          '<button class="speak-big small" id="sp-btn">' + Icons.svg("speak") + '</button></div></div>';
       } else if (q.type === "partJoin") {
         prompt =
           '<div class="prompt-area"><div class="prompt-label">🧩 这些部件能拼成哪个字?</div>' +
@@ -166,7 +166,7 @@
         /* 整词听写:听一个词,选出听到的那个词 */
         prompt =
           '<div class="prompt-area"><div class="prompt-label">👂 听一个词,选出听到的</div>' +
-          '<button class="speak-big" id="sp-btn">🔊</button>' +
+          '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button>' +
           '<div class="prompt-hint">再听一遍就点喇叭</div></div>';
       } else if (q.type === "charEmoji") {
         prompt = '<div class="prompt-area"><div class="prompt-label">这个字是哪幅图呢?</div><div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
@@ -345,7 +345,7 @@
           '<div class="review-info">🧠 <b>记忆小秘密:</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现,复习一次就记得更牢,连续答对 4 次就进入<b>长期记忆</b>啦!</div>' +
           (due.length === 0
             ? '<div class="empty-tip"><span class="big">🎈</span>今天没有要复习的字' + (learnedN ? ",学得真棒!<br>明天再来看看,或者去学新字吧" : "<br>先去学几个新字吧") + "</div>" +
-              '<button class="btn btn-lg btn-sky" id="go-learn">📖 去学新字</button>'
+              '<button class="btn btn-lg btn-sky" id="go-learn">' + Icons.svg("book") + '去学新字</button>'
             : '<div style="text-align:center;margin:26px 0">' +
                 '<div style="font-size:74px">📬</div>' +
                 '<div style="font-size:22px;font-weight:900;margin:10px 0 4px">有 ' + due.length + " 个字想见你!</div>" +
@@ -832,7 +832,7 @@
             '<p class="parent-note">💡 <b>这里不打分</b> —— 好听的不好听的，爸爸妈妈说了算。' +
               '3~6 岁最该练的是「敢说」，所以第一次说完就给他两颗星。' +
               '孩子说完，陪他一起听一遍录音，比任何评分都有用。</p>' +
-            '<p class="parent-note">🎤 想练得更细：让他照着「有谁 → 在哪里 → 在做什么」三问往下说；' +
+            '<p class="parent-note">' + Icons.svg("mic") + ' 想练得更细：让他照着「有谁 → 在哪里 → 在做什么」三问往下说；' +
               '说完了您再补一句「还想到什么？」，话就长了。</p>' +
             "</div>";
         }
@@ -938,7 +938,7 @@
         /* ---- 麦克风:跟读录音是唯一需要授权的功能,单独说清"授权/不授权会怎样" ---- */
         var rc = (window.Recorder && window.Recorder.diag) ? window.Recorder.diag() : null;
         if (rc) {
-          html += '<div class="panel"><h4>🎤 麦克风(跟我读)</h4>' +
+          html += '<div class="panel"><h4>' + Icons.svg("mic") + '麦克风(跟我读)</h4>' +
             '<div class="ab-row"><span class="ab-name">录音能力</span>' +
               '<span class="ab-val">' + yn(rc.supported, "可用", rc.stateName) + "</span></div>" +
             '<p class="parent-note">' + (rc.supported
@@ -962,7 +962,7 @@
             (sndAp.lastError ? '<div class="snd-row"><span>最近一次异常</span><span class="snd-bad">' + esc(sndAp.lastError) + "</span></div>" : "") +
           "</div>" +
           '<div class="backup-btns">' +
-            '<button class="btn btn-sky" id="snd-test">🔊 测试播放</button>' +
+            '<button class="btn btn-sky" id="snd-test">' + Icons.svg("speak") + '测试播放</button>' +
             '<button class="btn btn-ghost" id="snd-recheck">重新检测</button>' +
           "</div>" +
           '<p class="parent-note" id="snd-tip">' + sndAdvice(snd, sndAp) + "</p></div>";
@@ -987,7 +987,7 @@
                 '<span class="bi-name">' + esc(v.label) + "</span>" +
                 '<small>' + esc(engineName) + " · " + v.entries + " 条" + (v.current ? " · 当前" : "") + "</small>" +
               "</button>" +
-              '<button class="mini-btn" data-act="try">🔊 试听</button>' +
+              '<button class="mini-btn" data-act="try">' + Icons.svg("speak") + '试听</button>' +
             "</div>";
           });
           html += '</div><p class="parent-note" id="bi-tip">选中一个内置音色,全站(字/词/例句/角色台词)都用它。</p>';
@@ -1007,7 +1007,7 @@
             var label = x.name + (hq ? " ✨高音质" : "") + " · " + x.lang + (x.local ? "" : " · 需联网");
             html += '<option value="' + esc(x.id) + '"' + (x.id === curId ? " selected" : "") + ">" + esc(label) + "</option>";
           });
-          html += '</select><button class="btn btn-sky" id="voice-try">🔊 试听</button></div>';
+          html += '</select><button class="btn btn-sky" id="voice-try">' + Icons.svg("speak") + '试听</button></div>';
           if (!hasHQ) {
             html += '<p class="parent-note">💡 想要更自然的兜底声音:在系统里下载「增强/高级」中文音色。<br>' +
               "macOS:系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 中文(普通话),选带「增强」的下载<br>" +

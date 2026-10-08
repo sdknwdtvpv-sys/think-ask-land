@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 150" width="840" height="300">
+  <rect width="420" height="150" fill="#fffaf0"/>
+  <g fill="none" stroke="#3a3550" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- A: 宽胶囊 + 弧线 sweep=0 -->
+    <g transform="translate(20,10) scale(4)">
+      <rect x="8.6" y="2.8" width="6.8" height="11.2" rx="3.4"/>
+      <path d="M5.2 11.6a6.8 6.8 0 0 0 13.6 0"/>
+      <path d="M12 18.4v2.8"/>
+    </g>
+    <!-- B: 同 A，但弧线 sweep=1 -->
+    <g transform="translate(160,10) scale(4)">
+      <rect x="8.6" y="2.8" width="6.8" height="11.2" rx="3.4"/>
+      <path d="M5.2 11.6a6.8 6.8 0 0 1 13.6 0"/>
+      <path d="M12 18.4v2.8"/>
+    </g>
+    <!-- C: 同 A + 底座横线（更像"录音"） -->
+    <g transform="translate(300,10) scale(4)">
+      <rect x="8.6" y="2.6" width="6.8" height="11" rx="3.4"/>
+      <path d="M5.2 11.4a6.8 6.8 0 0 0 13.6 0"/>
+      <path d="M12 18.2v2.2"/>
+      <path d="M8.6 21.4h6.8"/>
+    </g>
+  </g>
+  <g font-family="PingFang SC" font-size="13" fill="#6b6580">
+    <text x="52" y="140">A sweep=0</text>
+    <text x="192" y="140">B sweep=1</text>
+    <text x="332" y="140">C + 底座</text>
+  </g>
+</svg>

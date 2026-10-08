@@ -157,7 +157,7 @@
         '<div class="sg-card">' +
           '<div class="sg-mascot">' + Mascot.trio("idle", 72) + "</div>" +
           '<div class="sg-title">点一下,开始玩</div>' +
-          '<button class="sg-btn" id="sg-go" aria-label="点一下开始">🔊</button>' +
+          '<button class="sg-btn" id="sg-go" aria-label="点一下开始">Icons.svg("speak")</button>' +
           '<div class="sg-note">从主屏幕打开时需要先点一下<br>才能播放声音(手机的规矩)</div>' +
         "</div>";
       document.body.appendChild(box);
@@ -254,7 +254,7 @@
             '<div class="home-meta">' +
               "<span>🔥 连续 <b>" + st.streak + "</b> 天</span>" +
               "<span>📚 已学 <b>" + c.learned + "</b>/" + total + "</span>" +
-              (rd && rd.read ? "<span>📖 读完 <b>" + rd.read + "</b> 篇</span>" : "") +
+              (rd && rd.read ? "<span>" + Icons.svg("book") + " 读完 <b>" + rd.read + "</b> 篇</span>" : "") +
             "</div>" +
           "</div>" +
           '<button class="today-task" data-go="' + taskGo + '">' +
@@ -308,7 +308,7 @@
               '<span class="menu-sub">学习报告 · 复习设置</span></span>' +
               '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
           "</div>" +
-          '<div class="home-foot">陪着孩子,一起把问题变成答案<br>适合 3~6 岁 · 每天 10 分钟 · 🔊 打开声音<br>' +
+          '<div class="home-foot">陪着孩子,一起把问题变成答案<br>适合 3~6 岁 · 每天 10 分钟 · ' + Icons.svg("speak") + ' 打开声音<br>' +
             '<a class="foot-link" href="privacy.html" target="_blank" rel="noopener">隐私说明</a></div>' +
         "</div>";
       view.querySelectorAll("[data-go]").forEach(function (b) {
@@ -561,12 +561,12 @@
             '<button class="btn btn-sky" id="act-speak">' + Icons.svg("speak") + "读汉字</button>" +
             '<button class="btn btn-grape" id="act-anim">' + Icons.svg("pencil") + "笔顺</button>" +
             '<button class="btn btn-coral" id="act-quiz">' + Icons.svg("grid") + "描一描</button>" +
-            '<button class="btn btn-sun" id="act-rec">🎤 跟我读</button>' +
+            '<button class="btn btn-sun" id="act-rec">' + Icons.svg("mic") + '跟我读</button>' +
           "</div>" +
           '<div class="rec-panel" id="rec-panel" hidden></div>' +
           ziliRow(ch) +
           '<div class="word-row" id="word-row"></div>' +
-          '<button class="sent-card" id="sent-card"><span class="sent-ico">📖</span><span>' + hl(ch.s, ch.c) + "</span></button>" +
+          '<button class="sent-card" id="sent-card"><span class="sent-ico">' + Icons.svg("book") + '</span><span>' + hl(ch.s, ch.c) + "</span></button>" +
           '<div class="card-nav">' +
             '<button class="nav-btn" id="nav-prev" aria-label="上一个字"' + (i === 0 ? " disabled" : "") + ">‹</button>" +
             '<button class="btn btn-mint know-btn" id="btn-know">' + (isLearned ? "学下一个 ▶" : "我会了 ✅") + "</button>" +
@@ -579,7 +579,7 @@
       ch.w.forEach(function (word) {
         var b = document.createElement("button");
         b.className = "word-chip";
-        b.innerHTML = hl(word, ch.c) + ' <span class="chip-speak">🔊</span>';
+        b.innerHTML = hl(word, ch.c) + ' <span class="chip-speak">' + Icons.svg("speak") + '</span>';
         b.addEventListener("click", function () {
           window.Speech.speak(word, 0.8);
           if (window.SFX) SFX.click();
@@ -630,11 +630,11 @@
 
       function recIdle(msg) {
         recMsg(
-          '<div class="rec-top">🎤 跟我读</div>' +
+          '<div class="rec-top">' + Icons.svg("mic") + '跟我读</div>' +
           '<div class="rec-sub">' + (msg || "点下面的按钮,读一遍「" + esc(ch.c) + "」,然后听听自己的声音。") + "</div>" +
           '<div class="rec-actions">' +
-            '<button class="btn btn-sun" id="rec-go">🎤 开始录音</button>' +
-            '<button class="btn btn-ghost" id="rec-model">🔊 先听示范</button>' +
+            '<button class="btn btn-sun" id="rec-go">' + Icons.svg("mic") + '开始录音</button>' +
+            '<button class="btn btn-ghost" id="rec-model">' + Icons.svg("speak") + '先听示范</button>' +
           "</div>" +
           '<div class="rec-note">录音只在这台设备上回放,不会上传,也不会保存。</div>'
         );
@@ -651,7 +651,7 @@
         if (!window.Recorder || !window.Recorder.supported()) {
           var why = (window.Recorder && window.Recorder.lastError()) ||
             "这台设备/浏览器不支持录音,或者页面不是安全连接(https)。不影响其它功能,继续学字就好。";
-          recMsg('<div class="rec-top">🎤 跟我读</div><div class="rec-sub">' + esc(why) + "</div>", "rec-off");
+          recMsg('<div class="rec-top">' + Icons.svg("mic") + '跟我读</div><div class="rec-sub">' + esc(why) + "</div>", "rec-off");
           return;
         }
         window.Recorder.start().then(function (h) {
@@ -675,7 +675,7 @@
           App.after(h.ms + 50, function () { if (recHandle === h && !recUrl) recFinish(); });
           h.onAutoStop = function () { if (recHandle === h && !recUrl) recFinish(); };
         }).catch(function (e) {
-          recMsg('<div class="rec-top">🎤 跟我读</div><div class="rec-sub">' + esc(e.message || String(e)) + "</div>", "rec-off");
+          recMsg('<div class="rec-top">' + Icons.svg("mic") + '跟我读</div><div class="rec-sub">' + esc(e.message || String(e)) + "</div>", "rec-off");
         });
       }
 
@@ -693,8 +693,8 @@
             '<div class="rec-top">🎉 录好了!听听你读的</div>' +
             '<div class="rec-actions">' +
               '<button class="btn btn-sky" id="rec-play">▶ 我的声音</button>' +
-              '<button class="btn btn-ghost" id="rec-model">🔊 听示范</button>' +
-              '<button class="btn btn-sun" id="rec-again">🎤 再录一次</button>' +
+              '<button class="btn btn-ghost" id="rec-model">' + Icons.svg("speak") + '听示范</button>' +
+              '<button class="btn btn-sun" id="rec-again">' + Icons.svg("mic") + '再录一次</button>' +
             "</div>" +
             '<div class="rec-note">录音只在这台设备上回放,不会上传,也不会保存。</div>'
           );
@@ -702,7 +702,7 @@
             try {
               var a = new Audio(r.url);
               a.play().catch(function () {
-                recMsg('<div class="rec-top">🎤 听我的</div><div class="rec-sub">浏览器拦住了自动播放,再点一次「我的声音」试试。</div>');
+                recMsg('<div class="rec-top">' + Icons.svg("mic") + '听我的</div><div class="rec-sub">浏览器拦住了自动播放,再点一次「我的声音」试试。</div>');
                 var again = recPanel.querySelector("#rec-play") || recPanel;
                 if (again.addEventListener) again.addEventListener("click", play);
               });

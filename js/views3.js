@@ -417,7 +417,7 @@
       });
 
       var html = '<div class="screen">' +
-        '<div class="practice-intro">📖 短文按<b>级别</b>分好了。点字能听读音,读完了还能玩找字游戏。' +
+        '<div class="practice-intro">' + Icons.svg("book") + ' 短文按<b>级别</b>分好了。点字能听读音,读完了还能玩找字游戏。' +
         '已读完 <b>' + window.Store.readCount() + "</b> / " + list.length + " 篇 · 已学 <b>" + learnedN + "</b> 字。</div>";
 
       /* 阅读进度条:一篇一篇地看得见(此前只有分组标题里的 x/y) */
@@ -518,7 +518,7 @@
         '<div class="story-body">' + body + "</div>" +
         '<div class="rd-tip" id="rd-tip">点一个字,听它怎么读</div>' +
         '<div class="story-actions">' +
-          '<button class="btn btn-sky" id="rd-play">🔊 读一遍</button>' +
+          '<button class="btn btn-sky" id="rd-play">' + Icons.svg("speak") + '读一遍</button>' +
           '<button class="btn btn-sun" id="rd-self-btn">🙋 我自己读</button>' +
           (target ? '<button class="btn btn-grape" id="rd-find">🎯 找「' + esc(target) + "」</button>" : "") +
           '<button class="btn btn-mint" id="rd-done">读完啦 ✅</button>' +
@@ -631,7 +631,7 @@
         var tip = q.t === "why" ? "为什么" : q.t === "where" ? "在哪里" : "谁 / 什么";
         quizBox.innerHTML =
           '<div class="rq-head"><span class="rq-tag">' + tip + '</span>读懂了没有?' +
-            '<button class="rq-say" id="rq-say" aria-label="把题目读给我听">🔊</button></div>' +
+            '<button class="rq-say" id="rq-say" aria-label="把题目读给我听">' + Icons.svg("speak") + '</button></div>' +
           '<div class="rq-q">' + esc(q.q) + "</div>" +
           '<div class="rq-opts">' + q.opts.map(function (o, i) {
             var cls = "rq-opt";

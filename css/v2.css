@@ -109,6 +109,14 @@ body::after { /* 全局纸纹,极淡 */
 .ico { width: 1.25em; height: 1.25em; flex: 0 0 auto; display: inline-block; vertical-align: -.22em; }
 .ico-solo { width: 24px; height: 24px; }
 
+/* 大圆钮里的喇叭图标 —— 为什么需要单独定尺寸:
+   这两个钮(110/118px)原本靠 font-size:52~54px 把 emoji 撑大;
+   换成 .ico 后,它的宽度是 1.25em,会跟着长到 65~67px,
+   而 SVG 的描边是等比缩放的,24px 网格上的 2.2 到了 65px 会变成约 6px —— 线条过粗。
+   这里显式收到与圆钮相称的尺寸(描边约 4.2px)。 */
+.speak-big .ico { width: 46px; height: 46px; }
+.sg-btn .ico { width: 50px; height: 50px; }
+
 /* ---------- 熊猫角色 ---------- */
 .mascot { display: block; width: 104px; height: 104px; overflow: visible; }
 .mascot.is-idle { animation: mascot-breathe 3.6s ease-in-out infinite; }

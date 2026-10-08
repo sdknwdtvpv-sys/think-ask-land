@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 140" width="840" height="280">
+  <rect width="420" height="140" fill="#fffaf0"/>
+  <g fill="none" stroke="#3a3550" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- A: 胶囊 + 弧形支架 + 立杆（标准话筒） -->
+    <g transform="translate(14,14) scale(4)">
+      <rect x="9.2" y="3.4" width="5.6" height="10.4" rx="2.8"/>
+      <path d="M5.8 11.6a6.2 6.2 0 0 1 12.4 0"/>
+      <path d="M12 17.8v2.8"/>
+    </g>
+    <!-- B: 同上 + 底座横线 -->
+    <g transform="translate(154,14) scale(4)">
+      <rect x="9.2" y="3" width="5.6" height="10.4" rx="2.8"/>
+      <path d="M5.8 11.2a6.2 6.2 0 0 1 12.4 0"/>
+      <path d="M12 17.4v2.4"/>
+      <path d="M8.4 20.6h7.2"/>
+    </g>
+    <!-- C: 参考 —— 项目已有的 speak（喇叭），用来核对线条粗细与风格是否一致 -->
+    <g transform="translate(294,14) scale(4)">
+      <path d="M11.2 4.8 6.6 8.8H3.4v6.4h3.2l4.6 4z"/>
+      <path d="M15.4 9.4a3.6 3.6 0 0 1 0 5.2M18 6.8a7.2 7.2 0 0 1 0 10.4"/>
+    </g>
+  </g>
+  <g font-family="PingFang SC" font-size="13" fill="#6b6580">
+    <text x="62" y="132">A 标准话筒</text>
+    <text x="202" y="132">B 带底座</text>
+    <text x="342" y="132">C 现有喇叭（风格基准）</text>
+  </g>
+</svg>

@@ -77,7 +77,7 @@
 
     view.innerHTML = '<div class="screen talk-stage">' +
       '<div class="talk-scene-big" id="tk-pic">' + sc.emoji + "</div>" +
-      '<button class="talk-sentence" id="tk-say">' + esc(sc.scene) + '<span class="tk-spk">🔊</span></button>' +
+      '<button class="talk-sentence" id="tk-say">' + esc(sc.scene) + '<span class="tk-spk">' + Icons.svg("speak") + '</span></button>' +
       '<div class="talk-scaffold"><span class="ts-label">照着问</span>' +
         '<span class="ts-step">有谁?</span><span class="ts-arrow">→</span>' +
         '<span class="ts-step">在哪里?</span><span class="ts-arrow">→</span>' +
@@ -112,11 +112,11 @@
 
     function idle(note) {
       msg(
-        '<div class="tk-top">🎤 现在听你说</div>' +
+        '<div class="tk-top">' + Icons.svg("mic") + '现在听你说</div>' +
         '<div class="tk-sub">' + (note || "想好了就点下面的按钮，慢慢说，说错了也没关系。") + "</div>" +
         '<div class="tk-actions">' +
-          '<button class="btn btn-sun" id="tk-go">🎤 我要说</button>' +
-          '<button class="btn btn-ghost" id="tk-listen">🔊 再听一遍</button>' +
+          '<button class="btn btn-sun" id="tk-go">' + Icons.svg("mic") + '我要说</button>' +
+          '<button class="btn btn-ghost" id="tk-listen">' + Icons.svg("speak") + '再听一遍</button>' +
         "</div>" +
         '<div class="tk-note">🔒 录音只在这台设备上回放，不上传、不保存。</div>'
       );
@@ -130,7 +130,7 @@
       if (!window.Recorder || !window.Recorder.supported()) {
         var why = (window.Recorder && window.Recorder.lastError()) ||
           "这台设备/浏览器不支持录音，或者页面不是安全连接（https）。不影响其它功能 —— 直接对着孩子说「你来讲讲看」也一样。";
-        msg('<div class="tk-top">🎤 现在听你说</div><div class="tk-sub">' + esc(why) + "</div>", "tk-off");
+        msg('<div class="tk-top">' + Icons.svg("mic") + '现在听你说</div><div class="tk-sub">' + esc(why) + "</div>", "tk-off");
         return;
       }
       window.Recorder.start({ maxMs: MAX }).then(function (h) {
@@ -153,7 +153,7 @@
         App.after(h.ms + 50, function () { if (handle === h && !url) finish(); });
         h.onAutoStop = function () { if (handle === h && !url) finish(); };
       }).catch(function (e) {
-        msg('<div class="tk-top">🎤 现在听你说</div><div class="tk-sub">' + esc(e.message || String(e)) + "</div>", "tk-off");
+        msg('<div class="tk-top">' + Icons.svg("mic") + '现在听你说</div><div class="tk-sub">' + esc(e.message || String(e)) + "</div>", "tk-off");
       });
     }
 
@@ -173,8 +173,8 @@
         '<div class="tk-top">🎉 说完了，听听你自己的</div>' +
         '<div class="tk-actions">' +
           '<button class="btn btn-sky" id="tk-play">▶ 我的声音</button>' +
-          '<button class="btn btn-ghost" id="tk-listen">🔊 再听题目</button>' +
-          '<button class="btn btn-sun" id="tk-again">🎤 再说一次</button>' +
+          '<button class="btn btn-ghost" id="tk-listen">' + Icons.svg("speak") + '再听题目</button>' +
+          '<button class="btn btn-sun" id="tk-again">' + Icons.svg("mic") + '再说一次</button>' +
         "</div>" +
         '<div class="tk-marks" id="tk-marks">' +
           '<span class="tk-marks-label">爸爸妈妈看一下（不打分，只是记一笔）：</span>' +
