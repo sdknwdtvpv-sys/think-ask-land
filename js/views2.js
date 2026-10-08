@@ -340,16 +340,16 @@
       var learnedN = window.Store.counts().learned;
       view.innerHTML =
         '<div class="screen v4 review-v4" data-screen="review">' +
-          '<div class="review-info">🧠 <b>记忆小秘密:</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现,复习一次就记得更牢,连续答对 4 次就进入<b>长期记忆</b>啦!</div>' +
+          '<div class="review-info">' + Icons.svg("sparkle") + '<b>记忆小秘密:</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现,复习一次就记得更牢,连续答对 4 次就进入<b>长期记忆</b>啦!</div>' +
           (due.length === 0
             ? '<div class="empty-tip"><span class="big">🎈</span>今天没有要复习的字' + (learnedN ? ",学得真棒!<br>明天再来看看,或者去学新字吧" : "<br>先去学几个新字吧") + "</div>" +
               '<button class="btn btn-lg btn-sky" id="go-learn">' + Icons.svg("book") + '去学新字</button>'
             : '<div style="text-align:center;margin:26px 0">' +
-                '<div style="font-size:74px">📬</div>' +
+                '<div style="font-size:74px">' + Icons.svg("mail") + '</div>' +
                 '<div style="font-size:22px;font-weight:900;margin:10px 0 4px">有 ' + due.length + " 个字想见你!</div>" +
                 '<div style="color:var(--ink-light);font-size:14px;font-weight:600">翻翻卡,想一想,你还认识它们吗?</div>' +
               "</div>" +
-              '<button class="btn btn-lg btn-mint" id="go-review">🔄 开始复习(' + Math.min(due.length, 20) + "张卡)</button>") +
+              '<button class="btn btn-lg btn-mint" id="go-review">' + Icons.svg("refresh") + '开始复习(' + Math.min(due.length, 20) + "张卡)</button>") +
         "</div>";
       var b1 = view.querySelector("#go-learn");
       if (b1) b1.addEventListener("click", function () { App.navigate("#/groups"); });
@@ -452,7 +452,7 @@
             '<div class="score-sub">共复习 ' + cards.length + " 个字,认识 " + knew + " 个<br>忘记的字一会儿还会再来找你哦</div>" +
             '<div class="end-stars">获得 ' + earned + " ⭐</div>" +
             '<div class="end-btns">' +
-              '<button class="btn btn-lg btn-ghost" id="go-home">🏠 回首页</button>' +
+              '<button class="btn btn-lg btn-ghost" id="go-home">' + Icons.svg("home") + '回首页</button>' +
             "</div>" +
           "</div>";
         window.UI.rain();
@@ -541,7 +541,7 @@
         var a = 12 + ((Math.random() * 18) | 0), b = 3 + ((Math.random() * 7) | 0);
         v.innerHTML =
           '<div class="screen v4 gate-v4" data-screen="gate"><div class="gate-box">' +
-            '<div class="gate-emoji">🧮</div><h3>家长验证</h3>' +
+            '<div class="gate-emoji">' + Icons.svg("math") + '</div><h3>家长验证</h3>' +
             "<p>为了防止小朋友误操作,请<b>家长</b>回答下面这道题:<br>" +
             "小朋友请叫爸爸妈妈来 🙋</p>" +
             '<div class="gate-q">' + a + " × " + b + " = ?</div>" +
@@ -692,7 +692,7 @@
           var r = E.report();
           if (unlocked) {
             return '<div class="panel" id="panel-entitle"><h4>' + Icons.svg("trophy") + '完整内容</h4>' +
-              '<p class="parent-note">✅ <b>已解锁</b> —— 分级阅读 L3~L5、拼音进阶、说一说、线下物料打印都可以用了。' +
+              '<p class="parent-note">' + Icons.svg("check") + '<b>已解锁</b> —— 分级阅读 L3~L5、拼音进阶、说一说、线下物料打印都可以用了。' +
               '<br>感谢支持!这一份是<b>一次性买断</b>,不会再收费。</p></div>';
           }
           var rows = E.paidFeatures().map(function (t) {
@@ -720,8 +720,8 @@
           return '<div class="panel" id="panel-backup"><h4>' + Icons.svg("shield") + "备份与换手机</h4>" +
             '<p class="parent-note">进度保存在本机浏览器里。换手机、清理浏览器数据前,先导出一份存档(一个 json 文件),在新设备上导入即可继续。</p>' +
             '<div class="backup-btns">' +
-              '<button class="btn btn-sky" id="btn-export">⬇️ 导出存档</button>' +
-              '<button class="btn btn-ghost" id="btn-import">⬆️ 导入存档</button>' +
+              '<button class="btn btn-sky" id="btn-export">' + Icons.svg("down") + '导出存档</button>' +
+              '<button class="btn btn-ghost" id="btn-import">' + Icons.svg("up") + '导入存档</button>' +
             "</div>" +
             '<input type="file" id="import-file" accept=".json,application/json" style="display:none">' +
             '<div id="import-preview" class="import-preview" hidden></div>' +
@@ -799,10 +799,10 @@
           });
           html += "</div>";
           var top = causes[0];
-          html += '<p class="parent-note">💡 主要在<b>' + esc(top.name) + "</b>上出错:" + causeAdvice[top.k] + "</p>";
+          html += '<p class="parent-note">' + Icons.svg("bulb") + '主要在<b>' + esc(top.name) + "</b>上出错:" + causeAdvice[top.k] + "</p>";
           var topPool = DB.errorPool(top.k);
           if (topPool.length >= 4) {
-            html += '<button class="btn btn-sky" id="btn-drill" data-cause="' + top.k + '">🎯 针对「' + esc(top.name) + '」练一轮(' + topPool.length + " 字)</button>";
+            html += '<button class="btn btn-sky" id="btn-drill" data-cause="' + top.k + '">' + Icons.svg("target") + '针对「' + esc(top.name) + '」练一轮(' + topPool.length + " 字)</button>";
           } else {
             html += '<p class="parent-note">同类错的字还不到 4 个,先在「趣味练习 → 错题重练」里综合练。</p>';
           }
@@ -812,7 +812,7 @@
         /* ---- 说一说(口语表达):产品从"认字"走到"表达"的第一步 ---- */
         var tk = window.Store.talkReport ? window.Store.talkReport() : null;
         if (tk && tk.runs) {
-          html += '<div class="panel"><h4>🗣️ 说一说（看图说话）</h4>' +
+          html += '<div class="panel"><h4>' + Icons.svg("speak") + '说一说（看图说话）</h4>' +
             '<div class="rp-line"><span>说过 <b>' + tk.scenes + "</b> 个场景</span>" +
               '<span class="rp-week">共 ' + tk.runs + " 次</span>" +
               (tk.week ? '<span class="rp-cur">本周 <b>' + tk.week + "</b> 个</span>" : "") +
@@ -822,7 +822,7 @@
               '<span class="rp-lv">用上新词 ' + tk.marks.word + "</span>" +
               '<span class="rp-lv">说得清楚 ' + tk.marks.clear + "</span>" +
             "</div>" +
-            '<p class="parent-note">💡 <b>这里不打分</b> —— 好听的不好听的，爸爸妈妈说了算。' +
+            '<p class="parent-note">' + Icons.svg("bulb") + '<b>这里不打分</b> —— 好听的不好听的，爸爸妈妈说了算。' +
               '3~6 岁最该练的是「敢说」，所以第一次说完就给他两颗星。' +
               '孩子说完，陪他一起听一遍录音，比任何评分都有用。</p>' +
             '<p class="parent-note">' + Icons.svg("mic") + ' 想练得更细：让他照着「有谁 → 在哪里 → 在做什么」三问往下说；' +
@@ -843,10 +843,10 @@
                 '<span class="ab-sub">练 ' + x.runs + " 遍 · 错 " + x.miss + " 笔" +
                 (x.worst >= 0 ? " · 第 " + (x.worst + 1) + " 笔最容易错" : "") + "</span></div>";
             }).join("") + "</div>";
-            html += '<p class="parent-note">💡 点开这些字卡 →「描一描」，' +
+            html += '<p class="parent-note">' + Icons.svg("bulb") + '点开这些字卡 →「描一描」，' +
               "页面上的<b>笔顺条</b>可以单独演那一笔给你看（不用从头播一遍）。</p>";
           } else {
-            html += '<p class="parent-note">💡 目前每一笔都写得对。可以让他在纸上写一遍试试 —— 屏幕上写得好，纸上是另一回事。</p>';
+            html += '<p class="parent-note">' + Icons.svg("bulb") + '目前每一笔都写得对。可以让他在纸上写一遍试试 —— 屏幕上写得好，纸上是另一回事。</p>';
           }
           if (sr.mistakes === 0 && sr.runs >= 3) {
             html += '<p class="parent-note">描红全对，说明他对手上这支"笔"已经有把握了。</p>';
@@ -867,7 +867,7 @@
               var full = l.total > 0 && l.read >= l.total;
               return '<span class="rp-lv' + (full ? " full" : "") + '"><i>' + l.id + "</i>" + l.read + "/" + l.total + "</span>";
             }).join("") + "</div>" +
-            '<p class="parent-note">💡 ' + (rd.read === 0
+            '<p class="parent-note">' + Icons.svg("bulb") + '' + (rd.read === 0
               ? "还没开始读。短文全部用<b>孩子学过的字</b>写成,点「读一读 → 我自己读」,孩子自己就能读完一篇,不需要您在旁边指字。"
               : (rd.week === 0
                 ? "这周还没读新篇目。每天读一篇就够,重在<b>每天</b>而不是每天读很多。"
@@ -889,7 +889,7 @@
               '<span class="ab-val">' + (val === null ? "—" : val + "%") + "</span>" +
               '<span class="ab-sub">' + label + "</span></div>";
           }).join("") + "</div>" +
-          '<p class="parent-note">💡 ' + esc(window.Store.abilityAdvice()) + "</p></div>";
+          '<p class="parent-note">' + Icons.svg("bulb") + '' + esc(window.Store.abilityAdvice()) + "</p></div>";
 
         /* ---- 亲子任务:每天一张,线下做 ---- */
         var quests = window.QUESTS || [];
@@ -903,7 +903,7 @@
               '<span class="tq-foot">约 ' + q.min + " 分钟 · " + esc(q.tag) + "</span></span></div>" +
             '<div class="backup-btns">' +
               '<button class="btn btn-ghost" id="btn-quest-next">换一个</button>' +
-              '<button class="btn btn-sky" id="btn-print-quests">🖨️ 打印任务卡</button>' +
+              '<button class="btn btn-sky" id="btn-print-quests">' + Icons.svg("print") + '打印任务卡</button>' +
             "</div>" +
             '<p class="parent-note">3~6 岁识字的主战场在家里。这些任务都不用备课,照着念就能做。</p></div>';
         }
@@ -914,14 +914,14 @@
           '<p class="parent-note">屏幕上练,纸上也要练。<b>懒人做法</b>：直接打「本周物料包」——' +
             "它会按这周学过的字自动出识字卡 + 描红格 + 今日任务 + 记录表，一次打印贴冰箱。</p>" +
           '<div class="backup-btns">' +
-            '<button class="btn btn-sun" id="pr-pack">📦 本周物料包' +
+            '<button class="btn btn-sun" id="pr-pack">' + Icons.svg("package") + '本周物料包' +
               (wsq.learned ? "（" + wsq.learned + " 字）" : "") + "</button>" +
-            '<button class="btn btn-grape" id="pr-cert">🏆 每周奖状</button>' +
+            '<button class="btn btn-grape" id="pr-cert">' + Icons.svg("trophy") + '每周奖状</button>' +
           "</div>" +
           '<div class="backup-btns">' +
             '<button class="btn btn-sky" id="pr-cards">🃏 识字卡</button>' +
-            '<button class="btn btn-ghost" id="pr-write">✍️ 描红练习纸</button>' +
-            '<button class="btn btn-ghost" id="pr-quests">🎲 任务卡</button>' +
+            '<button class="btn btn-ghost" id="pr-write">' + Icons.svg("pencil") + '描红练习纸</button>' +
+            '<button class="btn btn-ghost" id="pr-quests">' + Icons.svg("game") + '任务卡</button>' +
           "</div></div>";
 
         /* ---- 声音自检:手机上"没声音"时,这张表能直接指出是哪一环断了 ---- */
@@ -938,7 +938,7 @@
               ? "孩子可以读一遍自己的声音再听 —— 这是把「认字」变成「会读」的关键一步。"
               : "这台设备/浏览器用不了录音,或者页面不是 https。<b>不影响其它任何功能</b>,只少了「跟我读」。") +
             "</p>" +
-            '<p class="parent-note">🔒 录音<b>只在这台设备上回放</b>:不上传、不保存,离开页面立刻释放麦克风。</p>' +
+            '<p class="parent-note">' + Icons.svg("lock") + '录音<b>只在这台设备上回放</b>:不上传、不保存,离开页面立刻释放麦克风。</p>' +
             (rc.lastError ? '<p class="parent-note">上次失败的原因:' + esc(rc.lastError) + "</p>" : "") +
             "</div>";
         }
@@ -1002,7 +1002,7 @@
           });
           html += '</select><button class="btn btn-sky" id="voice-try">' + Icons.svg("speak") + '试听</button></div>';
           if (!hasHQ) {
-            html += '<p class="parent-note">💡 想要更自然的兜底声音:在系统里下载「增强/高级」中文音色。<br>' +
+            html += '<p class="parent-note">' + Icons.svg("bulb") + '想要更自然的兜底声音:在系统里下载「增强/高级」中文音色。<br>' +
               "macOS:系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 中文(普通话),选带「增强」的下载<br>" +
               "Windows:设置 → 时间和语言 → 语音 → 管理语音 → 添加语音(中文)<br>" +
               "iPhone/iPad:设置 → 辅助功能 → 朗读内容 → 声音 → 中文</p>";

@@ -116,7 +116,7 @@
       window.Store.learnedList().forEach(function (c) { learnedSet[c] = 1; });
 
       var html = '<div class="screen v4 pinyin-v4" data-screen="pinyin">' +
-        '<div class="practice-intro">🔤 拼音是给汉字注音的符号。这个阶段<b>只要求听和认</b>,不要求默写 —— 点一点,听一听就好。</div>';
+        '<div class="practice-intro">' + Icons.svg("pinyin") + '拼音是给汉字注音的符号。这个阶段<b>只要求听和认</b>,不要求默写 —— 点一点,听一听就好。</div>';
 
       /* ---------- 声母 ---------- */
       html += '<div class="panel"><h4>' + Icons.svg("speak") + '声母(23 个)</h4>' +
@@ -423,7 +423,7 @@
       /* 阅读进度条:一篇一篇地看得见(此前只有分组标题里的 x/y) */
       var pg = progress();
       html += '<div class="read-progress">' +
-        '<div class="rp-line"><span>📚 已读 <b>' + pg.read + "</b>/" + pg.total + " 篇</span>" +
+        '<div class="rp-line"><span>' + Icons.svg("book") + '已读 <b>' + pg.read + "</b>/" + pg.total + " 篇</span>" +
           (pg.week ? '<span class="rp-week">本周 +' + pg.week + "</span>" : "") +
           (pg.cur ? '<span class="rp-cur">当前 <b>' + pg.cur + "</b> " + esc(pg.curName) + "</span>" : "") +
         "</div>" +
@@ -449,12 +449,12 @@
           "<span class=\"lvl-name\">" + esc(lv.name) + "</span>" +
           '<span class="lvl-meta">' + esc(lv.hint) + " · " + doneN + "/" + rows.length + " 篇" + "</span></div>";
         if (PAID_LV[lv.id] && !paidUnlocked) {
-          html += '<div class="lvl-note">🔒 ' + lv.id + " 共 " + rows.length +
+          html += '<div class="lvl-note">' + Icons.svg("lock") + '' + lv.id + " 共 " + rows.length +
             " 篇属于<b>完整内容包</b>,还没有解锁。请家长到「家长中心 → 完整内容」查看。</div>";
           return;                                   // 未解锁就不渲染这些卡片
         }
         if (locked && lv.id !== "L1") {
-          html += '<div class="lvl-note">💡 建议学过 ' + lv.need + " 个字再来读这一级(现在 " + learnedN + " 个)。想读也可以直接点。</div>";
+          html += '<div class="lvl-note">' + Icons.svg("bulb") + '建议学过 ' + lv.need + " 个字再来读这一级(现在 " + learnedN + " 个)。想读也可以直接点。</div>";
         }
         html += '<div class="read-list">';
         rows.forEach(function (r) {
@@ -462,7 +462,7 @@
           html += '<button class="read-card' + (r.read ? " done" : "") + '" data-id="' + r.p.id + '">' +
             '<span class="rc-emoji">' + r.p.emoji + "</span>" +
             '<span class="rc-body"><span class="rc-title">' + esc(r.p.title) +
-              (r.read ? '<span class="rc-badge">✅ 读过</span>' : "") + "</span>" +
+              (r.read ? '<span class="rc-badge">' + Icons.svg("check") + '读过</span>' : "") + "</span>" +
               '<span class="rc-meta">' + r.total + " 个不同的字 · 已学 " + r.known + " 个</span>" +
               '<span class="rc-bar"><i style="width:' + pct + '%"></i></span>' +
             "</span><span class=\"scope-go\">›</span></button>";
@@ -519,8 +519,8 @@
         '<div class="rd-tip" id="rd-tip">点一个字,听它怎么读</div>' +
         '<div class="story-actions">' +
           '<button class="btn btn-sky" id="rd-play">' + Icons.svg("speak") + '读一遍</button>' +
-          '<button class="btn btn-sun" id="rd-self-btn">🙋 我自己读</button>' +
-          (target ? '<button class="btn btn-grape" id="rd-find">🎯 找「' + esc(target) + "」</button>" : "") +
+          '<button class="btn btn-sun" id="rd-self-btn">' + Icons.svg("users") + '我自己读</button>' +
+          (target ? '<button class="btn btn-grape" id="rd-find">' + Icons.svg("target") + '找「' + esc(target) + "」</button>" : "") +
           '<button class="btn btn-mint" id="rd-done">读完啦 ✅</button>' +
         "</div>" +
         '<div class="find-hud" id="rd-find-hud" hidden></div>' +

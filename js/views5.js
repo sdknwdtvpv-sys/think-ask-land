@@ -43,7 +43,7 @@
       var done = window.Store.talkCount ? window.Store.talkCount() : 0;
 
       var html = '<div class="screen v4 talk-v4" data-screen="talk">' +
-        '<div class="practice-intro">🗣️ 看一张图，说一段话。<b>说一句也行，说三句也行</b> —— ' +
+        '<div class="practice-intro">' + Icons.svg("speak") + '看一张图，说一段话。<b>说一句也行，说三句也行</b> —— ' +
           '这里不打分，好听不好听，爸爸妈妈说了算。' +
           (done ? '已经说过 <b>' + done + "</b> 个场景。" : "") + "</div>" +
         '<div class="talk-scaffold"><span class="ts-label">照着问</span>' +
@@ -118,7 +118,7 @@
           '<button class="btn btn-sun" id="tk-go">' + Icons.svg("mic") + '我要说</button>' +
           '<button class="btn btn-ghost" id="tk-listen">' + Icons.svg("speak") + '再听一遍</button>' +
         "</div>" +
-        '<div class="tk-note">🔒 录音只在这台设备上回放，不上传、不保存。</div>'
+        '<div class="tk-note">' + Icons.svg("lock") + '录音只在这台设备上回放，不上传、不保存。</div>'
       );
       panel.querySelector("#tk-go").addEventListener("click", begin);
       panel.querySelector("#tk-listen").addEventListener("click", function () { speak(sc.scene, 0.78); });
@@ -140,7 +140,7 @@
           '<div class="tk-top tk-live">🔴 在听你说…</div>' +
           '<div class="tk-sub">还可以说 <b id="tk-left">' + left + "</b> 秒</div>" +
           '<div class="tk-actions"><button class="btn btn-mint" id="tk-stop">说好了 ✓</button></div>' +
-          '<div class="tk-note">🔒 录音只在这台设备上回放，不上传。</div>'
+          '<div class="tk-note">' + Icons.svg("lock") + '录音只在这台设备上回放，不上传。</div>'
         );
         panel.querySelector("#tk-stop").addEventListener("click", finish);
         var tick = setInterval(function () {
@@ -184,7 +184,7 @@
           }).join("") +
         "</div>" +
         '<div class="tk-actions"><button class="btn btn-mint" id="tk-done">说好了，收起来 ✓</button></div>' +
-        '<div class="tk-note">🔒 录音只在这台设备上回放，不上传、不保存。</div>'
+        '<div class="tk-note">' + Icons.svg("lock") + '录音只在这台设备上回放，不上传、不保存。</div>'
       );
       var play = function () {
         try {

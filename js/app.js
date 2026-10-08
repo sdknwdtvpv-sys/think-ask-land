@@ -433,7 +433,8 @@
       var gi = parseInt(p.g || "0", 10);
       var g = window.CharDB.GROUPS[gi];
       if (!g) { App.navigate("#/groups"); return; }
-      App.setTopbar(g.icon + " " + g.name, true);
+      /* 顶栏不再带 emoji 岛图标 —— 与地图一致改用序号表达"第几岛" */
+      App.setTopbar("第 " + (gi + 1) + " 岛 · " + g.name, true);
       var st = window.Store.state;
       var learned = g.chars.filter(function (ch) { return st.chars[ch.c] && st.chars[ch.c].learned; }).length;
       var pct = learned / g.chars.length * 100;
@@ -446,7 +447,7 @@
                 '<circle class="ring-bg" cx="50" cy="50" r="44"/>' +
                 '<circle class="ring-fg" cx="50" cy="50" r="44" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct / 100)).toFixed(1) + '"/>' +
               "</svg>" +
-              '<span class="learn-ring-emoji">' + g.icon + "</span>" +
+              '<span class="learn-ring-num">' + (gi + 1) + "</span>" +
             "</span>" +
             '<div><div class="learn-title">' + esc(g.name) + '</div>' +
             '<div class="learn-sub">已学 ' + learned + " / " + g.chars.length + " · 点一点字卡开始学</div></div>" +
@@ -644,7 +645,7 @@
           recHandle = h;
           var left = Math.round(h.ms / 1000);
           recMsg(
-            '<div class="rec-top rec-live">🔴 正在录音… 读吧!</div>' +
+            '<div class="rec-top rec-live"><span class="rec-dot"></span>正在录音… 读吧!</div>' +
             '<div class="rec-sub">还可以读 <b id="rec-left">' + left + "</b> 秒</div>" +
             '<div class="rec-actions"><button class="btn btn-mint" id="rec-stop">读好了 ✓</button></div>' +
             '<div class="rec-note">录音只在这台设备上回放,不会上传。</div>'
