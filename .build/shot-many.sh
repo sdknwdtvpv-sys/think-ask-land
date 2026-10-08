@@ -63,6 +63,14 @@ cat >> www/__many.js <<'HDR'
 (function () {
   function go(h) { try { window.App.navigate(h); } catch (e) {} }
 HDR
+if [ "${HZ_PARENT:-0}" = "1" ]; then
+  # 家长门通过标记落在 sessionStorage —— 想截"门后"的家长中心就得先置上它,
+  # 否则每一屏都只会看到那道乘法题
+  cat >> www/__many.js <<'PARENT'
+  try { sessionStorage.setItem("hanziParentOk", "1"); } catch (e) {}
+PARENT
+fi
+
 if [ "$SEED" = "1" ]; then
   cat >> www/__many.js <<'SEED'
   setTimeout(function () {

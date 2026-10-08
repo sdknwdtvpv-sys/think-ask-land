@@ -717,3 +717,43 @@ html.v4 .empty-tip {
   border: 1px solid var(--line); border-radius: var(--r-lg);
 }
 html.v4 .empty-tip .big { font-size: 44px; }
+
+/* ---------------- 读一读 ----------------
+   旧版把级别徽章做成亮蓝实心(var(--sky-deep))、进度条做成薄荷绿,
+   都是糖果色板的遗留。级别徽章改用中性命中 + 强调色字,
+   进度条用 ok 绿(与"已学"的语义一致,但不是旧的薄荷色)。 */
+html.v4 .lvl-tag {
+  font-family: var(--font-num); font-size: var(--fs-xs); font-weight: 800;
+  color: var(--primary); background: var(--primary-bg);
+  border-radius: var(--r-sm); padding: 2px 8px; letter-spacing: .5px;
+}
+html.v4 .lvl-head { display: flex; align-items: center; gap: var(--s2); }
+html.v4 .lvl-note {
+  display: flex; align-items: center; gap: var(--s2);
+  font-size: var(--fs-sm); color: var(--ink-3);
+}
+html.v4 .lvl-note .ico { width: 15px; height: 15px; color: var(--ink-3); }
+html.v4 .read-progress {
+  box-shadow: none; background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r);
+}
+/* 进度条:旧版是薄荷绿渐变 */
+html.v4 .lvl-bar i,
+html.v4 .read-card .rc-bar i,
+html.v4 .pcard .pc-bar i { background: var(--ok); }
+
+/* ============================================================
+   [hidden] 必须真的隐藏
+   ------------------------------------------------------------
+   实测发现一个既有的严重 bug（不是我引入的，来自 v2.2.0 的自读模式）：
+     .selfread { display: flex; ... }   ← 作者样式
+     <div class="selfread" hidden>      ← hidden 只由 UA 样式提供 display:none
+   作者样式的优先级高于 UA 样式，于是 **hidden 完全失效** ——
+   自读覆盖层永远显示、盖住整个故事页，孩子根本看不到故事内容。
+   （项目里其它三个同类元素都手写了 [hidden] 规则，唯独漏了这个。）
+
+   同一类陷阱还出现在 srEnter() 里:它靠 story-head/story-body/... 的
+   hidden = true 来隐藏，而那些元素同样有 display 声明。
+   与其逐个补规则（补了还会再漏），不如用一条全局防御把它根治。
+   ============================================================ */
+html.v4 [hidden] { display: none !important; }
