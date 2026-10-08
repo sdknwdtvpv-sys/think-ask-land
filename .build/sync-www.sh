@@ -88,3 +88,28 @@ for must in index.html js/app.js js/entitlements.js; do
 done
 
 echo "✅ www/ 已组装:$(du -sh "$OUT" | cut -f1)  文件数:$(find "$OUT" -type f | wc -l | tr -d ' ')"
+
+# ---------- 防呆:www/ 干净 ≠ 打进 App 的是干净的 ----------
+# 背景(实测踩过,而且是装到真机上才发现的):
+#   我在 www/ 里做 iPad 商店截图时注入过 __shots.js(会播种 48 个已学 + 一堆星星),
+#   截完图用本脚本重建了干净的 www/ —— **但忘了跑 `npx cap copy ios`**。
+#   而 Capacitor 真机构建用的是 ios/App/App/public/,**不是** www/,
+#   于是那个带测试驱动的调试包被装到了手机上,表现为:
+#   "全新安装,却已经显示 48/761 已学、151 颗星" —— 极容易被误当成存储串数据。
+#   所以这里主动比对一次,别再靠人记得。
+PUB="$ROOT/ios/App/App/public"
+if [ -d "$PUB" ]; then
+  STALE=""
+  diff -q "$OUT/index.html" "$PUB/index.html" >/dev/null 2>&1 || STALE="index.html 与 www/ 不一致"
+  if ls "$PUB"/__*.js >/dev/null 2>&1; then
+    STALE="${STALE:+$STALE；}public/ 里还有临时测试驱动 $(cd "$PUB" && ls __*.js | tr '\n' ' ')"
+  fi
+  if [ -n "$STALE" ]; then
+    echo ""
+    echo "⚠️  ios/App/App/public/ 与 www/ 不一致：$STALE"
+    echo "    ⚠️ 真机构建用的是 public/ —— 不同步就会把旧内容（甚至测试驱动）打进 App。"
+    echo "    修复：npx cap copy ios"
+  else
+    echo "✅ ios/App/App/public/ 与 www/ 一致（可以直接构建真机包）"
+  fi
+fi
