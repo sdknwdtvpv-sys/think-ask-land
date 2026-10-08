@@ -43,6 +43,19 @@ echo "════════ 多屏截图（${#} 屏 · 每屏 ${DWELL}s）═
 echo "▶ [1/5] 组装 www/"
 bash .build/sync-www.sh >/dev/null 2>&1 || exit 1
 
+if [ "${HZ_FORCE_SG:-0}" = "1" ]; then
+  # 声音解锁页只在"从主屏幕启动"(display-mode: standalone)时出现,模拟器里看不到。
+  # 想验收它只能临时把条件改成恒真 —— 总比"盲改样式"强。
+  python3 - <<'PYEOF'
+p = "www/js/app.js"
+s = open(p, encoding="utf-8").read()
+s2 = s.replace("if (!standalone) return;", "/* 截图临时 */ standalone = true;")
+assert s2 != s, "soundGate 条件没找到"
+open(p, "w", encoding="utf-8").write(s2)
+PYEOF
+  echo "ℹ️  已临时强制显示声音解锁页（仅 www/）"
+fi
+
 if [ "${HZ_UNLOCK:-0}" = "1" ]; then
   # 只在 www/ 里临时关闭门控（不动源码）—— 否则拼音/读一读/说一说/打印
   # 这几屏永远只显示锁卡,看不到真实内容

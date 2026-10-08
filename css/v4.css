@@ -980,3 +980,24 @@ html.v4 .print-sheet { box-shadow: none; border: 1px solid var(--line); }
    打印要比屏幕更深才看得清,所以不用 --gold 而用更深的金。 */
 html.v4 .cert-title { color: #A87A18; }
 html.v4 .cert-box { background: var(--paper-2); }
+
+/* ---------------- 硬编码渐变（枚举变量与颜色都抓不到的一类）----------------
+   旧 CSS 里有 42 个选择器带硬编码渐变，多数已被前面的规则覆盖，
+   剩下这几处仍在起作用： */
+/* 声音解锁页:整屏是 linear-gradient(170deg,#d9f0ff,#ffeec9) 硬编码的旧天空 */
+body.v4 .sound-gate { background: var(--paper); }
+body.v4 .sg-card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-xl); box-shadow: var(--e3);
+}
+body.v4 .sg-brand { color: var(--ink-2); }
+body.v4 .sg-title { color: var(--ink); font-weight: 800; }
+body.v4 .sg-note { color: var(--ink-3); }
+
+/* 例句卡 / 翻面卡:旧版是渐变实底 */
+html.v4 .sent-card { background: var(--surface); }
+html.v4 .flip-back { background: var(--surface); }
+/* 家长中心的语音选择下拉 */
+html.v4 .voice-row select {
+  background: var(--surface) !important; border: 1px solid var(--line); color: var(--ink);
+}
