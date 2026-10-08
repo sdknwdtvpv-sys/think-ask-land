@@ -668,7 +668,7 @@
             '<div class="kid-list">' + rows + "</div>" +
             '<p class="parent-note">每个孩子有独立的识字进度、星星和贴纸。切换后首页会显示是谁的进度。</p>' +
             '<details class="kid-add"' + (list.length < 2 ? " open" : "") + ">" +
-              "<summary>➕ 添加一个孩子</summary>" +
+              "<summary>" + Icons.svg("plus") + "添加一个孩子</summary>" +
               '<div class="kid-form">' +
                 '<input id="kid-name" type="text" maxlength="12" placeholder="孩子的名字/小名" autocomplete="off">' +
                 '<div class="emoji-pick" id="kid-emoji">' +

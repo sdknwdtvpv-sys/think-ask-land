@@ -757,3 +757,76 @@ html.v4 .pcard .pc-bar i { background: var(--ok); }
    与其逐个补规则（补了还会再漏），不如用一条全局防御把它根治。
    ============================================================ */
 html.v4 [hidden] { display: none !important; }
+
+/* ---------------- 家长中心 ----------------
+   这一屏原来散布着一批亮蓝（旧 --sky）：当前徽章、档案卡描边、
+   "添加一个孩子"、头像选中的蓝框、创建按钮。全部收到强调色/中性色。 */
+html.v4 .kid-badge {
+  background: var(--primary-bg); color: var(--primary);
+  border-radius: var(--r-pill); padding: 1px 8px; font-size: var(--fs-xs); font-weight: 800;
+  margin-left: var(--s2);
+}
+html.v4 .kid-row {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  padding: var(--s3); gap: var(--s3);
+}
+html.v4 .kid-row.active { border-color: var(--primary); background: var(--primary-bg); }
+html.v4 .kid-face { font-size: 26px; }
+html.v4 .kid-name { font-size: var(--fs-body); font-weight: 700; color: var(--ink); }
+html.v4 .kid-info small { font-size: var(--fs-sm); color: var(--ink-3); }
+html.v4 .mini-btn {
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink-2);
+  border-radius: var(--r-sm); box-shadow: none; font-size: var(--fs-sm); padding: 4px 10px;
+}
+html.v4 .mini-btn.danger { color: var(--bad); border-color: #EBD5D2; }
+
+/* "添加一个孩子"用的是 <details>/<summary>，旧版把它做成了蓝色链接 */
+html.v4 .kid-add > summary {
+  display: flex; align-items: center; gap: var(--s2);
+  color: var(--ink-2); font-size: var(--fs-body); font-weight: 700;
+  padding: var(--s3) 0; list-style: none; cursor: pointer;
+}
+html.v4 .kid-add > summary::-webkit-details-marker { display: none; }
+html.v4 .kid-add > summary .ico { width: 16px; height: 16px; color: var(--primary); }
+html.v4 .kid-form input {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  color: var(--ink); padding: var(--s3) var(--s4); font-size: var(--fs-body); width: 100%;
+}
+html.v4 .emoji-opt-btn {
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-sm);
+  font-size: 22px; padding: 5px 7px; box-shadow: none;
+}
+html.v4 .emoji-opt-btn.on { background: var(--primary-bg); border-color: var(--primary); }
+
+/* 统计卡:旧版把数字与标签挤在一行("48/761已学" + "汉字" 换行),
+   这里明确改成"数字在上、标签在下"的两行结构。 */
+html.v4 .stat-card { display: flex; align-items: center; gap: var(--s3); }
+html.v4 .stat-ico {
+  width: 36px; height: 36px; flex: 0 0 auto; border-radius: var(--r-sm);
+  background: var(--surface-2); color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+}
+html.v4 .stat-ico .ico { width: 19px; height: 19px; }
+html.v4 .stat-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+html.v4 .stat-num {
+  font-size: var(--fs-h); font-weight: 800; color: var(--ink);
+  font-variant-numeric: tabular-nums; line-height: 1.2;
+}
+html.v4 .stat-label { font-size: var(--fs-sm); color: var(--ink-3); }
+
+/* 7 天柱状图:旧版是橙黄渐变条 */
+html.v4 .week-bars i, html.v4 .wb-bar {
+  background: var(--primary); border-radius: var(--r-sm) var(--r-sm) 0 0;
+}
+
+/* 修正两处：
+   ① .kid-row.active 的蓝框来自 `box-shadow: 0 0 0 2px var(--sky) inset`
+      —— 是 inset 蓝阴影，不是 border，所以改 border 没用。
+   ② 柱状图的类名是 .wbar，不是我先前猜的 .week-bars i（又一次先猜后验，
+      这次是截图发现没生效才回头 grep 的）。 */
+html.v4 .kid-row.active { box-shadow: none; border-color: var(--primary); background: var(--primary-bg); }
+html.v4 .kid-face { background: var(--surface-2); }
+html.v4 .wbar { background: var(--primary); border-radius: var(--r-sm) var(--r-sm) 0 0; }
+html.v4 .wbar.zero { background: var(--paper-2); }
+html.v4 .wbar-val { font-size: var(--fs-xs); color: var(--ink-2); font-weight: 700; }
+html.v4 .wbar-label { font-size: var(--fs-xs); color: var(--ink-3); }
