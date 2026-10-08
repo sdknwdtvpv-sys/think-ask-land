@@ -183,3 +183,119 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
   line-height: var(--lh-loose); padding: 0 var(--s5) var(--s8);
 }
 .home-v4 .v4-foot a { color: var(--ink-2); }
+
+/* ============================================================
+   字卡（识字 App 的核心屏）
+   ------------------------------------------------------------
+   这一屏**只做 CSS 迁移，不动 JS**：DOM 里有大量被 JS 引用的 id
+   （#writer-target / #stroke-bar / #word-row / #act-* …），
+   重写结构风险远大于收益。视觉层本来就是 CSS 的事。
+   主角是那个字；四个动作是**平级**的，不硬造主次。
+   ============================================================ */
+.card-v4 { padding: 0 var(--s5) var(--s6); }
+
+.card-v4 .card-pos {
+  font-size: var(--fs-sm); color: var(--ink-3); font-weight: 700;
+  text-align: center; margin-bottom: var(--s2);
+}
+
+/* 拼音:现在它是"读音"这一信息的载体,用强调色点出来 */
+.card-v4 .py-big {
+  display: flex; align-items: center; justify-content: center; gap: var(--s2);
+  font-size: 30px; font-weight: 800; color: var(--primary);
+  letter-spacing: 1px; min-height: 42px; margin-bottom: var(--s2);
+}
+.card-v4 .py-big .mini-speak {
+  width: 36px; height: 36px; border-radius: var(--r-pill); font-size: 18px;
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink-2);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* 田字格:主角的舞台。去掉渐变与贴纸阴影,用边框做结构 */
+.card-v4 .writer-box {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-xl); padding: var(--s4); box-shadow: var(--e1);
+  margin: var(--s3) 0 var(--s2);
+  display: flex; align-items: center; justify-content: center;
+}
+/* 意思提示(如 苹→🍎):仍保留 —— 它是记忆锚点,不是装饰。
+   但去掉浮动动画与投影,收成角落里一个安静的小图。 */
+.card-v4 .card-emoji {
+  position: absolute; top: var(--s2); right: var(--s3);
+  font-size: 26px; animation: none; filter: none; opacity: .85;
+}
+.card-v4 .writer-tip { color: var(--ink-3); font-weight: 700; }
+/* 判分提示平时是空串,旧版留了 18px 高的占位 + 6px 外边距 ——
+   在田字格与按钮之间凭空多出一条缝。收小到"够用即可"。 */
+.card-v4 .quiz-done-tip { margin-top: var(--s1); min-height: 14px; font-size: var(--fs-sm); }
+
+/* 四个动作:平级、中性底、颜色只在图标上 —— 与首页的小卡同一套语言 */
+.card-v4 .card-actions { gap: var(--s2); margin: var(--s2) 0 var(--s4); }
+.card-v4 .card-actions .btn {
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink);
+  box-shadow: none; border-radius: var(--r); min-height: 56px;
+  font-size: var(--fs-body); font-weight: 700;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+}
+.card-v4 .card-actions .btn .ico { width: 20px; height: 20px; }
+.card-v4 .card-actions .btn-sky   .ico { color: var(--t-sky); }
+.card-v4 .card-actions .btn-grape .ico { color: var(--t-plum); }
+.card-v4 .card-actions .btn-coral .ico { color: var(--t-rose); }
+.card-v4 .card-actions .btn-sun   .ico { color: var(--t-amber); }
+.card-v4 .card-actions .btn:active { transform: scale(.97); }
+
+/* 部首 / 部件 */
+.card-v4 .zili-row .zl-item {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-pill); color: var(--ink-2); padding: 4px 10px; font-size: var(--fs-sm);
+}
+/* 组词 chips */
+.card-v4 .word-row { gap: var(--s2); margin-top: var(--s3); }
+.card-v4 .word-chip {
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink);
+  border-radius: var(--r-pill); box-shadow: none;
+}
+.card-v4 .word-chip .ico { color: var(--ink-3); }
+
+/* 例句 */
+.card-v4 .sent-card {
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--r); color: var(--ink); box-shadow: none;
+}
+.card-v4 .sent-card .sent-ico { color: var(--t-sky); }
+
+/* 底部:上一字 / 我会了 / 下一字 —— "我会了"是推进动作,给它实心 */
+.card-v4 .card-nav { gap: var(--s3); margin-top: var(--s5); }
+.card-v4 .card-nav .nav-btn {
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink-2);
+  border-radius: var(--r); box-shadow: none; min-height: 56px; min-width: 56px;
+}
+.card-v4 .card-nav .nav-btn:disabled { opacity: .38; }
+.card-v4 .card-nav .know-btn {
+  background: var(--primary); color: var(--on-primary); border: 0; box-shadow: var(--e2);
+  border-radius: var(--r); min-height: 56px; font-size: var(--fs-h); font-weight: 800;
+}
+
+/* 笔顺步骤条与判分提示 */
+.card-v4 .stroke-bar { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.card-v4 .sb-step {
+  background: var(--paper-2); border: 0; color: var(--ink-2); border-radius: var(--r-sm);
+}
+.card-v4 .sb-step.on { background: var(--primary); color: var(--on-primary); }
+.card-v4 .quiz-done-tip { color: var(--ink-2); }
+
+/* 田字格:旧版用粉色画十字(rgba(255,141,161,.45)),与新版暖纸底冲突。
+   换成中性细线 —— 它是"辅助线",不该抢字的注意力。 */
+.card-v4 #writer-target::before {
+  background:
+    linear-gradient(to right, transparent calc(50% - .5px), var(--line-2) calc(50% - .5px),
+                    var(--line-2) calc(50% + .5px), transparent calc(50% + .5px)),
+    linear-gradient(to bottom, transparent calc(50% - .5px), var(--line-2) calc(50% - .5px),
+                    var(--line-2) calc(50% + .5px), transparent calc(50% + .5px));
+  box-shadow: none;
+}
+
+/* 组词与例句里"目标字"的高亮:旧版是粉红 #ff6b8f(糖果色板的遗留)。
+   新版改用强调色 —— 高亮的语义是"注意这个字",而强调色正是干这个用的。 */
+.card-v4 .word-chip b,
+.card-v4 .sent-card b { color: var(--primary); font-weight: 900; }

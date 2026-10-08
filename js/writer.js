@@ -14,12 +14,16 @@
 (function () {
   "use strict";
 
+  /* 书写配色已随 v4 视觉层调整(2026-10-08):
+     旧值是紫灰 + 粉色系(摘自旧版糖果色板),与新版暖纸底 + 陶土强调色不搭。
+     改后 —— 描红用强调色、完成高亮用成功绿、轮廓用暖灰。
+     书写板只在字卡一屏出现(见 app.js 的 App.register("card"))。 */
   var COLORS = {
-    strokeColor: "#5b5366",
-    radicalColor: "#ff7d9c",
-    outlineColor: "#ddd7ea",
-    drawingColor: "#ff7d9c",
-    highlightColor: "#34c99a"
+    strokeColor: "#2C2721",     /* 墨:与 --ink 一致 */
+    radicalColor: "#8567AE",    /* 部首高亮:柔和紫,与 --t-plum 一致 */
+    outlineColor: "#E4DCCB",    /* 未写笔画轮廓:暖灰 */
+    drawingColor: "#C25E2A",    /* 孩子描出来的笔画:强调色 */
+    highlightColor: "#3E9B72"   /* 写完的高亮:成功绿 */
   };
 
   function hasData(ch) {

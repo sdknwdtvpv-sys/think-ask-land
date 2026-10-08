@@ -527,7 +527,7 @@
       };
 
       view.innerHTML =
-        '<div class="screen card-wrap" id="card-root">' +
+        '<div class="screen card-wrap card-v4 v4" id="card-root" data-screen="card">' +
           '<div class="card-pos">' +
             "<span>第 " + (i + 1) + " / " + g.chars.length + " 个 · " + esc(g.name) + "</span></div>" +
           '<div class="py-big">' + esc(ch.p) +
