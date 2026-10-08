@@ -830,3 +830,51 @@ html.v4 .wbar { background: var(--primary); border-radius: var(--r-sm) var(--r-s
 html.v4 .wbar.zero { background: var(--paper-2); }
 html.v4 .wbar-val { font-size: var(--fs-xs); color: var(--ink-2); font-weight: 700; }
 html.v4 .wbar-label { font-size: var(--fs-xs); color: var(--ink-3); }
+
+/* ============================================================
+   旧糖果色板重定向
+   ------------------------------------------------------------
+   扫描发现仍有 63 条旧规则在引用 var(--sky/--sun/--coral/--mint/--grape)。
+   逐个覆盖一定会漏（前面已经漏过好几次），所以在 html.v4 下**把这些变量
+   重定向到新色板** —— 引用它们的规则就自动跟着变了。
+   （html.v4 的优先级高于 :root，能稳定覆盖。）
+   ============================================================ */
+html.v4 {
+  --sky: #5B8FB9;      /* 旧: #7ec8ff 糖果蓝  → 哑光蓝 */
+  --sky-deep: #4A87B8; /* 旧: #4aa8f0 */
+  --sun: #D9A227;      /* 旧: #ffd166 奶油黄  → 金 */
+  --coral: #C05874;    /* 旧: #ff8fab 珊瑚粉  → 玫瑰 */
+  --mint: #3F9B77;     /* 旧: #6fe3bd 薄荷绿  → 松绿 */
+  --grape: #8567AE;    /* 旧: #b197fc 葡萄紫  → 柔和紫 */
+}
+
+/* 进度条：旧版蓝/绿/黄各一套，统一用强调色 */
+html.v4 .bar-fill, html.v4 .tt-bar i, html.v4 .rp-bar > i,
+html.v4 .cause-bar > i, html.v4 .rt-bar i, html.v4 .group-bar-fill,
+html.v4 .ab-bar > i {
+  background: var(--primary);
+}
+/* 作答进度点：对/错沿用"成功绿 / 中性"，当前题用强调色 */
+html.v4 .dot { background: var(--paper-2); }
+html.v4 .dot.done-ok { background: var(--ok); }
+html.v4 .dot.done-bad { background: #E8B4BE; }
+html.v4 .dot.on { background: var(--primary); }
+html.v4 .hud-tick.ok { background: var(--ok); }
+
+/* 零散的硬编码旧色（不在变量体系里，只能逐个点名） */
+html.v4 .feedback-line.bad { color: var(--ink-2); }         /* 旧: #ff7d9c 粉 */
+html.v4 .flip-back .b-py, html.v4 .pc-py, html.v4 .wc-py, html.v4 .ph-brand {
+  color: var(--primary);                                     /* 旧: --sky-deep / #ff6b8f */
+}
+html.v4 .rq-opt.good, html.v4 .rd-char.found, html.v4 .talk-card.done,
+html.v4 .tk-mark.on, html.v4 .sr-char.on, html.v4 .zt-cell.learned {
+  background: #EAF4F0; border-color: var(--ok); color: var(--ink);
+}
+html.v4 .gate-input:focus, html.v4 .voice-row select:focus {
+  outline: none; border-color: var(--primary);
+}
+html.v4 .switch[aria-pressed="true"] { background: var(--primary); }
+html.v4 .bi-voice.on { border-color: var(--primary); background: var(--primary-bg); }
+html.v4 .isle-check, html.v4 .tile-check { background: var(--ok); }
+html.v4 .tone-demo, html.v4 .rc-badge { background: var(--primary-bg); color: var(--primary); }
+html.v4 .opt.py-opt { color: var(--primary); }
