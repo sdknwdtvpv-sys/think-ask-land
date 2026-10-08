@@ -485,17 +485,16 @@
       var need = every - cur;
       var pct = Math.round(cur / every * 100);
       var html =
-        '<div class="screen">' +
+        '<div class="screen v4 rewards-v4" data-screen="rewards">' +
           '<div class="reward-head">' +
-            '<div class="reward-stars">⭐ ' + st.stars + "</div>" +
+            '<div class="reward-stars">' + Icons.svg("starFill") + st.stars + "</div>" +
             '<div class="reward-next">' + (allGot ? "全部贴纸都集齐啦,太厉害了!" : "再得 " + need + " 颗星,解锁下一张贴纸!") + "</div>" +
             (allGot ? "" :
               '<div class="reward-track">' +
                 '<span class="rt-next">' + nextSticker.e + "</span>" +
                 '<span class="rt-bar"><i style="width:' + pct + '%"></i></span>' +
-                '<span class="rt-num">还差 ' + need + " ⭐</span>" +
+                '<span class="rt-num">还差 ' + need + Icons.svg("starFill") + "</span>" +
               "</div>") +
-            '<div class="progress-bar"><div class="bar-fill" style="width:' + pct + '%"></div></div>' +
           "</div>" +
           '<div class="section-title">' + Icons.svg("sparkle") + "贴纸册(" + unlocked + "/" + window.Store.STICKERS.length + ")</div>" +
           '<div class="sticker-wall">';
@@ -504,7 +503,7 @@
         if (i < unlocked) {
           html += '<div class="sticker got" style="--rot:' + rot + 'deg"><span class="st-emoji">' + s.e + '</span><span class="st-name">' + s.n + "</span></div>";
         } else {
-          html += '<div class="sticker locked" style="--rot:' + rot + 'deg"><span class="st-emoji">❓</span><span class="st-name">' + (i + 1) * every + "⭐</span></div>";
+          html += '<div class="sticker locked" style="--rot:' + rot + 'deg"><span class="st-emoji">' + Icons.svg("lock") + '</span><span class="st-name">' + (i + 1) * every + Icons.svg("starFill") + "</span></div>";
         }
       });
       html += "</div>" +

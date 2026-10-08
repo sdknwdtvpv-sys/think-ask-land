@@ -470,3 +470,69 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
   box-shadow: var(--e2);
 }
 .run-v4 .end-btns .btn .ico { color: inherit; }
+
+/* ============================================================
+   奖励页（贴纸册 + 勋章架）
+   ------------------------------------------------------------
+   贴纸与勋章的图案**是内容,保留 emoji**（那是孩子收集的东西,
+   换成 SVG 反而丢掉"贴纸"的丰富感）。改的是容器与装饰。
+   ============================================================ */
+.rewards-v4 { padding: 0 var(--s5) var(--s6); }
+
+.rewards-v4 .reward-head {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-lg); padding: var(--s4); margin: var(--s2) 0 var(--s5);
+  box-shadow: var(--e1);
+}
+.rewards-v4 .reward-stars {
+  display: flex; align-items: center; justify-content: center; gap: var(--s2);
+  font-size: var(--fs-display); font-weight: 800; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.rewards-v4 .reward-stars .ico { width: 26px; height: 26px; color: var(--gold); }
+.rewards-v4 .reward-next {
+  text-align: center; font-size: var(--fs-sm); color: var(--ink-3); margin-top: var(--s2);
+}
+.rewards-v4 .reward-track {
+  display: flex; align-items: center; gap: var(--s3); margin-top: var(--s4);
+  background: var(--surface-2); border-radius: var(--r); padding: var(--s3);
+}
+.rewards-v4 .rt-next { font-size: 26px; line-height: 1; }
+.rewards-v4 .rt-bar {
+  flex: 1; height: 8px; background: var(--paper-2);
+  border-radius: var(--r-pill); overflow: hidden;
+}
+.rewards-v4 .rt-bar i { display: block; height: 100%; background: var(--primary); border-radius: var(--r-pill); }
+.rewards-v4 .rt-num {
+  display: flex; align-items: center; gap: 3px;
+  font-size: var(--fs-sm); font-weight: 700; color: var(--ink-2); white-space: nowrap;
+}
+.rewards-v4 .rt-num .ico { width: 14px; height: 14px; color: var(--gold); }
+
+.rewards-v4 .section-title {
+  display: flex; align-items: center; gap: var(--s2);
+  font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3);
+  letter-spacing: 1.2px; margin: var(--s5) 0 var(--s3);
+}
+.rewards-v4 .section-title .ico { width: 16px; height: 16px; color: var(--ink-3); }
+
+/* 贴纸墙:保留"手账贴纸"的轻旋转与白边 —— 那是这个页面的趣味所在 */
+.rewards-v4 .sticker {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r); box-shadow: var(--e1);
+}
+.rewards-v4 .sticker.locked { background: var(--surface-2); border-style: dashed; }
+.rewards-v4 .sticker.locked .st-emoji .ico { width: 30px; height: 30px; color: var(--ink-3); }
+.rewards-v4 .st-name { font-size: var(--fs-xs); color: var(--ink-2); }
+.rewards-v4 .sticker.locked .st-name {
+  display: inline-flex; align-items: center; gap: 2px; color: var(--ink-3);
+}
+.rewards-v4 .sticker.locked .st-name .ico { width: 11px; height: 11px; color: var(--ink-3); }
+
+/* 勋章架 */
+.rewards-v4 .badge {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r); box-shadow: none;
+}
+.rewards-v4 .badge.locked { background: var(--surface-2); border-style: dashed; opacity: .7; }
+.rewards-v4 .bd-name { font-size: var(--fs-sm); font-weight: 700; color: var(--ink); }
