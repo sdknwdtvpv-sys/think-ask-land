@@ -709,3 +709,11 @@ body.v4 .sg-btn {
   background: var(--primary); color: var(--on-primary); box-shadow: var(--e2);
 }
 body.v4 .sg-card { box-shadow: var(--e1); background: var(--surface); border: 1px solid var(--line); }
+
+/* 空状态卡（今日复习没有待复习的字等）：
+   旧版用的是淡绿底 + 硬阴影，在暖纸底上显得"脏"。统一成中性。 */
+html.v4 .empty-tip {
+  box-shadow: none; background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+}
+html.v4 .empty-tip .big { font-size: 44px; }
