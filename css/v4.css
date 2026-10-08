@@ -1065,8 +1065,8 @@ html.v4 :focus-visible {
   outline-offset: 2px;
   border-radius: var(--r-sm);
 }
+/* .menu-btn 是旧版首页的菜单按钮,首页重写成 .v4-tile 后它已不存在 —— 去掉 */
 html.v4 .group-card:focus-visible,
-html.v4 .menu-btn:focus-visible,
 html.v4 .opt:focus-visible,
 html.v4 .btn:focus-visible {
   outline: 3px solid var(--primary);
