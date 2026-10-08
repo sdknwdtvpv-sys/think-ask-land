@@ -348,7 +348,7 @@
         return g.chars.every(function (ch) { return st.chars[ch.c] && st.chars[ch.c].learned; });
       }).length;
       var html =
-        '<div class="screen">' +
+        '<div class="screen v4 map-v4" data-screen="groups">' +
           '<div class="map-head">' +
             '<div class="section-title">' + Icons.svg("flag") + "已点亮 " + lit + " / " + window.CharDB.GROUPS.length + " 座岛</div>" +
             '<div class="map-sub">每学会一个字,小岛就亮一点 ✨</div>' +
@@ -367,7 +367,11 @@
                 '<circle class="ring-bg" cx="50" cy="50" r="44"/>' +
                 '<circle class="ring-fg" cx="50" cy="50" r="44" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct / 100)).toFixed(1) + '"/>' +
               "</svg>" +
-              '<span class="isle-body"><span class="isle-emoji">' + g.icon + "</span>" +
+              /* 原来这里是 data 里的 emoji 岛图标(🔢🌦️✋…)。
+                 16 个 emoji 并排正是"廉价感"的大头,而且 emoji 字形由系统版本决定。
+                 改成**岛序号**:干净、有推进感,还省掉新画 16 个图标的工作量。
+                 真正的语义由下面的岛名承担("第1岛 · 数字与基础")。 */
+              '<span class="isle-body"><span class="isle-num">' + (gi + 1) + "</span>" +
                 (done ? '<span class="isle-check">' + Icons.svg("check") + "</span>" : "") +
               "</span>" +
             "</span>" +

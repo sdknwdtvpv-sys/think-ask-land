@@ -299,3 +299,57 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
    新版改用强调色 —— 高亮的语义是"注意这个字",而强调色正是干这个用的。 */
 .card-v4 .word-chip b,
 .card-v4 .sent-card b { color: var(--primary); font-weight: 900; }
+
+/* ============================================================
+   小岛地图（选关）
+   ------------------------------------------------------------
+   这一屏原来的"廉价感"主要来自 16 个 emoji 岛图标。已改为**岛序号**，
+   语义交给岛名承担。剩下的就是把环/路径/标签收到 v4 语言里。
+   ============================================================ */
+.map-v4 { padding: 0 0 var(--s6); }
+
+.map-v4 .map-head { padding: var(--s2) var(--s5) var(--s4); }
+.map-v4 .map-head .section-title {
+  display: flex; align-items: center; gap: var(--s2);
+  font-size: var(--fs-h); font-weight: 800; color: var(--ink);
+}
+.map-v4 .map-head .section-title .ico { width: 18px; height: 18px; color: var(--primary); }
+.map-v4 .map-sub { font-size: var(--fs-sm); color: var(--ink-3); margin-top: var(--s1); }
+
+/* 岛:环 + 序号 + 名称 + 进度 */
+.map-v4 .island-map { padding: 0 var(--s4) var(--s4); gap: var(--s4) var(--s2); }
+.map-v4 .isle-ring { width: 96px; height: 96px; }
+.map-v4 .ring-bg { stroke: var(--paper-2); stroke-width: 6; }
+.map-v4 .ring-fg { stroke: var(--primary); stroke-width: 6; }
+.map-v4 .island.done .ring-fg { stroke: var(--gold); }
+/* 环内:去掉旧版的渐变球体与高光,改成安静的纸面 */
+.map-v4 .isle-body {
+  inset: 9px; border-radius: 50%; overflow: hidden;
+  background: var(--surface); border: 1px solid var(--line);
+  box-shadow: none;
+}
+.map-v4 .isle-body::after { display: none; }
+.map-v4 .isle-num {
+  font-family: var(--font-display); font-size: 34px; line-height: 1;
+  color: var(--ink); position: relative; z-index: 1;
+}
+.map-v4 .island.started .isle-num { color: var(--primary); }
+.map-v4 .island.done .isle-num { color: var(--gold); }
+
+/* 标签:小径从环之间穿过,标签用纸色垫底保证可读(这条在旧版也是必需的) */
+.map-v4 .isle-name {
+  font-size: var(--fs-sm); font-weight: 700; color: var(--ink);
+  background: var(--paper); border-radius: var(--r-pill); padding: 1px 8px;
+}
+.map-v4 .isle-meta {
+  font-size: var(--fs-xs); color: var(--ink-3);
+  background: var(--paper); border-radius: var(--r-pill); padding: 1px 8px;
+}
+.map-v4 .island.done .isle-meta { color: var(--gold); }
+/* 小径:旧版是粗白点(为压住天空的彩底),在暖纸上要收细 */
+.map-v4 .map-path path { stroke: var(--line-2); stroke-width: 6; }
+.map-v4 .map-foot {
+  display: flex; align-items: center; justify-content: center; gap: var(--s2);
+  padding: var(--s5) var(--s5) 0; font-size: var(--fs-sm); color: var(--ink-3);
+}
+.map-v4 .map-foot .ico { width: 15px; height: 15px; color: var(--gold); }
