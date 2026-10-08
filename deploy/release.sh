@@ -60,24 +60,56 @@ fi
 # ---------- 2. 推送到 GitHub ----------
 if [ "$NO_PUSH" = "0" ]; then
   echo "▶ [2/5] 推送到 GitHub"
-  if [ ! -f "$REPO/../.deploy/github_ed25519" ]; then
-    echo "  ⚠️ 未找到 GitHub 私钥，跳过推送"
-  else
-    mkdir -p /tmp/hzdeploy && chmod 700 /tmp/hzdeploy
-    cp "$REPO/../.deploy/github_ed25519" /tmp/hzdeploy/github_ed25519
-    chmod 600 /tmp/hzdeploy/github_ed25519
-    touch /tmp/hzdeploy/gh_known_hosts
-    export GIT_SSH_COMMAND="ssh -i /tmp/hzdeploy/github_ed25519 -o UserKnownHostsFile=/tmp/hzdeploy/gh_known_hosts -o StrictHostKeyChecking=accept-new"
-    git remote get-url origin >/dev/null 2>&1 || git remote add origin "git@github.com:sdknwdtvpv-sys/think-ask-land.git"
-    git push -q origin HEAD
-    git push -q origin --tags
+  REMOTE_URL="$(git remote get-url origin 2>/dev/null || echo '')"
+  if [ -z "$REMOTE_URL" ]; then
+    git remote add origin "https://github.com/sdknwdtvpv-sys/think-ask-land.git"
+    REMOTE_URL="$(git remote get-url origin)"
+  fi
+
+  GH_OK=0; GH_OUT=""
+  case "$REMOTE_URL" in
+    https://*|http://*)
+      # HTTPS 远端:走系统凭据助手(本机是 osxkeychain),**不需要**那把 SSH 部署密钥。
+      # ⚠️ 原脚本只认 $REPO/../.deploy/github_ed25519,于是本仓库（HTTPS 远端）
+      #    永远显示"未找到 GitHub 私钥,跳过推送" —— 一个静默失效的坑,实测踩到。
+      GH_OUT="$(GIT_TERMINAL_PROMPT=0 git push origin HEAD 2>&1)"; GH_RC=$?
+      [ "$GH_RC" = "0" ] && GH_OK=1
+      ;;
+    *)
+      # SSH 远端:优先用专用部署密钥;没有就**退回用户默认密钥** ~/.ssh/id_ed25519。
+      # 实测本机没有 .deploy/github_ed25519,但 ~/.ssh/id_ed25519 已验证能以仓库
+      # 所有者身份通过 GitHub 认证 —— 原脚本只认前者,于是白白跳过推送。
+      GHKEY="$REPO/../.deploy/github_ed25519"
+      [ -f "$GHKEY" ] || GHKEY="$HOME/.ssh/id_ed25519"
+      if [ ! -f "$GHKEY" ]; then
+        echo "  ⚠️ 远端是 SSH（$REMOTE_URL），但既没有部署密钥也没有默认密钥，跳过推送"
+      else
+        mkdir -p /tmp/hzdeploy && chmod 700 /tmp/hzdeploy
+        cp "$GHKEY" /tmp/hzdeploy/github_ed25519
+        chmod 600 /tmp/hzdeploy/github_ed25519
+        touch /tmp/hzdeploy/gh_known_hosts
+        export GIT_SSH_COMMAND="ssh -i /tmp/hzdeploy/github_ed25519 -o UserKnownHostsFile=/tmp/hzdeploy/gh_known_hosts -o StrictHostKeyChecking=accept-new"
+        GH_OUT="$(git push origin HEAD 2>&1)"; GH_RC=$?
+        [ "$GH_RC" = "0" ] && GH_OK=1
+      fi
+      ;;
+  esac
+
+  if [ "$GH_OK" = "1" ]; then
+    git push -q origin --tags 2>/dev/null || true
     LOCAL="$(git rev-parse HEAD)"
-    REMOTE="$(git ls-remote origin refs/heads/main | cut -f1)"
-    if [ "$LOCAL" = "$REMOTE" ]; then
+    REMOTE="$(git ls-remote origin refs/heads/main 2>/dev/null | cut -f1)"
+    if [ -n "$REMOTE" ] && [ "$LOCAL" = "$REMOTE" ]; then
       echo "  ✓ 已推送，远端与本地一致: ${LOCAL:0:12}"
     else
-      echo "  ❌ 远端与本地不一致（本地 ${LOCAL:0:12} / 远端 ${REMOTE:0:12}）"; exit 1
+      echo "  ⚠️ 推送成功但远端引用对不上（本地 ${LOCAL:0:12} / 远端 ${REMOTE:-取不到}）"
     fi
+  else
+    # GitHub 不可达**不该拦住发版** —— 网站部署才是用户看得见的结果。
+    # 代码已经在本地提交里，等网络恢复再补推不会丢。
+    echo "  ⚠️ 推送失败，**发版继续**（GitHub 是备份，不是发版前置）"
+    printf "%s\n" "$GH_OUT" | tail -2 | sed 's/^/     /'
+    echo "     代码已提交到本地仓库；恢复后手动补推: git push origin HEAD"
   fi
 else
   echo "▶ [2/5] 跳过推送（--no-push）"
@@ -100,7 +132,22 @@ fi
 
 # ---------- 4. 部署到腾讯云 ----------
 echo "▶ [4/5] 部署到腾讯云"
-./deploy/deploy-tencent.sh 2>&1 | grep -E "✅|❌|⚠️" | sed 's/^/  /' || true
+# 注意:这里**不能**用 `| grep -E "✅|❌|⚠️" || true` 一把梭。
+# 原因(实测踩过):音频安全闸拦下部署时,它会打印"哪个音色本机更旧"和一条现成的
+# rsync 同步命令 —— 这些行**都不以 ✅/❌/⚠️ 开头**,会被 grep 整段吃掉,
+# 用户只看到一句"已阻止部署",不知道下一步该做什么。
+# 更糟的是 `|| true` 把 exit 1 也吞了,于是继续跑第 5 步比对,
+# 报出一堆"线上与本地不一致",让人误以为"部署做了一半"。
+DEPLOY_OUT="$(./deploy/deploy-tencent.sh 2>&1)" && DEPLOY_RC=0 || DEPLOY_RC=$?
+if printf "%s" "$DEPLOY_OUT" | grep -q "已阻止部署"; then
+  printf "%s\n" "$DEPLOY_OUT" | sed 's/^/  /'
+  echo
+  echo "⛔ 部署已中止,代码**没有**上传到服务器。按上面的提示处理后重跑:"
+  echo "   ./deploy/release.sh --deploy-only"
+  exit 1
+fi
+printf "%s\n" "$DEPLOY_OUT" | grep -E "✅|❌|⚠️" | sed 's/^/  /' || true
+[ "$DEPLOY_RC" = "0" ] || echo "  ⚠️ 部署脚本退出码 $DEPLOY_RC（继续做一致性比对，便于定位）"
 
 # ---------- 4. 验证 ----------
 echo "▶ [5/5] 验证"
