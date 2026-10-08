@@ -1109,3 +1109,15 @@ html.v4 .cert-title { color: var(--gold-ink); }
    教训:测量工具会对自己不理解的做法产生假阳性。
    "量出来不对"之后必须先看具体实现,再决定改不改。 */
 .card-v4 .py-big .mini-speak .ico { width: 19px; height: 19px; }
+
+/* 故事页的可点单字：旧版 min-width: 34px（高度 44px 已达标，宽度没有）。
+   这是故事页的**核心交互** ——「点一个字,听它怎么读」。
+
+   修法有取舍：单加宽会让正文排得像键盘。所以**同时放大字号**：
+   字从 27px 到 34px，格子从 34pt 到 44pt。
+   既把命中区补到 44，也让儿童读物正文更好读（原本 27px 偏小）。
+   一行放不下就换行 —— 旧版本来就会换行。 */
+html.v4 .rd-char {
+  font-size: 34px; min-width: 44px; min-height: 48px; padding: 0 4px;
+}
+html.v4 .rd-punc { font-size: 30px; }
