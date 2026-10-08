@@ -656,3 +656,56 @@ html.v4 .lock-card .btn { margin-top: var(--s4); width: 100%; min-height: 52px; 
 }
 .learn-v4 .char-tile.learned::before { border-color: #BCDCCB; }
 .learn-v4 .char-tile.learned { background: #F3F9F6; border-color: #CFE6DA; }
+
+/* ============================================================
+   压平旧版"立体块"
+   ------------------------------------------------------------
+   旧 CSS 里有 80 条规则用 `box-shadow: 0 Npx 0` 模拟 2015 年那种"立体块"
+   （外加一层顶部内高光）。这是"廉价感"最统一的技术特征。
+   前几屏是逐个覆盖的；剩下这批分布在各屏，逐个精修成本高，
+   先**统一去掉硬阴影与内高光、换中性底**，之后按需单独调。
+   （逐个截图看效果的收益，在这一点上已经很小了。）
+   ============================================================ */
+html.v4 .status-chip,
+html.v4 .stat-card,
+html.v4 .tone-card, html.v4 .tone-card.on,
+html.v4 .tone-fam-item,
+html.v4 .py-cell, html.v4 .py-cell.on,
+html.v4 .py-ex-char, html.v4 .py-ex-char.learned,
+html.v4 .blend-part, html.v4 .blend-q,
+html.v4 .part-tile,
+html.v4 .part-plus,
+html.v4 .read-card,
+html.v4 .story-body,
+html.v4 .rq-opt,
+html.v4 .rd-quiz,
+html.v4 .read-progress,
+html.v4 .talk-scaffold, html.v4 .talk-card,
+html.v4 .talk-sentence, html.v4 .talk-word, html.v4 .talk-panel,
+html.v4 .zt-cell,
+html.v4 .sr-dots > i, html.v4 .sr-exit,
+html.v4 .weak-item {
+  box-shadow: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+}
+/* 选中/强调态:用强调色浅底 + 描边,而不是"按下去"的硬阴影 */
+html.v4 .py-cell.on,
+html.v4 .tone-card.on,
+html.v4 .talk-card.on {
+  background: var(--primary-bg); border-color: var(--primary); color: var(--primary);
+}
+html.v4 .zt-cell { border-radius: var(--r-sm); }
+
+/* 打印纸:它是要打印出来的,保留纸张白与灰边(打印时不丢线),
+   但去掉屏幕上的立体感 */
+html.v4 .print-sheet {
+  box-shadow: none; background: #fff; border: 1px solid var(--line-2); border-radius: var(--r);
+}
+
+/* 声音解锁页:整页只有这一个按钮,给它实心强调色 */
+body.v4 .sg-btn {
+  background: var(--primary); color: var(--on-primary); box-shadow: var(--e2);
+}
+body.v4 .sg-card { box-shadow: var(--e1); background: var(--surface); border: 1px solid var(--line); }
