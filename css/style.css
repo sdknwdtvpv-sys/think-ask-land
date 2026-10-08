@@ -80,7 +80,6 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 
 /* ---------- 首页 ---------- */
 .home-hero { text-align: center; padding: 14px 0 6px; }
-.home-mascot { font-size: 66px; display: inline-block; animation: floaty 3s ease-in-out infinite; }
 @keyframes floaty { 50% { transform: translateY(-9px) rotate(-3deg); } }
 .home-title {
   font-size: 40px; font-weight: 900; letter-spacing: 4px; margin-top: 2px;
@@ -207,7 +206,6 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 /* ---------- 矮视口(笔记本浏览器窗口)紧凑布局:保证首页 5 张卡片与字卡主按钮都在首屏 ---------- */
 @media (max-height: 820px) {
   .home-hero { padding: 2px 0; }
-  .home-mascot { font-size: 44px; }
   .home-title { font-size: 30px; margin-top: 0; }
   .home-sub { font-size: 13px; margin-top: 2px; }
   .status-row { margin: 10px 0 12px; }
@@ -247,7 +245,6 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   .menu-ico .ico { width: 24px; height: 24px; }
   .menu-label { font-size: 15px; letter-spacing: 0; }
   .menu-btn.wide { padding: 10px 16px; }
-  .home-mascot svg { height: 64px; width: auto; }
   .home-foot { margin-top: 8px; font-size: 11px; }
   .today-task { padding: 9px 13px; }
 }

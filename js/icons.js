@@ -2,7 +2,9 @@
    用法:
      Icons.svg("book")            -> 24px 线性图标(继承 currentColor)
      Icons.svg("book", "ico-solo")-> 追加 class
-   说明:图标用 <symbol>+"<use>" 复用;角色形象在 js/mascot.js(可替换 IP)。 */
+   说明:图标用 <symbol>+"<use>" 复用。
+   全线为 24×24 / 2.2 圆头描边的线性图标 —— 新增图标必须沿用这套规格,
+   否则又会回到"emoji 与线性图标混用"的老问题。 */
 (function () {
   "use strict";
 

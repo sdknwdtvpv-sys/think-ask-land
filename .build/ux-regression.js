@@ -175,14 +175,17 @@ const BENIGN = [
     await sleep(700);
     ok("退出描红后同一手势正常切字", win.location.hash === "#/card?g=0&i=1", win.location.hash);
 
-    /* ---------- 6. 角色情绪(idle/happy/cheer/think/sleep)与图标 ---------- */
-    const idleSvg = win.Mascot.render("idle", 40);
-    const thinkSvg = win.Mascot.render("think", 40);
-    const sleepSvg = win.Mascot.render("sleep", 40);
-    ok("think 有独立附加件(问号气泡)", thinkSvg.includes("m-think") && !idleSvg.includes("m-think"));
-    ok("sleep 有独立附加件(闭眼 + Zzz)", sleepSvg.includes("m-sleep") && sleepSvg.includes("m-zzz") && !idleSvg.includes("m-zzz"));
-    ok("状态 class 落到 svg 上", thinkSvg.includes("is-think") && sleepSvg.includes("is-sleep"));
-    ok("五种情绪都能渲染", ["idle", "happy", "cheer", "think", "sleep"].every((s) => win.Mascot.render(s, 40).includes("<svg")));
+    /* ---------- 6. 吉祥物已移除（2026-10-08 产品决定）----------
+       三只吉祥物（问仔/抱抱豆/书小满）原本承担品牌与情感反馈，
+       现改由「汉字本身当主角」承接（首页=今天的字）。
+       下面两条是**决策守卫**：若有人把 Mascot 加回来、或界面里又冒出 mascot 节点，这里会红。 */
+    ok("吉祥物已彻底移除（不残留 window.Mascot）", typeof win.Mascot === "undefined", typeof win.Mascot);
+    await win.App.navigate("#/home");
+    await sleep(500);
+    const leftover = doc.querySelectorAll('[class*="mascot"]').length;
+    ok("首页不含任何 mascot 节点", leftover === 0, leftover + " 个");
+
+    /* ---------- 6b. 图标系统 ---------- */
 
     const names = win.Icons.names;
     ok("无用图标 left/clock 已移除", names.indexOf("left") < 0 && names.indexOf("clock") < 0, "共 " + names.length + " 个");

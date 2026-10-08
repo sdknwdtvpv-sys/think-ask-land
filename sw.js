@@ -41,7 +41,6 @@ const ASSETS = [
   "js/games.js?v=2.12.0",
   "js/haptics.js?v=2.12.0",
   "js/icons.js?v=2.12.0",
-  "js/mascot.js?v=2.12.0",
   "js/pinyin.js?v=2.12.0",
   "js/platform-io.js?v=2.12.0",
   "js/recorder.js?v=2.12.0",

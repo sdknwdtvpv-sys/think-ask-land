@@ -118,35 +118,11 @@ body::after { /* 全局纸纹,极淡 */
 .sg-btn .ico { width: 50px; height: 50px; }
 
 /* ---------- 熊猫角色 ---------- */
-.mascot { display: block; width: 104px; height: 104px; overflow: visible; }
-.mascot.is-idle { animation: mascot-breathe 3.6s ease-in-out infinite; }
-@keyframes mascot-breathe { 50% { transform: translateY(-5px) scale(1.015); } }
-.mascot.is-happy { animation: mascot-hop .62s cubic-bezier(.3, 1.6, .5, 1) 2; }
-@keyframes mascot-hop { 45% { transform: translateY(-13px) rotate(-4deg); } }
-.mascot .m-eye { transform-origin: center; animation: mascot-blink 5.2s steps(1, end) infinite; }
-@keyframes mascot-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.08); } }
-.mascot .m-arm-up, .mascot .m-mouth-open { display: none; }
-.mascot.is-happy .m-arm-up { display: block; }
-.mascot.is-happy .m-arm-down { display: none; }
-.mascot.is-happy .m-mouth-open { display: block; }
-.mascot.is-happy .m-mouth-smile { display: none; }
 /* 思考:歪头 + 问号气泡(复习回想、练习"再想想"结算) */
-.mascot.is-think { animation: mascot-think 2.8s ease-in-out infinite; }
-@keyframes mascot-think { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
-.mascot .m-think { transform-box: fill-box; transform-origin: center; animation: think-pop 2.2s ease-in-out infinite; }
-@keyframes think-pop { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 /* 睡觉:闭眼 + Zzz 飘动(深夜问候) */
-.mascot.is-sleep { animation: mascot-doze 3.8s ease-in-out infinite; }
-@keyframes mascot-doze { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(2px) scale(1.025); } }
-.mascot.is-sleep .m-eye { display: none; }
-.mascot .m-zzz { transform-box: fill-box; transform-origin: center; animation: zzz-float 2.6s ease-in-out infinite; }
-.mascot .m-zzz.z2 { animation-delay: .9s; }
-@keyframes zzz-float { 0% { opacity: 0; transform: translateY(5px) scale(.9); } 35% { opacity: 1; } 100% { opacity: 0; transform: translateY(-7px) scale(1.05); } }
 
 /* ---------- 首页 ---------- */
 .home-hero { padding: 6px 0 4px; }
-.home-mascot { font-size: 0; margin-bottom: 2px; }
-.home-mascot .mascot { margin: 0 auto; }
 .home-title {
   font-size: 38px; letter-spacing: 5px; color: #ff7a3d;
   background: linear-gradient(180deg, #ffb03a, #ff5d84);
@@ -193,7 +169,6 @@ body::after { /* 全局纸纹,极淡 */
 
 /* ---------- 字卡页 ---------- */
 .card-pos { display: flex; align-items: center; gap: 7px; font-weight: 800; color: #7a7391; }
-.card-pos .mascot { width: 30px; height: 30px; }
 /* 田字格纸 */
 .writer-box { border-radius: var(--r-lg); padding: 14px; background: var(--paper); }
 #writer-target { position: relative; }
@@ -230,13 +205,11 @@ body::after { /* 全局纸纹,极淡 */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
   .sc-cloud { animation: none !important; }
-  .mascot { animation: none !important; }
 }
 
 /* ---------- 矮视口:保持首页 5 张卡与「我会了」在首屏 ---------- */
 @media (max-height: 820px) {
   .home-hero { padding: 0; }
-  .home-mascot .mascot { width: 76px; height: 76px; }
   .home-title { font-size: 30px; }
   .home-sub { font-size: 12.5px; }
   .home-meta { margin-top: 3px; font-size: 12px; }
@@ -251,10 +224,7 @@ body::after { /* 全局纸纹,极淡 */
 }
 
 /* ---------- 细节补充 ---------- */
-.mascot-btn { padding: 0; border: 0; background: none; display: block; margin: 0 auto; cursor: pointer; }
-.mascot-btn:active .mascot { transform: scale(.94); }
 .mini-speak .ico { width: 18px; height: 18px; }
-.card-pos .mascot { display: inline-block; }
 /* 家长中心整行卡:箭头垂直居中,不压文字 */
 .menu-btn.wide .menu-arrow { bottom: 50%; transform: translateY(50%); right: 14px; }
 .menu-btn.wide { padding-right: 40px; }
@@ -377,7 +347,6 @@ body::after { /* 全局纸纹,极淡 */
 .run-hud { margin-bottom: 12px; }
 .hud-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 27px; margin-bottom: 7px; }
 .hud-count { display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 800; color: var(--ink-light); }
-.hud-count .mascot { width: 26px; height: 26px; }
 .hud-count b { color: var(--ink); font-size: 15px; }
 .hud-knew {
   display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 800;
@@ -450,18 +419,10 @@ body::after { /* 全局纸纹,极淡 */
 .g-B .grade-letter { color: #3a8fd0; }
 .g-C { border-color: #cbb8ff; box-shadow: 0 8px 0 rgba(63, 58, 82, .10), 0 0 0 6px rgba(167, 139, 250, .2); }
 .g-C .grade-letter { color: #7c5fd3; }
-.end-mascot { display: flex; justify-content: center; margin-bottom: 2px; }
-.end-mascot .mascot { width: 92px; height: 92px; }
 .end-star-row { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; justify-content: center; min-height: 28px; margin: 10px 0 2px; font-size: 21px; }
 .jump-star { display: inline-block; animation: jumpIn .5s cubic-bezier(.2, 1.6, .4, 1) both; }
 @keyframes jumpIn { 0% { transform: translateY(14px) scale(.4); opacity: 0; } 100% { transform: none; opacity: 1; } }
 .jump-more { font-size: 14px; font-weight: 900; color: #ff9f1c; margin-left: 5px; }
-.mascot.is-cheer .m-arm-up { display: block; }
-.mascot.is-cheer .m-arm-down { display: none; }
-.mascot.is-cheer .m-mouth-open { display: block; }
-.mascot.is-cheer .m-mouth-smile { display: none; }
-.mascot.is-cheer { animation: mascot-cheer .9s ease-in-out infinite; }
-@keyframes mascot-cheer { 25% { transform: rotate(-7deg) scale(1.04); } 75% { transform: rotate(7deg) scale(1.04); } }
 
 /* ================= P2:复习翻卡 ================= */
 .flip-back { overflow: hidden; }
@@ -484,8 +445,6 @@ body::after { /* 全局纸纹,极淡 */
 .review-btns .btn .ico { width: 18px; height: 18px; }
 
 /* ================= P2:奖励(贴纸册 + 勋章架) ================= */
-.rh-mascot { display: flex; justify-content: center; margin-bottom: 2px; }
-.rh-mascot .mascot { width: 76px; height: 76px; }
 .reward-track { display: flex; align-items: center; gap: 9px; margin-top: 11px; }
 .rt-next { font-size: 26px; filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .12)); }
 .rt-bar { flex: 1; height: 10px; border-radius: 99px; background: #f1ecdf; overflow: hidden; }
@@ -513,7 +472,6 @@ body::after { /* 全局纸纹,极淡 */
   animation: none !important; transition: none !important;
 }
 .reduce-motion .sc-cloud { display: none; }
-.reduce-motion .mascot { transform: none !important; }
 
 /* Toast:改为顶部滑下的胶囊,与顶栏呼应 */
 .toast {
@@ -531,8 +489,6 @@ body::after { /* 全局纸纹,极淡 */
   transform: rotate(-.8deg);
   padding-top: 22px;
 }
-.modal-card .modal-mascot { display: flex; justify-content: center; margin-bottom: -6px; }
-.modal-card .modal-mascot .mascot { width: 92px; height: 92px; }
 .modal-card .modal-emoji { font-size: 62px; }
 .modal-title { font-size: 22px; }
 .modal-text { font-size: 14px; color: var(--ink-light); }
@@ -572,24 +528,11 @@ body::after { /* 全局纸纹,极淡 */
 .switch[aria-pressed="true"] i { transform: translateX(22px); }
 
 /* ================= 三伙伴（问仔 · 抱抱豆 · 书小满） ================= */
-.mascot-trio {
-  display: inline-flex; align-items: flex-end; justify-content: center; gap: 2px;
-}
-.mascot-trio-item { display: inline-block; }
 /* 首页品牌亮相：三个并排（高度统一，中间略高形成节奏） */
-.home-mascot .mascot-trio .mascot { width: 78px; height: 78px; margin: 0; }
-.home-mascot .mascot-trio .mascot-trio-item:nth-child(2) { transform: translateY(-6px); }
 /* 结算页 S/A 级三伙伴庆祝 */
-.end-mascot .mascot-trio { gap: 0; }
-.end-mascot .mascot-trio .mascot { width: 64px; height: 64px; }
 /* 答错时抱抱豆出现在提示文字前 */
-.feedback-line .mascot {
-  display: inline-block; width: 22px; height: 22px; vertical-align: -5px; margin-right: 4px;
-}
-.feedback-line .mascot .m-eye { animation: none; }
 /* 矮视口：三伙伴进一步收小，保证首屏 */
 @media (max-height: 820px) {
-  .home-mascot .mascot-trio .mascot { width: 64px; height: 64px; }
 }
 
 /* ================= 家长周报分享卡 ================= */

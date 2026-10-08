@@ -155,9 +155,9 @@
       box.className = "sound-gate";
       box.innerHTML =
         '<div class="sg-card">' +
-          '<div class="sg-mascot">' + Mascot.trio("idle", 72) + "</div>" +
+          '<div class="sg-brand">思问岛</div>' +
           '<div class="sg-title">点一下,开始玩</div>' +
-          '<button class="sg-btn" id="sg-go" aria-label="点一下开始">Icons.svg("speak")</button>' +
+          '<button class="sg-btn" id="sg-go" aria-label="点一下开始">' + Icons.svg("speak") + '</button>' +
           '<div class="sg-note">从主屏幕打开时需要先点一下<br>才能播放声音(手机的规矩)</div>' +
         "</div>";
       document.body.appendChild(box);
@@ -224,7 +224,6 @@
       var allDone = doneN === 3;
       /* 深夜(21:00~6:00)熊猫打瞌睡,与 greet() 的「夜深啦」呼应 */
       var hour = new Date().getHours();
-      var mascotState = allDone ? "happy" : ((hour >= 21 || hour < 6) ? "sleep" : "idle");
       var taskGo = tDue > 0 ? "#/review" : (tLearn < gLearn ? "#/groups" : "#/practice");
       /* 阅读进度上首页:让"读一读"变成一个看得见进度的目标,而不是一个入口按钮 */
       var rd = (window.ReadDrill && window.ReadDrill.progress) ? window.ReadDrill.progress() : null;
@@ -246,9 +245,6 @@
         '<div class="screen">' +
           '<div class="home-hero">' +
             (kidChip() ? '<div class="kid-chip-row">' + kidChip() + "</div>" : "") +
-            '<div class="home-mascot">' +
-              '<button class="mascot-btn" id="mascot-btn" aria-label="和三个小伙伴打招呼">' + Mascot.trio(mascotState, 84) + "</button>" +
-            "</div>" +
             '<div class="home-title">思问岛</div>' +
             '<div class="home-sub">' + greet() + ",小宝贝!今天想学什么呢?</div>" +
             '<div class="home-meta">' +
@@ -323,30 +319,6 @@
         kc.addEventListener("click", function () {
           if (window.SFX) SFX.click();
           App.navigate("#/parent?focus=kids");
-        });
-      }
-      /* 点熊猫:它会长高举手打招呼(孩子最爱的小交互) */
-      var mb = view.querySelector("#mascot-btn");
-      if (mb) {
-        mb.addEventListener("click", function () {
-          /* 点一下:三个小伙伴一起开心(品牌亮相的"活起来"时刻) */
-          var ms = mb.querySelectorAll(".mascot");
-          var baseCls = "is-" + mascotState;
-          Array.prototype.forEach.call(ms, function (m) {
-            m.classList.remove(baseCls);
-            m.classList.add("is-happy");
-          });
-          if (window.SFX) SFX.star();
-          /* 由"陪伴者"抱抱豆的声音说话(hug 角色音色,缺省自动回退) */
-          window.Speech.speak(allDone ? "今天任务都完成啦,你真棒!" : greet() + ",我们一起来认字吧!",
-            { rate: 0.9, role: "hug" });
-          App.after(1600, function () {
-            Array.prototype.forEach.call(ms, function (m) {
-              if (!m.isConnected) return;
-              m.classList.remove("is-happy");
-              m.classList.add(baseCls);
-            });
-          });
         });
       }
       window.Store.touchDay();
@@ -546,7 +518,7 @@
 
       view.innerHTML =
         '<div class="screen card-wrap" id="card-root">' +
-          '<div class="card-pos">' + Mascot.render("idle", 30, "wenzai") +
+          '<div class="card-pos">' +
             "<span>第 " + (i + 1) + " / " + g.chars.length + " 个 · " + esc(g.name) + "</span></div>" +
           '<div class="py-big">' + esc(ch.p) +
             '<button class="mini-speak" id="py-speak" aria-label="读拼音">' + Icons.svg("speak", "ico-solo") + "</button></div>" +

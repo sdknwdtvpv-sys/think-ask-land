@@ -83,25 +83,8 @@
     };
   }
 
-  /* ---------- 角色 SVG → Image（含情绪所需的最小内联样式） ---------- */
-  function mascotImage(key, mood) {
-    return new Promise(function (resolve) {
-      var svg = window.Mascot.render(mood || "happy", 120, key);
-      /* 独立渲染时 CSS 不生效,这里补最小样式:开心态=举手+张嘴 */
-      var style = "<style>" +
-        ".m-arm-down,.m-mouth-smile{display:none}" +
-        "@media (prefers-reduced-motion:reduce){*{animation:none}}" +
-        "</style>";
-      svg = svg.replace(/(<svg[^>]*>)/, "$1" + style);
-      var img = new Image();
-      img.onload = function () { resolve(img); };
-      img.onerror = function () { resolve(null); };
-      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-    });
-  }
-
   /* ---------- 画卡 ---------- */
-  function draw(canvas, d, imgs) {
+  function draw(canvas, d) {
     var ctx = canvas.getContext("2d");
     var s = 2;                                   // 2 倍导出,手机上更清晰
     canvas.width = W * s; canvas.height = H * s;
@@ -118,15 +101,6 @@
     text(ctx, "思问岛", 48, 92, { size: 44, color: "#fff", weight: 800 });
     text(ctx, "本周学习报告", 48, 142, { size: 30, color: "rgba(255,255,255,.92)" });
     text(ctx, d.from + " ~ " + d.to, 48, 182, { size: 20, color: "rgba(255,255,255,.8)", weight: 600 });
-
-    /* 三伙伴 */
-    var order = ["wenzai", "baobaodou", "shuxiaoman"];
-    order.forEach(function (k, i) {
-      var img = imgs[k];
-      if (!img) return;
-      var size = 132, x = 380 + i * 112, y = 176 - (i === 1 ? 12 : 0);
-      ctx.drawImage(img, x, y, size, size);
-    });
 
     /* 三项核心数字 */
     var boxY = 268;
@@ -204,14 +178,11 @@
   /* ---------- 生成 ---------- */
   function make() {
     var d = collect();
-    return Promise.all([
-      mascotImage("wenzai"), mascotImage("baobaodou"), mascotImage("shuxiaoman")
-    ]).then(function (list) {
-      var imgs = { wenzai: list[0], baobaodou: list[1], shuxiaoman: list[2] };
+    return Promise.resolve().then(function () {
       var canvas = document.createElement("canvas");
       /* 等字体就绪,避免标题用回退字体 */
       var ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
-      return ready.then(function () { return draw(canvas, d, imgs); });
+      return ready.then(function () { return draw(canvas, d); });
     });
   }
 
