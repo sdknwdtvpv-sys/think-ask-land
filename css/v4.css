@@ -935,3 +935,21 @@ html.v4 {
   --hill-2: var(--paper);
   --meadow: var(--paper);
 }
+
+/* 第三批（收尾）：散落组件的硬编码紫灰 rgba(63,58,82)/(74,68,88)
+   —— 它们不走变量，改不到，只能点名。
+   多数落在阴影/描边上，统一去掉并从 --line 取色。 */
+html.v4 .btn:active,
+html.v4 .icon-btn,
+html.v4 .icon-btn:active,
+html.v4 .star-pill,
+html.v4 .rc-bar,
+html.v4 .ab-bar,
+html.v4 .sg-card,
+html.v4 .tt-chip {
+  box-shadow: none;
+  border-color: var(--line);
+}
+html.v4 .card-pos { color: var(--ink-3); }        /* 旧: #7a7391 紫灰 */
+html.v4 .tt-chip { color: var(--ink-3); }
+html.v4 .rc-bar > i, html.v4 .ab-bar > i { background: var(--primary); }
