@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>隐私说明 · 思问岛</title>
-<meta name="description" content="思问岛隐私说明:孩子的学习记录只保存在本机浏览器,我们不上传、不收集个人信息;匿名统计不含 IP 与设备信息,可一键关闭。">
+<meta name="description" content="思问岛隐私说明:完全离线、不联网,孩子的学习记录只保存在本机,我们不收集任何个人信息,也没有任何统计或第三方 SDK。">
 <meta name="theme-color" content="#8ec9f0">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css?v=2.12.0">
@@ -32,7 +32,7 @@
 <div class="doc">
   <a class="doc-back" href="index.html">‹ 回到思问岛</a>
   <h1>隐私说明</h1>
-  <p class="meta">思问岛 · 幼儿识字启蒙　｜　最近更新：2026-09-21</p>
+  <p class="meta">思问岛 · 幼儿识字启蒙　｜　最近更新：2026-10-07</p>
 
   <div class="panel">
     <h4>🌱 一句话</h4>
@@ -54,14 +54,16 @@
   </div>
 
   <div class="panel">
-    <h4>📊 匿名使用统计（默认开启，可一键关闭）</h4>
-    <p>为了知道「哪一步孩子容易放弃、哪类题容易错」，应用会发送极少量<strong>匿名</strong>信息：</p>
+    <h4>📴 完全离线：不联网、不收集、无统计</h4>
+    <p><span class="key">思问岛不向任何外部服务器发送数据。</span>没有账号、没有服务器、没有统计 SDK，
+    也没有崩溃上报或任何第三方分析组件 —— 我们<b>无法</b>知道孩子学过什么，因为那些数据根本没有离开过这台设备。</p>
     <ul>
-      <li><strong>会发送</strong>：事件名（打开了哪个页面、答了几题、对错）、应用版本号、一个<strong>每天更换</strong>的匿名标识</li>
-      <li><span class="warn">绝不发送</span>：IP 地址、设备型号、浏览记录、孩子姓名 / 头像 / 语音、以及任何能定位到具体人的信息</li>
-      <li>服务端只记录四列日志，<strong>字段里就没有 IP 与 User-Agent</strong>；匿名标识每天重新生成，无法跨天追踪同一个孩子</li>
-      <li>关闭方式：<strong>家长中心 → 帮助改进（匿名统计）</strong>，关掉即不再发送；也可以随时更换匿名标识</li>
+      <li>应用不发起任何外部网络请求</li>
+      <li>不采集设备标识、不采集使用统计、不做用户画像</li>
+      <li>因此也不存在"关闭统计"的必要 —— 它从一开始就没有</li>
     </ul>
+    <p>浏览器版会从本站读取音频索引与音频文件，那属于<b>本地站点资源</b>，不向第三方发送任何内容；
+    App 版把这些资源全部放进安装包，连这一次请求也不需要。</p>
   </div>
 
   <div class="panel">
@@ -76,7 +78,7 @@
       <li><strong>可以拒绝</strong>：不授权也完全不影响学习功能，只是少了这一项。
       离开页面时应用会主动释放麦克风（浏览器标签上的录音提示会立刻消失）</li>
     </ul>
-    <p>上面那条「匿名统计」里也<strong>绝不发送语音</strong> —— 语音无法匿名化，所以干脆一个字节都不发。</p>
+    <p>由于应用完全不联网，语音也不可能被发送到任何地方 —— 一个字节都不会发。</p>
   </div>
 
   <div class="panel">
@@ -84,6 +86,7 @@
     <ul>
       <li>不要手机号、不要实名、不要注册登录</li>
       <li>没有广告，没有第三方统计 SDK，没有社交功能</li>
+      <li><strong>不联网</strong>：不发统计、不上报崩溃、不做更新检查</li>
       <li>字体、笔顺数据、朗读音频全部放在本站，<strong>不请求第三方 CDN</strong></li>
       <li>不做用户画像，不做推荐算法，不做任何形式的自动化决策</li>
     </ul>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 思问岛 · iOS 隐私清单(PrivacyInfo.xcprivacy)
+
+	     这里全部填"无",是因为应用**真的**不联网、不收集任何数据 ——
+	     这一条由 .build/offline-guard-test.js 断言守着(静态扫描 + jsdom 全流程零跨源请求)。
+
+	     ⚠️ 一旦有人加了埋点/崩溃上报/第三方 SDK,这份清单与 App Store 的隐私标签
+	        必须同步改,否则就是虚假声明。 -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+
+	<!-- 不追踪任何域名 -->
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+
+	<!-- 不收集任何数据类型。
+	     录音虽然敏感,但只在本机处理、从不离开设备 ——
+	     按 Apple 的定义(on-device 处理不构成 "collected"),不需要也不应该在这里声明;
+	     多声明反而与"不收集数据"的隐私标签自相矛盾。 -->
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+
+	<!-- 必填理由 API:用到就必须声明理由,否则 App Store Connect 直接不受理
+	     (2024-05-01 起)。理由码必须如实反映真实用途。 -->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<!-- 存应用设置与学习进度(WebView 壳与 Capacitor Preferences 都会用到 UserDefaults) -->
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+		<dict>
+			<!-- 读取自己容器内文件的元数据(存档文件与缓存的时间戳/大小) -->
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>C617.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

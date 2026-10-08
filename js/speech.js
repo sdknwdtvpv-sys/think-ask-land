@@ -117,7 +117,7 @@
     },
 
     savedId: function () {
-      try { return localStorage.getItem(VOICE_KEY) || ""; } catch (e) { return ""; }
+      return window.PlatformStorage.get(VOICE_KEY) || "";
     },
 
     /* 家长手动选音色:id 为 listVoices() 里的 id */
@@ -127,7 +127,7 @@
         if (list[i].id === id) {
           this.voice = list[i].v;
           this._voicesLoaded = true;
-          try { localStorage.setItem(VOICE_KEY, id); } catch (e) { /* 隐私模式 */ }
+          try { window.PlatformStorage.set(VOICE_KEY, id); } catch (e) { /* 隐私模式 */ }
           return list[i];
         }
       }

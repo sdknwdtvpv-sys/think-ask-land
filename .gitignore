@@ -18,3 +18,19 @@ build/_listen.html
 *.log
 # ===== 预置朗读音频(由 .build/gen-audio.py 生成,体积大;是否入库见 README) =====
 audio/
+
+# ===== Capacitor 原生壳(见 APP-PLAN.md) =====
+# www/ 是由 .build/sync-www.sh 组装出来的产物,不入库
+www/
+node_modules/
+# 原生工程(ios/)要入库 —— 那是源码;下面是它的构建/同步产物,不入库
+ios/App/App/public/
+ios/App/Pods/
+ios/App/build/
+ios/App/DerivedData/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/App.xcworkspace/xcuserdata/
+# 将来加安卓时再放开(当前只做 iOS):
+# android/app/build/
+# android/.gradle/
+

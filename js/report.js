@@ -216,45 +216,31 @@
   }
 
   /* ---------- 导出与分享 ---------- */
-  function toBlob(canvas) {
-    return new Promise(function (resolve) {
-      if (canvas.toBlob) canvas.toBlob(resolve, "image/png");
-      else resolve(null);
-    });
-  }
+  /* (原来这里有个 toBlob 辅助函数,已随导出逻辑一起搬进 js/platform-io.js) */
   function fileName() {
     return "思问岛-学习报告-" + window.Store.dayStr() + ".png";
   }
+  /* 保存与分享都走平台桥接层(js/platform-io.js):
+     `<a download>` 在 App 内的 WKWebView 里不被支持,点了没反应;
+     `navigator.share` 在 WKWebView 里根本不存在。
+     两者在原生壳里都会换成"写进 Cache + 唤起系统分享面板"。 */
   function download(canvas) {
-    return toBlob(canvas).then(function (blob) {
-      var url = blob ? URL.createObjectURL(blob) : canvas.toDataURL("image/png");
-      var a = document.createElement("a");
-      a.href = url; a.download = fileName();
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function () { if (blob) URL.revokeObjectURL(url); }, 4000);
-      return "downloaded";
-    });
+    return window.PlatformIO.saveImage({ canvas: canvas, filename: fileName() })
+      .then(function (r) { return r || "downloaded"; });
   }
   function share(canvas) {
     canvas = canvas || null;
     var p = canvas ? Promise.resolve(canvas) : make();
     return p.then(function (cv) {
-      return toBlob(cv).then(function (blob) {
-        var file = null;
-        try { file = new File([blob], fileName(), { type: "image/png" }); } catch (e) { file = null; }
-        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-          return navigator.share({ files: [file], title: "思问岛 · 本周学习报告", text: "陪着孩子,一起把问题变成答案" })
-            .then(function () { return "shared"; })
-            .catch(function (err) { return (err && err.name === "AbortError") ? "canceled" : download(cv); });
-        }
-        return download(cv);
+      return window.PlatformIO.shareImage({
+        canvas: cv, filename: fileName(),
+        title: "思问岛 · 本周学习报告", text: "陪着孩子,一起把问题变成答案"
       });
     });
   }
 
   /* ---------- 预览浮层(先看再存,避免直接弹出下载) ---------- */
   function preview() {
-    if (window.Beacon) Beacon.track("report", { a: "open" });
     return make().then(function (canvas) {
       var mask = document.createElement("div");
       mask.className = "report-mask";
@@ -276,11 +262,12 @@
         if (ev.key === "Escape") { close(); document.removeEventListener("keydown", esc); }
       });
       mask.querySelector("#rp-save").addEventListener("click", function () {
-        if (window.Beacon) Beacon.track("report", { a: "save" });
-        download(canvas).then(function () { window.UI.toast("已保存,去相册/下载里看看"); });
+        download(canvas).then(function (res) {
+          if (res === "canceled") return;
+          window.UI.toast(res === "shared" ? "已打开分享面板,可存到相册或发给家人" : "已保存,去相册/下载里看看");
+        });
       });
       mask.querySelector("#rp-share").addEventListener("click", function () {
-        if (window.Beacon) Beacon.track("report", { a: "share" });
         share(canvas).then(function (res) {
           if (res === "downloaded") window.UI.toast("已导出图片,可手动发送");
           else if (res === "shared") window.UI.toast("已分享");

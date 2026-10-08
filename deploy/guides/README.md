@@ -9,6 +9,14 @@
 |---|---|---|---|
 | 01 | [腾讯云密钥与预置音频生成](01-tencent-key-and-audio.md) | 字库改动后要补朗读音频；或想换朗读音色 | 首次约 20 分钟，之后每次约 5 分钟 |
 | 02 | [发版上线与回滚](02-release-and-rollback.md) | 改完东西要发布到线上，或线上出问题要回滚 | 3~6 分钟 |
+| 03 | [v2.x 迭代经验与常见坑](03-v2.x经验与常见坑.md) | 改代码前扫一眼；想知道"这条为什么有测试守着" | 10 分钟 |
+| 04 | [本机开发环境（macOS）](04-本机开发环境.md) | **换了一台电脑**；或 `run-all.sh` 莫名其妙一大片红 | 一次性约 3 分钟 |
+| 05 | [距 iOS 上架还差什么](05-上架待办.md) | **准备上架 App Store**；想知道还剩哪些事、谁来做 | 通读 10 分钟 |
+| 06 | [App Store 上架文案与审核备注](06-AppStore-文案.md) | 要往 App Store Connect 里填字段了 | 复制粘贴即可 |
+| 07 | [重新配置部署密钥](07-重新配置部署密钥.md) | **拿不到 `hanzi_deploy`**；或**换了一台电脑要部署** | 约 5 分钟 |
+
+> ⚠️ **注意路径**：01~03 号指南里的 `/Volumes/Elliot's SSD/HARNESS/hanzi-kids` 是**原开发机**的位置。
+> 在别的机器上请替换成你实际克隆到的路径（当前这台是 `/Users/elliot/Harness/think-ask-land`），详见 04 号指南。
 
 ## 有向导的，就别手敲
 
@@ -16,7 +24,8 @@
 例如补齐朗读音频：
 
 ```bash
-bash "/Volumes/Elliot's SSD/HARNESS/hanzi-kids/.build/run-audio.sh"
+# 在仓库根目录执行（先在终端 cd 到你的克隆目录）
+bash .build/run-audio.sh
 ```
 
 ## 你需要知道的三件事

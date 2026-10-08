@@ -52,6 +52,13 @@
 
   App.register("print", {
     render: function (p, view) {
+      /* 付费门控:线下物料打印属于完整内容包 */
+      if (window.Entitlements && !window.Entitlements.isUnlocked("print")) {
+        App.setTopbar("打印物料", true);
+        view.innerHTML = window.UI.lockCard({ what: "线下物料打印(字卡 / 描红纸 / 活动卡 / 物料包 / 奖状)" });
+        window.UI.wireLock(view);
+        return;
+      }
       var type = p.type || "cards";
       var scope = p.scope || "learned";
       var title = "打印物料";
@@ -86,7 +93,6 @@
             '（家长中心 →「识字卡 / 描红练习纸」）按岛屿或我学过的字来出。</p></div>',
             '<button class="btn btn-ghost" id="pr-back">‹ 返回</button>');
           view.querySelector("#pr-back").addEventListener("click", function () { App.navigate("#/parent"); });
-          if (window.Beacon) Beacon.track("view", { v: "print" });
           return;
         }
         var questsP = window.QUESTS || [];
@@ -202,7 +208,6 @@
         });
       }
       view.querySelector("#pr-back").addEventListener("click", function () { App.navigate("#/parent"); });
-      if (window.Beacon) Beacon.track("view", { v: "print" });
     }
   });
 

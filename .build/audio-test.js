@@ -103,7 +103,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       win.Speech.speak("一", 0.8, () => { ended = true; });
       await sleep(80);
       const played = win.__played[win.__played.length - 1] || "";
-      ok("命中的文本交给 <audio> 播放", /audio\/[^/]+\/z\/yi1(-[0-9a-f]{8})?\.mp3$/.test(played), played || "(无)");
+      /* 扩展名不再写死:云服务引擎产 mp3,而 macOS 本地 say 引擎只能产 m4a
+         (macOS 没有 mp3 编码器)—— 两者都是合法产物,见 gen-audio.py 的 EXT。 */
+      ok("命中的文本交给 <audio> 播放", /audio\/[^/]+\/z\/yi1(-[0-9a-f]{8})?\.(mp3|m4a)$/.test(played), played || "(无)");
       ok("命中时不再走 TTS", win.__said.indexOf("一") < 0, JSON.stringify(win.__said));
 
       const el = doc.querySelector("audio");

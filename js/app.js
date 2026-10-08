@@ -84,7 +84,6 @@
       var r = this.parse();
       var def = this.routes[r.name] || this.routes.home;
       this.currentName = def === this.routes.home ? "home" : r.name;
-      if (window.Beacon) Beacon.track("view", { n: this.currentName });
       var view = document.getElementById("view");
       view.innerHTML = "";
       view.scrollTop = 0;
@@ -133,7 +132,6 @@
           t = setTimeout(function () { if (self.currentName === "card" || self.currentName === "groups") self.render(); }, 350);
         };
       })());
-      if (window.Beacon) Beacon.track("open");
       this.render();
       this.welcome();
       this.soundGate();
@@ -170,7 +168,6 @@
         box.classList.add("gone");
         setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 260);
         setTimeout(function () { window.Speech.speak("你好呀,我们一起来认字吧", 0.88); }, 320);
-        if (window.Beacon) Beacon.track("evt", { n: "sound_gate" });
       });
     },
 
@@ -853,7 +850,6 @@
         var btn = this;
         btn.disabled = true; // 防连点
         var r1 = window.Store.markLearned(ch.c);
-        if (window.Beacon) Beacon.track("card", { first: r1.first ? 1 : 0 });
         var advance = function () {
           if (i + 1 < g.chars.length) go(i + 1);
           else {
@@ -902,7 +898,38 @@
   window.App = App;
   window.escHtml = esc;
 
+  /* 启动门控:必须先等平台存储就绪,再读学习进度。
+     浏览器里 PlatformStorage.ready 是**同步**回调(行为与从前完全一致,零启动改动);
+     原生壳里它会先把 Capacitor Preferences 水合进内存,再回调 ——
+     否则会以"空进度"启动,家长会以为孩子的记录丢了。
+     水合失败也必须能打开(ready 内部已兜底),所以这里不做失败分支。 */
   document.addEventListener("DOMContentLoaded", function () {
-    App.start();
+    var go = function () {
+      try { window.Store.boot(); } catch (e) { /* 存档坏了也不能打不开,Store 内部已兜底 */ }
+
+      /* 内购初始化:异步、**绝不阻塞首屏**。
+         商店加载慢、失败、或根本没装插件时,应用照常可用(付费模块只是显示未解锁)。
+         插件那 508KB 只在原生环境动态加载,网页版与测试套件完全不加载。 */
+      try {
+        if (window.Entitlements) {
+          var wasUnlocked = window.Entitlements.unlocked();
+          window.Entitlements.onChange(function (nowUnlocked) {
+            if (nowUnlocked && !wasUnlocked) {
+              wasUnlocked = true;
+              /* 刚买完:把当前页重画一次,让家长立刻看到内容解锁 */
+              try { App.render(); } catch (e) { /* 忽略 */ }
+            }
+          });
+          window.Entitlements.init();
+        }
+      } catch (e) { /* 内购坏了不能连累主流程 */ }
+
+      App.start();
+    };
+    if (window.PlatformStorage && typeof window.PlatformStorage.ready === "function") {
+      window.PlatformStorage.ready(go);
+    } else {
+      go();
+    }
   });
 })();

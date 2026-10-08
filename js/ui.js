@@ -233,6 +233,53 @@
     mask.querySelector("#cf-cancel").addEventListener("click", function () { mask.remove(); restoreFocus(); o.onCancel && o.onCancel(); });
   }
 
+  /* 通用输入弹窗 —— 替代 window.prompt。
+     为什么必须换掉:window.prompt / window.confirm 在 App 内的 WKWebView 里
+     **不被支持**,会静默返回 null/false,用户表现为"点了改名没反应""删档案点了不动"。
+     按钮 id 刻意复用 cf-ok / cf-cancel,这样下面那个 Esc 关闭逻辑不用改就能生效。 */
+  function promptModal(o) {
+    var root = document.getElementById("modal-root");
+    var mask = document.createElement("div");
+    mask.className = "modal-mask";
+    mask.innerHTML =
+      '<div class="modal-card" role="dialog" aria-modal="true" aria-label="' + attr(o.title || "输入") + '">' +
+        '<span class="modal-emoji">' + (o.emoji || "✏️") + "</span>" +
+        '<div class="modal-title">' + (o.title || "") + "</div>" +
+        (o.text ? '<div class="modal-text">' + o.text + "</div>" : "") +
+        '<input class="gate-input" id="pm-in" type="text" autocomplete="off" ' +
+          'maxlength="' + (o.maxLength || 12) + '" ' +
+          'placeholder="' + attr(o.placeholder || "") + '" ' +
+          'value="' + attr(o.value == null ? "" : o.value) + '">' +
+        '<div class="modal-btns">' +
+          '<button class="btn btn-lg ' + (o.danger ? "btn-danger" : "btn-coral") + '" id="cf-ok">' + (o.okText || "确定") + "</button>" +
+          '<button class="btn btn-lg btn-ghost" id="cf-cancel">' + (o.cancelText || "取消") + "</button>" +
+        "</div>" +
+      "</div>";
+    root.appendChild(mask);
+    rememberFocus();
+    var inp = mask.querySelector("#pm-in");
+    if (inp) { try { inp.focus(); inp.select(); } catch (e) { /* 忽略 */ } }
+    function close() { mask.remove(); restoreFocus(); }
+    function submit() {
+      var val = inp ? inp.value : "";
+      close();
+      if (o.onOk) o.onOk(val);
+    }
+    mask.addEventListener("click", function (ev) {
+      if (ev.target !== mask) return;
+      close();
+      if (o.onCancel) o.onCancel();
+    });
+    mask.querySelector("#cf-ok").addEventListener("click", submit);
+    mask.querySelector("#cf-cancel").addEventListener("click", function () { close(); if (o.onCancel) o.onCancel(); });
+    if (inp) {
+      /* 回车即确定 —— 家长在手机键盘上少点一次 */
+      inp.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter") { ev.preventDefault(); submit(); }
+      });
+    }
+  }
+
   /* Esc 关闭弹窗(键盘可达性) —— 必须关「最上面」那一层:
      旧的 querySelector 只取第一个匹配,多层弹窗时会关掉被遮住的那层,
      反而把上面的弹窗留在屏幕上。 */
@@ -245,8 +292,34 @@
     if (btn) btn.click();
   });
 
+  /* ---------- 付费内容的"上锁"卡片 ----------
+     ⚠️ 儿童类合规(Apple 1.3):应用内的**购买入口必须位于家长门之后**。
+     所以这里刻意**不放购买按钮** —— 只告诉家长去哪里解锁,并跳到家长中心(那里有算术门)。
+     孩子点到锁住的模块时,不会看到任何"买东西"的入口。 */
+  function lockCard(o) {
+    o = o || {};
+    return '<div class="screen"><div class="panel lock-card">' +
+        '<div class="lock-emoji">🔒</div>' +
+        '<h3>这部分内容还没解锁</h3>' +
+        '<p class="parent-note">' + (o.what || "该内容") + '属于<b>完整内容包</b>,当前还没有解锁。</p>' +
+        '<p class="parent-note">请家长到 <b>家长中心 → 完整内容</b> 里查看(那里有一道家长验证)。</p>' +
+        '<button class="btn btn-lg btn-sun" id="lock-go">去家长中心</button>' +
+      "</div></div>";
+  }
+  function wireLock(view, backHash) {
+    var b = view.querySelector("#lock-go");
+    if (!b) return;
+    b.addEventListener("click", function () {
+      try { if (window.SFX) window.SFX.click(); } catch (e) { /* 忽略 */ }
+      if (window.App && window.App.navigate) window.App.navigate("#/parent");
+    });
+    /* 顶栏返回仍然可用(为空的 backHash 只是显式一点) */
+    if (backHash && window.App && window.App.setTopbar) window.App.setTopbar(backHash, true);
+  }
+
   window.UI = {
     burst: burst, rain: rain, flyStar: flyStar, wordFlash: wordFlash,
-    toast: toast, celebrate: celebrate, confirm: confirmModal, clearModals: clearModals
+    toast: toast, celebrate: celebrate, confirm: confirmModal, prompt: promptModal, clearModals: clearModals,
+    lockCard: lockCard, wireLock: wireLock
   };
 })();

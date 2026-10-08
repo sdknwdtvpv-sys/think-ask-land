@@ -104,6 +104,12 @@
   App.register("pinyin", {
     render: function (p, view) {
       App.setTopbar("拼音小课堂", true);
+      /* 付费门控:拼音进阶属于完整内容包 */
+      if (window.Entitlements && !window.Entitlements.isUnlocked("pinyin")) {
+        view.innerHTML = window.UI.lockCard({ what: "拼音进阶(整体认读音节 16 个)" });
+        window.UI.wireLock(view);
+        return;
+      }
       var DB = window.CharDB;
       var idx = Py.syllableIndex();
       var learnedSet = {};
@@ -297,7 +303,6 @@
       }
       renderBlend();
 
-      if (window.Beacon) Beacon.track("view", { v: "pinyin" });
     }
   });
 
@@ -429,6 +434,11 @@
         }).join("") + "</div>" +
         "</div>";
 
+      /* 付费门控:L1~L2 免费,L3~L5 属于完整内容包(见 js/entitlements.js 的 readPro)。
+         这里是"硬门":未解锁就不渲染这些卡片,而不是渲染了再拦点击。 */
+      var paidUnlocked = window.Entitlements ? window.Entitlements.isUnlocked("readPro") : true;
+      var PAID_LV = { L3: 1, L4: 1, L5: 1 };
+
       LEVELS.forEach(function (lv) {
         var rows = list.filter(function (r) { return r.lvl === lv.id; });
         if (!rows.length) return;
@@ -438,6 +448,11 @@
         html += '<div class="lvl-head"><span class="lvl-tag">' + lv.id + "</span>" +
           "<span class=\"lvl-name\">" + esc(lv.name) + "</span>" +
           '<span class="lvl-meta">' + esc(lv.hint) + " · " + doneN + "/" + rows.length + " 篇" + "</span></div>";
+        if (PAID_LV[lv.id] && !paidUnlocked) {
+          html += '<div class="lvl-note">🔒 ' + lv.id + " 共 " + rows.length +
+            " 篇属于<b>完整内容包</b>,还没有解锁。请家长到「家长中心 → 完整内容」查看。</div>";
+          return;                                   // 未解锁就不渲染这些卡片
+        }
         if (locked && lv.id !== "L1") {
           html += '<div class="lvl-note">💡 建议学过 ' + lv.need + " 个字再来读这一级(现在 " + learnedN + " 个)。想读也可以直接点。</div>";
         }
@@ -462,7 +477,6 @@
           App.navigate("#/story?id=" + b.getAttribute("data-id"));
         });
       });
-      if (window.Beacon) Beacon.track("view", { v: "read" });
     }
   });
 
@@ -471,6 +485,17 @@
       var id = p.id || (passages()[0] || {}).id;
       var story = passages().filter(function (x) { return x.id === id; })[0];
       if (!story) { App.navigate("#/read"); return; }
+
+      /* 付费门控:L3~L5 属于完整内容包。
+         直接改 URL 也要拦得住 —— 所以这里(而不只是列表页)再判一次。 */
+      var PAID_LV = { L3: 1, L4: 1, L5: 1 };
+      if (PAID_LV[story.lvl] && window.Entitlements && !window.Entitlements.isUnlocked("readPro")) {
+        App.setTopbar(story.title, true);
+        view.innerHTML = window.UI.lockCard({ what: "分级阅读 " + story.lvl + "《" + story.title + "》" });
+        window.UI.wireLock(view);
+        return;
+      }
+
       App.setTopbar(story.title, true);
       var learned = learnedSet();
       var targets = findTargets(story, 1);
@@ -796,7 +821,6 @@
         if (window.SFX) SFX.correct();
         App.after(700, function () { App.navigate("#/read"); });
       });
-      if (window.Beacon) Beacon.track("view", { v: "story" });
     }
   });
 

@@ -29,6 +29,14 @@
   /* ---------- 场景列表 ---------- */
   App.register("talk", {
     render: function (p, view) {
+      /* 付费门控:说一说属于完整内容包。
+         放在最前面 —— 列表页与单个场景页都要拦住(直接改 URL 也不行)。 */
+      if (window.Entitlements && !window.Entitlements.isUnlocked("talk")) {
+        App.setTopbar("说一说", true);
+        view.innerHTML = window.UI.lockCard({ what: "说一说(看图说话,24 个场景)" });
+        window.UI.wireLock(view);
+        return;
+      }
       if (p.id) { renderTalk(view, p.id); return; }
       App.setTopbar("说一说", true);
       var list = scenes();
@@ -58,7 +66,6 @@
           App.navigate("#/talk?id=" + b.getAttribute("data-id"));
         });
       });
-      if (window.Beacon) Beacon.track("view", { v: "talk" });
     }
   });
 
@@ -207,7 +214,6 @@
     }
 
     idle();
-    if (window.Beacon) Beacon.track("view", { v: "talk-one" });
   }
 
   /* 供测试与家长端使用 */

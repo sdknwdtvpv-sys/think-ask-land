@@ -133,11 +133,19 @@ def load_chars():
 def load_phrases():
     """App 口播文案(data/phrases.js):打招呼/表扬/任务完成。
        它们只有十几条、百来个字,却决定"孩子答对时能不能听到声音",
-       所以和字库一起做成预置音频(kind = p)。"""
+       所以和字库一起做成预置音频(kind = p)。
+
+       ⚠️ 提取前必须**先剥掉注释**:
+       原实现直接对整段做 re.findall(r'"([^"]+)"'),于是注释里出现的英文双引号
+       会被当成一条真实口播(实测:一句解释文字里的 "要找家长" 就被生成了音频)。
+       剥注释后,注释怎么写都不会污染合成清单。"""
     path = os.path.join(ROOT, "data", "phrases.js")
     if not os.path.exists(path):
         return []
     src = open(path, encoding="utf-8").read()
+    # 先去掉块注释与行注释,再取数组 —— 顺序不能反(数组本身在代码里)
+    src = re.sub(r"/\*.*?\*/", "", src, flags=re.S)
+    src = re.sub(r"(?m)//.*$", "", src)
     m = re.search(r"window\.APP_PHRASES\s*=\s*\[(.*?)\]", src, re.S)
     if not m:
         return []
@@ -189,6 +197,45 @@ def gen_edge(bin_path, voice, rate, text, path):
     r = subprocess.run(cmd, capture_output=True)
     if r.returncode != 0 or not os.path.exists(path) or os.path.getsize(path) == 0:
         raise RuntimeError("edge-tts 失败: %s" % (r.stderr.decode("utf-8", "ignore")[:200]))
+
+# ---------- 引擎：macOS 本地语音（免密钥 / 离线） ----------
+SAY_BIN = "/usr/bin/say"
+AFCONVERT_BIN = "/usr/bin/afconvert"
+
+def gen_say(voice_name, text, path):
+    """用 macOS 自带语音合成 —— **免密钥、完全离线**。
+
+    为什么要有这个引擎:没有云服务密钥时,App 会完全依赖浏览器 TTS;
+    而 iOS 27 上 TTS 与 WebAudio 有互相打死的回归(WebKit 325274),那条路不可靠。
+    用本机语音生成一整套音频,App 就能「自带全部声音」,把 TTS 降级为可选增强 ——
+    这正是 APP-PLAN.md 2.1 想要的形态,也让"音频全覆盖"这件事在无密钥时也能验证。
+
+    ⚠️ **音质低于腾讯云 / Azure 的神经音色**(后两者是产品的正式选择)。
+       它是开发与自测的兜底;正式发布前用 --engine tencent/azure 重新生成即可覆盖。
+
+    产物是 **m4a/AAC**:macOS 没有 mp3 编码器(afconvert 列得出 MPG3,但实际会报 'fmt?'),
+       而 AAC 在 iOS / Safari / Chrome / Edge 上都能播。
+
+    语音名必须写**完整名**(带地区),例如 "Sandy (中文（中国大陆）)"。
+    只写 "Sandy" 会命中另一个变体,实测产物体积差 8 倍 —— 那是没念对。
+    用 `say -v '?' | grep zh_CN` 看本机有哪些。
+    """
+    aiff = tempfile.mktemp(prefix="hzsay-", suffix=".aiff")
+    try:
+        r = subprocess.run([SAY_BIN, "-v", voice_name, "-o", aiff, text], capture_output=True)
+        if r.returncode != 0:
+            raise RuntimeError("say 失败: %s" % (r.stderr.decode("utf-8", "ignore")[:160] or "未知"))
+        if not os.path.exists(aiff) or os.path.getsize(aiff) < MIN_BYTES:
+            raise RuntimeError("say 产出异常(空文件)")
+        r2 = subprocess.run([AFCONVERT_BIN, aiff, path, "-f", "m4af", "-d", "aac", "-b", "64000"],
+                            capture_output=True)
+        if r2.returncode != 0:
+            raise RuntimeError("afconvert 失败: %s" % (r2.stderr.decode("utf-8", "ignore")[:160] or "未知"))
+    finally:
+        try:
+            os.remove(aiff)
+        except OSError:
+            pass
 
 # ---------- 引擎：Azure 语音服务 ----------
 def gen_azure(args, voice, text, path):
@@ -282,6 +329,10 @@ def find_ffmpeg():
 TRIM_AF = ("silenceremove=start_periods=1:start_duration=0:start_threshold=-50dB:detection=peak,"
            "areverse,silenceremove=start_periods=1:start_duration=0:start_threshold=-50dB:detection=peak,areverse")
 
+# 音频扩展名随引擎变:macOS 没有 mp3 编码器,本地 say 引擎只能产出 m4a/AAC;
+# 其余引擎(edge / azure / tencent)都是 mp3。main() 里按 --engine 覆盖。
+EXT = ".mp3"
+
 MIN_BYTES = 500          # 生成产物的下限（实测坏文件只有 236 字节）
 TRIM_MIN_BYTES = 900     # 去静音产物的下限：48kbps 下约 0.15s 真实语音。
                          # 只按绝对大小判断——短音节（二/八/大）本就该被裁掉九成,
@@ -363,7 +414,7 @@ def selftest_sign():
 # ---------- 主流程 ----------
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--engine", choices=["edge", "azure", "tencent"], default="edge")
+    ap.add_argument("--engine", choices=["edge", "azure", "tencent", "say"], default="edge")
     ap.add_argument("--voice", default="zh-CN-YunxiaNeural",
                     help="逗号分隔；edge 填音色名，tencent 填音色 ID（如 402000,403000）。第一个为默认音色")
     ap.add_argument("--edge-bin", default="edge-tts")
@@ -568,7 +619,8 @@ def main():
             print("   %s %-14s ← %s" % (kind, stem, text))
         if len(tasks) > 20:
             print("   …其余 %d 条" % (len(tasks) - 20))
-        if args.engine == "edge":
+        if args.engine in ("edge", "say"):
+            # edge 与本地 say 都不能用 SSML 音素锁读音:只能用同音字替代,发/谁 只能跳过
             skipped = sorted(SKIP_SINGLE & {c["c"] for c in chars})
             print("跳过的单字（前端回退浏览器 TTS）: %s" % ("、".join(skipped) or "无"))
         else:
@@ -580,6 +632,15 @@ def main():
         sys.exit("腾讯云引擎需要 --secret-id / --secret-key（或 TENCENT_SECRET_ID / TENCENT_SECRET_KEY）")
     if args.engine == "azure" and not args.azure_key:
         sys.exit("Azure 引擎需要 --azure-key（或 AZURE_SPEECH_KEY）")
+
+    # 本地 say 引擎产的是 m4a/AAC:既不需要去静音(say 输出本就很紧),
+    # 也不能用 libmp3lame 那条链路。这里直接关掉,避免生成出坏文件。
+    if args.engine == "say":
+        global EXT
+        EXT = ".m4a"
+        if args.trim:
+            print("ℹ️ --engine say 产的是 m4a,不支持 --trim,已自动忽略")
+            args.trim = False
 
     ffmpeg = find_ffmpeg() if args.trim else None
     if args.trim and not ffmpeg:
@@ -596,7 +657,7 @@ def main():
     # 预检:文件名必须与文本一一对应,否则索引会指错音频
     paths = {}
     for kind, stem, text, key in uniq:
-        rel = "%s/%s.mp3" % (kind, stem)
+        rel = "%s/%s%s" % (kind, stem, EXT)
         if rel in paths and paths[rel] != key:
             sys.exit("❌ 文件名冲突: %s 同时对应「%s」和「%s」" % (rel, paths[rel], key))
         paths[rel] = key
@@ -617,7 +678,7 @@ def main():
 
         def work(item):
             kind, stem, text, key = item
-            rel = "%s/%s.mp3" % (kind, stem)
+            rel = "%s/%s%s" % (kind, stem, EXT)
             path = os.path.join(vdir, rel)
             if args.resume and os.path.exists(path) and os.path.getsize(path) > 0:
                 return (key, rel, None)
@@ -628,6 +689,8 @@ def main():
                         gen_edge(args.edge_bin, voice["id"], args.rate, text, path)
                     elif args.engine == "azure":
                         gen_azure(args, voice["id"], text, path)
+                    elif args.engine == "say":
+                        gen_say(voice["id"], text, path)
                     else:
                         gen_tencent(args, voice["id"], text, path)
                     if not sane(path):       # 服务偶发返回空音频,重试

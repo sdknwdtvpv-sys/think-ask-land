@@ -54,6 +54,9 @@ t("--check:有缺口返回非 0,完整返回 0", () => {
 
 /* ---------- 2. 密钥错误必须失败且可读 ---------- */
 const before = { a: idxCount("tc-502007"), b: idxCount("tc-403000") };
+/* 记下"跑之前 audio/ 长什么样",收尾时还原 —— 见文件末尾的 cleanup */
+const hadConfig = fs.existsSync(path.join(ROOT, "audio", "config.json"));
+const hadAudioDir = fs.existsSync(path.join(ROOT, "audio"));
 
 t("密钥错误:返回非 0 且给出中文指引", () => {
   const r = run(["--engine", "tencent", "--voice", "502007:tc-502007:智小虎", "--only", "今"],
@@ -92,6 +95,28 @@ t("成功路径下不出现失败字样(避免误报)", () => {
   if (/本次有 \d+ 条失败/.test(out)) return FAIL("--list 不应报失败");
   return PASS("--list 正常");
 });
+
+/* ---------- 收尾:还原现场,避免跨套件污染 ----------
+   本套件用假密钥跑**真实**生成器;而生成器在"一条都没成功"时仍会写出
+   audio/config.json 与空的 index.json —— 那正是上面那条断言抓到的 bug。
+   但留下的残骸会被后面的 voice-config-test 看见并报"未登记的音频目录 tc-502007",
+   那是**跨套件污染**,与它要守的东西无关。所以跑完把自己造出来的东西清掉:
+   只删"跑之前不存在、跑之后才出现"的部分,既不动真实音频,也不掩盖上面那条失败。 */
+(function cleanup() {
+  const removed = [];
+  [["tc-502007", before.a], ["tc-403000", before.b]].forEach(function (pair) {
+    const d = path.join(ROOT, "audio", pair[0]);
+    if (pair[1] === -1 && fs.existsSync(d)) { try { fs.rmSync(d, { recursive: true, force: true }); removed.push(pair[0]); } catch (e) { /* 忽略 */ } }
+  });
+  if (!hadConfig) {
+    const cfg = path.join(ROOT, "audio", "config.json");
+    if (fs.existsSync(cfg)) { try { fs.rmSync(cfg); removed.push("config.json"); } catch (e) { /* 忽略 */ } }
+  }
+  if (!hadAudioDir) {
+    try { fs.rmdirSync(path.join(ROOT, "audio")); removed.push("audio/"); } catch (e) { /* 非空就算了 */ }
+  }
+  if (removed.length) console.log("  (已还原现场:清掉本次生成的 " + removed.join("、") + ")");
+})();
 
 console.log("\n========== 音频生成器:失败可见性守卫 ==========");
 results.forEach((r) => console.log((r.pass ? "✅ " : "❌ ") + r.name + (r.why ? "  —— " + r.why : "")));

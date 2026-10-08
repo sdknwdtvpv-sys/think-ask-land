@@ -31,12 +31,20 @@ for o in "${SSH_OPTS[@]}"; do SSH_CMD="$SSH_CMD '$o'"; done
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 echo "▶ 本地目录: $SRC"
 echo "▶ 目标: $DEST:$REMOTE_DIR (端口 $PORT)"
-echo "▶ 排除: .build/ deploy/ node_modules/ .npmcache/ .git/ .DS_Store"
+echo "▶ 排除: .build/ deploy/ ios/ www/ node_modules/ .git/ 规划文档"
+echo "▶ (ios/ 是原生工程、www/ 是 Capacitor 组装产物 —— 都不该上静态站点)"
 
 RSYNC_ARGS=(-avz --delete
   --exclude '.build/' --exclude 'deploy/' --exclude 'node_modules/'
   --exclude '.npmcache/' --exclude '.DS_Store' --exclude '*.log'
   --exclude '.git/' --exclude '.gitignore' --exclude '*.swp'
+  # Capacitor 相关:原生工程与组装产物都不该出现在公网静态站点上
+  --exclude 'ios/' --exclude 'www/' --exclude 'node_modules/'
+  --exclude 'package.json' --exclude 'package-lock.json'
+  --exclude 'capacitor.config.json'
+  # 规划/调研文档:含商业模式与合规分析,没有理由发布到公网
+  --exclude 'PRODUCT.md' --exclude 'APP-PLAN.md'
+  --exclude 'packaging-research-2026.md'
   -e "$SSH_CMD")
 [ -n "${DRY:-}" ] && RSYNC_ARGS+=(--dry-run)
 

@@ -1,4 +1,9 @@
-/* ============ 思问岛 · 学习记录仓库(localStorage + 记忆曲线) ============ */
+/* ============ 思问岛 · 学习记录仓库(平台存储 + 记忆曲线) ============
+   存储不再直接碰 localStorage,一律走 js/storage.js 的平台适配层:
+     - 浏览器:行为与从前逐字节相同(直通 localStorage)
+     - 原生壳:落到 Capacitor Preferences(App 私有存储),
+       不受"内嵌 WebView 存储在存储压力下被 LRU 淘汰"的影响
+   初始化时机也变了:不再在解析期 load(),而是等 app.js 在存储水合完成后调用 Store.boot()。 */
 (function () {
   "use strict";
 
@@ -237,14 +242,22 @@
   /* ---------- 档案目录 ---------- */
   var profileList = [{ id: DEFAULT_PROFILE, name: "宝贝", emoji: "🐻", created: 0 }];
   var activeId = DEFAULT_PROFILE;
-  /* 放在声明之后:先确定"当前是哪个孩子",之后所有读写都落到他的键上 */
-  loadProfiles();
+  /* 初始化不再在解析期做:必须先等平台存储水合完成(原生壳里 Preferences 是异步的),
+     否则会以"空进度"启动。由 app.js 在 PlatformStorage.ready() 之后调用 Store.boot()。
+     ⚠️ 调用 Store.boot() 之前不要读 Store.state。 */
+  var booted = false;
+  function boot() {
+    if (booted) return state;
+    booted = true;
+    loadProfiles();     /* 先确定"当前是哪个孩子",之后所有读写都落到他的键上 */
+    return load();
+  }
 
   function stateKey(id) { return id === DEFAULT_PROFILE ? KEY : KEY + "." + id; }
 
   function loadProfiles() {
     var raw = null;
-    try { raw = localStorage.getItem(PROF_KEY); } catch (e) { raw = null; }
+    try { raw = PlatformStorage.get(PROF_KEY); } catch (e) { raw = null; }
     if (raw) {
       try {
         var o = JSON.parse(raw);
@@ -267,7 +280,7 @@
 
   function saveProfiles() {
     try {
-      localStorage.setItem(PROF_KEY, JSON.stringify({ v: 1, active: activeId, list: profileList }));
+      PlatformStorage.set(PROF_KEY, JSON.stringify({ v: 1, active: activeId, list: profileList }));
     } catch (e) { /* 隐私模式:忽略 */ }
   }
 
@@ -279,14 +292,14 @@
 
   function load() {
     var raw = null;
-    try { raw = localStorage.getItem(stateKey(activeId)); } catch (e) { raw = null; }
+    try { raw = PlatformStorage.get(stateKey(activeId)); } catch (e) { raw = null; }
     if (!raw) { state = defaultState(); return state; }
     try {
       state = migrate(JSON.parse(raw));
     } catch (e) {
       /* 存档损坏(半写入 / 被手动改过):留一份原始副本便于排查,再用默认值继续,
          保证应用一定能打开 —— 旧实现是静默重置,用户连"进度为什么没了"都无从查起 */
-      try { localStorage.setItem(stateKey(activeId) + ".broken", raw); } catch (e2) { /* 忽略 */ }
+      try { PlatformStorage.set(stateKey(activeId) + ".broken", raw); } catch (e2) { /* 忽略 */ }
       try { console.warn("思问岛:学习存档解析失败,已保留副本 " + stateKey(activeId) + ".broken 并重置", e); } catch (e2) { /* 忽略 */ }
       state = defaultState();
     }
@@ -300,14 +313,14 @@
     try { payload = JSON.stringify(state); } catch (e) { payload = null; }
     if (payload !== null) {
       try {
-        localStorage.setItem(stateKey(activeId), payload);
+        PlatformStorage.set(stateKey(activeId), payload);
         saveWarned = false;
       } catch (e) {
         var okSaved = false;
         try {
           /* 先裁掉较老的每日统计再试一次:它最占体积,又最不影响体验 */
           state.daily = pruneDaily(state.daily, 7);
-          localStorage.setItem(stateKey(activeId), JSON.stringify(state));
+          PlatformStorage.set(stateKey(activeId), JSON.stringify(state));
           okSaved = true;
           saveWarned = false;
         } catch (e2) { okSaved = false; }
@@ -759,7 +772,7 @@
   /* 每个档案的简要进度:家长选孩子时一眼看出谁学到哪了 */
   function profileSummary(id) {
     var obj = null;
-    try { obj = JSON.parse(localStorage.getItem(stateKey(id)) || "null"); } catch (e) { obj = null; }
+    try { obj = JSON.parse(PlatformStorage.get(stateKey(id)) || "null"); } catch (e) { obj = null; }
     if (id === activeId) obj = state;               /* 当前档案以内存为准 */
     if (!obj) return { learned: 0, mastered: 0, stars: 0, days: 0 };
     var learned = 0, mastered = 0;
@@ -812,7 +825,7 @@
     if (!profileList.some(function (p) { return p.id === id; })) return { ok: false, err: "档案不存在" };
     profileList = profileList.filter(function (p) { return p.id !== id; });
     /* 删掉这个孩子的学习数据(不留垃圾键),并切到默认档案 */
-    try { localStorage.removeItem(stateKey(id)); } catch (e) { /* 忽略 */ }
+    try { PlatformStorage.remove(stateKey(id)); } catch (e) { /* 忽略 */ }
     if (activeId === id) { activeId = profileList[0].id; saveProfiles(); load(); }
     else saveProfiles();
     return { ok: true, active: activeProfile() };
@@ -863,7 +876,7 @@
   function applyImport(text) {
     var r = parseImport(text);
     if (!r.ok) return r;
-    try { localStorage.setItem(stateKey(activeId) + ".before-import", JSON.stringify(state)); } catch (e) { /* 忽略 */ }
+    try { PlatformStorage.set(stateKey(activeId) + ".before-import", JSON.stringify(state)); } catch (e) { /* 忽略 */ }
     state = r.state;
     state.welcomed = true;
     save();
@@ -871,15 +884,15 @@
   }
 
   function hasImportBackup() {
-    try { return !!localStorage.getItem(stateKey(activeId) + ".before-import"); } catch (e) { return false; }
+    try { return !!PlatformStorage.get(stateKey(activeId) + ".before-import"); } catch (e) { return false; }
   }
   function undoImport() {
     var raw = null;
-    try { raw = localStorage.getItem(stateKey(activeId) + ".before-import"); } catch (e) { raw = null; }
+    try { raw = PlatformStorage.get(stateKey(activeId) + ".before-import"); } catch (e) { raw = null; }
     if (!raw) return { ok: false, err: "没有可恢复的备份" };
     try { state = migrate(JSON.parse(raw)); } catch (e) { return { ok: false, err: "备份已损坏" }; }
     save();
-    try { localStorage.removeItem(stateKey(activeId) + ".before-import"); } catch (e) { /* 忽略 */ }
+    try { PlatformStorage.remove(stateKey(activeId) + ".before-import"); } catch (e) { /* 忽略 */ }
     return { ok: true };
   }
 
@@ -887,6 +900,7 @@
     INT: INT, STICKERS: STICKERS, STICKER_EVERY: STICKER_EVERY, BADGES: BADGES,
     SCHEMA: SCHEMA, KEEP_DAYS: KEEP_DAYS,
     get state() { return state; },
+    boot: boot,
     load: load, save: save, on: on, dayStr: dayStr, touchDay: touchDay,
     addStars: addStars, counts: counts, stickerCount: stickerCount,
     markLearned: markLearned, reviewResult: reviewResult, quizResult: quizResult,
@@ -911,5 +925,20 @@
     /* 能力地图 */
     DIMS: DIMS, DIM_NAME: DIM_NAME, abilityMap: abilityMap, abilityAdvice: abilityAdvice
   };
-  load();
+
+  /* 原生壳里落盘是**异步**的(Preferences),失败不会走上面 save() 的 try/catch。
+     这里把它接到同一套"只提示一次"的上报逻辑上 —— 写失败绝不能静默吞掉,
+     否则家长以为进度存上了,其实一关 App 就没了。 */
+  if (window.PlatformStorage && window.PlatformStorage.onWriteError) {
+    window.PlatformStorage.onWriteError(function (msg) {
+      if (saveWarned) return;
+      saveWarned = true;
+      try { console.warn("思问岛:学习记录保存失败 —— " + msg); } catch (e) { /* 忽略 */ }
+      try {
+        if (window.UI && window.UI.toast) {
+          window.UI.toast("⚠️ 进度保存失败,请检查设备存储空间是否已满", 4000);
+        }
+      } catch (e) { /* 忽略 */ }
+    });
+  }
 })();

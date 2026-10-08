@@ -13,7 +13,10 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
-<script>/* 启动即应用减少动效偏好,避免动画闪烁 */try{if(localStorage.getItem("hanziKids.reduceMotion")==="1")document.documentElement.className+=" reduce-motion";}catch(e){}</script>
+<script>/* 启动即应用减少动效偏好,避免动画闪烁。
+   这一个键**故意**读 localStorage 而不是 PlatformStorage:后者在原生壳里是异步的,
+   读不到就会闪一下;而它只是可重设的 UI 偏好,不是学习进度。见 views2.js 的同一处注释。 */
+try{if(localStorage.getItem("hanziKids.reduceMotion")==="1")document.documentElement.className+=" reduce-motion";}catch(e){}</script>
 <link rel="stylesheet" href="css/style.css?v=2.12.0">
 <link rel="stylesheet" href="css/style2.css?v=2.12.0">
 <link rel="stylesheet" href="css/v2.css?v=2.12.0">
@@ -60,10 +63,12 @@
 <script src="data/passages2.js?v=2.12.0"></script>
 <script src="data/talk-scenes.js?v=2.12.0"></script>
 <script src="data/quests.js?v=2.12.0"></script>
+<script src="js/storage.js?v=2.12.0"></script>
+<script src="js/platform-io.js?v=2.12.0"></script>
+<script src="js/entitlements.js?v=2.12.0"></script>
 <script src="js/audio.js?v=2.12.0"></script>
 <script src="js/recorder.js?v=2.12.0"></script>
 <script src="js/contact.js?v=2.12.0"></script>
-<script src="js/beacon.js?v=2.12.0"></script>
 <script src="js/speech.js?v=2.12.0"></script>
 <script src="js/store.js?v=2.12.0"></script>
 <script src="js/mascot.js?v=2.12.0"></script>

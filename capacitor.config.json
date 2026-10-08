@@ -1,0 +1,10 @@
+{
+  "appId": "work.elliotli.siwendao",
+  "appName": "Siwendao",
+  "webDir": "www",
+  "backgroundColor": "#d9f0ff",
+  "ios": {
+    "contentInset": "always",
+    "preferredContentMode": "mobile"
+  }
+}

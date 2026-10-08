@@ -220,7 +220,6 @@
       area.querySelectorAll(".opt").forEach(function (b) { b.classList.add("locked"); });
       var fb = view.querySelector("#fb");
       var correct = oi === q.answerIdx;
-      if (window.Beacon) Beacon.track("quiz", { t: q.type, ok: correct ? 1 : 0 });
       var tick = tickEls[idx];
 
       if (correct) {
@@ -282,7 +281,6 @@
       } else {
         window.Store.save();
       }
-      if (window.Beacon) Beacon.track("end", { n: qs.length, ok: okCount, sc: scope });
       var ratio = qs.length ? okCount / qs.length : 0;
       var grade = ratio >= 1 ? { k: "S", t: "完美通关!", m: "cheer" }
         : ratio >= 0.8 ? { k: "A", t: "很棒哦!", m: "cheer" }
@@ -431,7 +429,6 @@
 
         function answer(ok) {
           window.Store.reviewResult(ch.c, ok);
-          if (window.Beacon) Beacon.track("rev", { ok: ok ? 1 : 0 });
           if (tickEls[idx]) tickEls[idx].classList.add(ok ? "ok" : "bad");
           if (ok) {
             knew++; earned++;
@@ -543,35 +540,86 @@
 
       function renderGate(v) {
         App.setTopbar("家长中心", true);
-        var a = 6 + ((Math.random() * 3) | 0), b = 3 + ((Math.random() * 6) | 0);
+        /* 家长门必须是「成人级任务」——这是 Apple 儿童类 Guideline 1.3 的判据
+           ("adult-level tasks"),而我们的年龄带是 5 and under。
+           原来是 6~8 × 3~8 的个位数乘法,对 5~6 岁孩子偏低;
+           改成**两位数 × 一位数**(12~29 × 3~9,积 36~261),再加语音提示与错误锁定。
+           见 APP-PLAN.md 8.5 风险 2。 */
+        var a = 12 + ((Math.random() * 18) | 0), b = 3 + ((Math.random() * 7) | 0);
         v.innerHTML =
           '<div class="screen"><div class="gate-box">' +
             '<div class="gate-emoji">🧮</div><h3>家长验证</h3>' +
-            "<p>为了防止小朋友误操作,<br>请家长回答下面这道题:</p>" +
+            "<p>为了防止小朋友误操作,请<b>家长</b>回答下面这道题:<br>" +
+            "小朋友请叫爸爸妈妈来 🙋</p>" +
             '<div class="gate-q">' + a + " × " + b + " = ?</div>" +
             '<input class="gate-input" id="gate-in" type="number" inputmode="numeric" autocomplete="off">' +
             '<div class="gate-err" id="gate-err"></div>' +
             '<button class="btn btn-lg btn-sky" id="gate-ok">确 定</button>' +
           "</div></div>";
+
+        /* 语音提示:Apple 明确建议"面向尚未识字的孩子时用语音提示,让他知道要找家长"。
+           这里是家长门,念一句不会打扰谁;TTS 不可用就静默跳过。 */
+        try {
+          if (window.Speech && window.Speech.speak) {
+            App.after(320, function () { window.Speech.speak("这道题请家长来完成", 0.92); });
+          }
+        } catch (e) { /* 忽略 */ }
+
         var inp = v.querySelector("#gate-in");
+        var okBtn = v.querySelector("#gate-ok");
+        var tries = 0, locked = false;
+        var errEl = function () { return v.querySelector("#gate-err"); };
+
+        function shake() {
+          var box = v.querySelector(".gate-box");
+          if (!box) return;
+          box.classList.remove("shake-anim");
+          void box.offsetWidth;
+          box.style.animation = "shake .45s";
+          App.after(500, function () { box.style.animation = ""; });
+        }
+
+        /* 连错 3 次锁 10 秒:既挡住乱按的孩子,又不至于把家长挡在门外 */
+        function lock() {
+          locked = true;
+          var left = 10;
+          inp.value = "";
+          inp.disabled = true;
+          okBtn.disabled = true;
+          var tick = function () {
+            var el = errEl();
+            if (!el) return;                       // 已经换页了
+            if (left <= 0) {
+              locked = false;
+              inp.disabled = false;
+              okBtn.disabled = false;
+              el.textContent = "可以再试了";
+              return;
+            }
+            el.textContent = "错得有点多,请等 " + left + " 秒再试";
+            left--;
+            App.after(1000, tick);
+          };
+          tick();
+        }
+
         var submit = function () {
+          if (locked) return;
           var val = parseInt(inp.value, 10);
           if (val === a * b) {
             try { sessionStorage.setItem("hanziParentOk", "1"); } catch (e) {}
             if (window.SFX) SFX.correct();
             renderDash(v);
-          } else {
-            if (window.SFX) SFX.wrong();
-            v.querySelector("#gate-err").textContent = "答案不对哦,再算算~";
-            inp.value = "";
-            var box = v.querySelector(".gate-box");
-            box.classList.remove("shake-anim");
-            void box.offsetWidth;
-            box.style.animation = "shake .45s";
-            setTimeout(function () { box.style.animation = ""; }, 500);
+            return;
           }
+          tries++;
+          if (window.SFX) SFX.wrong();
+          if (tries >= 3) { lock(); return; }
+          errEl().textContent = "答案不对,再算算~";
+          inp.value = "";
+          shake();
         };
-        v.querySelector("#gate-ok").addEventListener("click", submit);
+        okBtn.addEventListener("click", submit);
         inp.addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
       }
 
@@ -633,6 +681,40 @@
                 "</div>" +
                 '<button class="btn btn-sky" id="kid-add-go">创建档案</button>' +
               "</div></details></div>";
+        };
+
+        /* ---- 完整内容(内购解锁) ----
+           整个购买/恢复入口都**只在这里** —— 家长中心已经在家长门之后,
+           满足 Apple 1.3「purchasing opportunities 必须位于 parental gate 之后」。
+           被锁住的模块页里刻意不放购买按钮(见 js/ui.js 的 lockCard)。 */
+        var entitlePanel = function () {
+          var E = window.Entitlements;
+          if (!E) return "";
+          var unlocked = E.unlocked();
+          var price = E.priceText();
+          var r = E.report();
+          if (unlocked) {
+            return '<div class="panel" id="panel-entitle"><h4>' + Icons.svg("trophy") + '完整内容</h4>' +
+              '<p class="parent-note">✅ <b>已解锁</b> —— 分级阅读 L3~L5、拼音进阶、说一说、线下物料打印都可以用了。' +
+              '<br>感谢支持!这一份是<b>一次性买断</b>,不会再收费。</p></div>';
+          }
+          var rows = E.paidFeatures().map(function (t) {
+            return "<li>" + esc(t) + "</li>";
+          }).join("");
+          return '<div class="panel" id="panel-entitle"><h4>' + Icons.svg("trophy") + '完整内容</h4>' +
+            '<p class="parent-note">免费部分包含:<b>核心字库 · 字卡 · 笔顺描红 · 练习 · 复习 · 分级阅读 L1~L2</b>。' +
+            '<br>下面这些属于<b>完整内容包</b>,一次买断、永久可用:</p>' +
+            '<ul class="ent-list">' + rows + "</ul>" +
+            '<div class="backup-btns">' +
+              '<button class="btn btn-sun" id="btn-buy">' +
+                (price ? "解锁完整内容 " + esc(price) : "解锁完整内容") + "</button>" +
+              '<button class="btn btn-ghost" id="btn-restore">恢复购买</button>' +
+            "</div>" +
+            '<p class="parent-note" id="ent-hint">' +
+              (r.nativeEnv
+                ? "购买需要通过 App Store 连一次网;买完之后所有内容都能<b>离线</b>使用。换手机后用「恢复购买」找回。"
+                : "当前是网页版,全部内容都可直接使用。") +
+            "</p></div>";
         };
 
         /* ---- 备份与搬家:存档导出/导入 ---- */
@@ -954,28 +1036,40 @@
             '<p class="parent-note" id="fb-hint" style="margin-top:8px"></p>' +
           "</div>";
 
-        var tracking = window.Beacon ? Beacon.on() : false;
+        /* 这里原本是「帮助改进(匿名统计)」开关。按"真离线"路线,埋点已**整体移除**:
+           它会向 /api/beacon 发请求 → 中国区"单机不联网免备案"的豁免失效、
+           隐私标签无法填"不收集数据"、且儿童类对任何统计都极敏感。
+           现在改成把"零联网"当作卖点如实告诉家长,而不是留一个开关。 */
         html +=
-          '<div class="panel"><h4>' + Icons.svg("chart") + '帮助改进(匿名统计)</h4>' +
-            '<p class="parent-note">只收集"打开了几次、哪类题容易错、在哪一步退出"这类<b>匿名统计</b>,用于改进产品。' +
-            '<br>不收集孩子姓名、头像、语音等任何个人信息;<b>匿名标识每天更换,无法跨天追踪同一个孩子</b>。随时可以关闭。</p>' +
-            '<button class="switch-row" id="btn-track" aria-pressed="' + (tracking ? "true" : "false") + '">' +
-              '<span>发送匿名统计</span>' +
-              '<span class="switch" aria-pressed="' + (tracking ? "true" : "false") + '"><i></i></span></button>' +
-            '<button class="btn btn-ghost" id="btn-seed" style="width:100%;min-height:44px;font-size:15px">换一个匿名标识</button>' +
+          '<div class="panel"><h4>' + Icons.svg("lock") + '完全离线(不联网、不收集)</h4>' +
+            '<p class="parent-note"><b>本应用不向任何外部服务器发送数据</b> —— 没有账号、没有服务器、没有统计 SDK。' +
+            '<br>学习进度只存在这台设备上;录音只在本机回放,不上传、不保存。' +
+            '<br>换设备时请用下面的<b>导出存档</b>把进度带走。</p>' +
           "</div>";
 
         var VER = (document.querySelector('meta[name="app-version"]') || {}).content || "dev";
+        /* 在 App 里这几处说法要更准确(见下方页脚):
+           ① 进度落在 App 私有存储(Capacitor Preferences),不是"浏览器"
+           ② 隐私说明必须**在 App 内可达**(App Store 5.1.1(i)),不能用 target="_blank" */
+        var inApp = !!(window.PlatformStorage && window.PlatformStorage.isNative);
         html +=
           '<div class="panel"><h4>' + Icons.svg("refresh") + '复习机制说明</h4><p class="parent-note">本应用采用简化版<b>艾宾浩斯间隔重复</b>:孩子标记"我会了"后,字会在 10 分钟后首次回到复习队列;每答对一次,下次复习间隔加倍延长(10分钟 → 1天 → 2天 → 4天 → 7天);答错则重新开始。连续答对 4 次(box≥4)即视为进入长期记忆。所有数据仅保存在本设备浏览器中。</p></div>' +
           '<div class="panel"><h4>' + Icons.svg("sparkle") + '显示设置</h4>' +
           '<button class="switch-row" id="btn-motion" aria-pressed="' + reduced + '"><span>减少动态效果(关闭云朵飘动与庆祝动画)</span><span class="switch" aria-pressed="' + reduced + '"><i></i></span></button>' +
         '</div>' +
+        entitlePanel() +
         backupPanel() +
         '<div class="panel danger-zone"><h4>' + Icons.svg("lock") + '数据管理</h4>' +
           '<button class="btn btn-danger" id="btn-reset">清空当前孩子的学习记录</button></div>' +
-          '<p class="parent-note" style="text-align:center;margin-top:2px">思问岛 v' + VER + ' · 数据保存在本机浏览器 · ' +
-            '<a class="foot-link" href="privacy.html" target="_blank" rel="noopener">隐私说明</a></p>' +
+          '<p class="parent-note" style="text-align:center;margin-top:2px">思问岛 v' + VER +
+            (inApp ? " · 数据保存在本机" : " · 数据保存在本机浏览器") + " · " +
+            /* App Store 5.1.1(i) 要求隐私政策**在 App 内也能方便地访问**;
+               而 target="_blank" 在 WKWebView 里行为不可靠 —— 原生环境改成原地跳转,
+               privacy.html 自带的「回到思问岛」正好能把人带回应用。 */
+            (inApp
+              ? '<a class="foot-link" href="privacy.html">隐私说明</a>'
+              : '<a class="foot-link" href="privacy.html" target="_blank" rel="noopener">隐私说明</a>') +
+          "</p>" +
         "</div>";
         v.innerHTML = html;
 
@@ -1007,19 +1101,33 @@
                 rerender();
               } else if (act === "rename") {
                 var cur = window.Store.profiles().filter(function (x) { return x.id === id; })[0];
-                var name = window.prompt("给孩子起个名字(最多 12 个字)", cur ? cur.name : "");
-                if (name === null) return;
-                var rr = window.Store.renameProfile(id, name, null);
-                if (!rr.ok) { window.UI.toast(rr.err); return; }
-                window.UI.toast("已改名为「" + rr.profile.name + "」");
-                rerender();
+                /* window.prompt 在 App 内的 WKWebView 里**不被支持**(静默返回 null),
+                   家长会以为"点了改名没反应" —— 改用自绘输入弹窗。 */
+                window.UI.prompt({
+                  title: "给孩子起个名字", emoji: "✏️", maxLength: 12,
+                  placeholder: "最多 12 个字", value: cur ? cur.name : "",
+                  okText: "改名",
+                  onOk: function (name) {
+                    var rr = window.Store.renameProfile(id, name, null);
+                    if (!rr.ok) { window.UI.toast(rr.err); return; }
+                    window.UI.toast("已改名为「" + rr.profile.name + "」");
+                    rerender();
+                  }
+                });
               } else if (act === "del") {
                 var p2 = window.Store.profiles().filter(function (x) { return x.id === id; })[0];
-                if (!window.confirm("删除「" + (p2 ? p2.name : "") + "」的档案?\n该孩子的识字进度、星星和贴纸会一起删除,无法撤销。")) return;
-                var rd = window.Store.removeProfile(id);
-                if (!rd.ok) { window.UI.toast(rd.err); return; }
-                window.UI.toast("档案已删除");
-                rerender();
+                /* window.confirm 同上:在 WKWebView 里静默返回 false,删除会"点了没反应" */
+                window.UI.confirm({
+                  title: "删除「" + (p2 ? p2.name : "") + "」的档案?",
+                  text: "该孩子的识字进度、星星和贴纸会一起删除,无法撤销。",
+                  emoji: "🗑️", danger: true, okText: "删除",
+                  onOk: function () {
+                    var rd = window.Store.removeProfile(id);
+                    if (!rd.ok) { window.UI.toast(rd.err); return; }
+                    window.UI.toast("档案已删除");
+                    rerender();
+                  }
+                });
               }
             });
           });
@@ -1051,21 +1159,20 @@
         if (expBtn) {
           expBtn.addEventListener("click", function () {
             if (window.SFX) SFX.click();
-            try {
-              var text = JSON.stringify(window.Store.exportData());
-              var blob = new Blob([text], { type: "application/json" });
-              var url = URL.createObjectURL(blob);
-              var a = document.createElement("a");
-              a.href = url;
-              a.download = window.Store.exportFileName();
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              App.after(1500, function () { try { URL.revokeObjectURL(url); } catch (e) {} });
-              window.UI.toast("存档已导出,请保存好这个文件");
-            } catch (e) {
-              window.UI.toast("导出失败:" + e.message);
-            }
+            var text;
+            try { text = JSON.stringify(window.Store.exportData()); }
+            catch (e) { window.UI.toast("导出失败:" + e.message); return; }
+            /* 走平台桥接层:`<a download>` 在 App 内的 WKWebView 里**不被支持**,
+               点了会静默失败 —— 而存档是"换手机不丢进度"的唯一途径,不能没反应。 */
+            window.PlatformIO.saveText({
+              filename: window.Store.exportFileName(),
+              text: text, mime: "application/json"
+            }).then(function (res) {
+              if (res === "canceled") return;
+              window.UI.toast(res === "shared" ? "已打开分享面板,可存到「文件」或发给家人" : "存档已导出,请保存好这个文件");
+            }).catch(function (e) {
+              window.UI.toast("导出失败:" + ((e && e.message) || e));
+            });
           });
         }
         var impBtn = v.querySelector("#btn-import");
@@ -1122,11 +1229,16 @@
         var undoBtn = v.querySelector("#btn-undo-import");
         if (undoBtn) {
           undoBtn.addEventListener("click", function () {
-            if (!window.confirm("恢复到导入之前的进度?")) return;
-            var ur = window.Store.undoImport();
-            if (!ur.ok) { window.UI.toast(ur.err); return; }
-            window.UI.toast("已恢复到导入前的进度");
-            rerender();
+            /* 同上:window.confirm 在 WKWebView 里不可用 */
+            window.UI.confirm({
+              title: "恢复到导入之前的进度?", emoji: "↩️", okText: "恢复",
+              onOk: function () {
+                var ur = window.Store.undoImport();
+                if (!ur.ok) { window.UI.toast(ur.err); return; }
+                window.UI.toast("已恢复到导入前的进度");
+                rerender();
+              }
+            });
           });
         }
 
@@ -1234,10 +1346,16 @@
             href += "?subject=" + encodeURIComponent(fb.subject || "思问岛 · 意见反馈") +
                     "&body=" + encodeURIComponent("\n\n\n————\n应用版本：v" + VER + "\n(请描述遇到的问题或想法)");
           }
-          try {
-            if (fb.url) window.open(href, "_blank", "noopener");
-            else window.location.href = href;
-          } catch (e) { fbSay("没能打开，请手动写信到 " + (fb.email || ""), false); }
+          if (fb.url) {
+            /* 外链走平台桥接层:WebView 里 window.open 需要交给系统浏览器才会动。
+               ⚠️ 儿童类要求所有外链位于家长门之后 —— 这里已经在门后了。 */
+            window.PlatformIO.openExternal(href, function () {
+              fbSay("没能打开,请用下面的「复制联系方式」手动联系", false);
+            });
+          } else {
+            try { window.location.href = href; }
+            catch (e) { fbSay("没能打开，请手动写信到 " + (fb.email || ""), false); }
+          }
         });
         var fbCopy = v.querySelector("#btn-feedback-copy");
         if (fbCopy) fbCopy.addEventListener("click", function () {
@@ -1253,21 +1371,51 @@
           } catch (e) { fail(); }
         });
 
-        var trackBtn = v.querySelector("#btn-track");
-        if (trackBtn && window.Beacon) {
-          trackBtn.addEventListener("click", function () {
-            var now = !Beacon.on();
-            Beacon.setOn(now);
-            trackBtn.setAttribute("aria-pressed", now ? "true" : "false");
-            var sw = trackBtn.querySelector(".switch");
-            if (sw) sw.setAttribute("aria-pressed", now ? "true" : "false");
-            window.UI.toast(now ? "已开启匿名统计,谢谢你帮我们改进" : "已关闭匿名统计");
-          });
-          v.querySelector("#btn-seed").addEventListener("click", function () {
-            Beacon.reset();
-            window.UI.toast("已换一个匿名标识");
+        /* 内购:购买与恢复都在家长门之后。文案要如实 —— 购买要联网,买完能离线。 */
+        var buyBtn = v.querySelector("#btn-buy");
+        if (buyBtn && window.Entitlements) {
+          buyBtn.addEventListener("click", function () {
+            if (window.SFX) SFX.click();
+            var hint = v.querySelector("#ent-hint");
+            buyBtn.disabled = true;
+            if (hint) hint.textContent = "正在连接 App Store…";
+            window.Entitlements.purchase(function (res) {
+              buyBtn.disabled = false;
+              if (!res.ok) {
+                if (hint) hint.textContent = res.err;
+                window.UI.toast(res.err);
+                return;
+              }
+              if (window.Entitlements.unlocked()) {
+                window.UI.toast("已解锁,谢谢你!");
+                rerender();
+              } else if (hint) {
+                hint.textContent = "购买已提交,正在等 App Store 确认…";
+              }
+            });
           });
         }
+        var restoreBtn = v.querySelector("#btn-restore");
+        if (restoreBtn && window.Entitlements) {
+          restoreBtn.addEventListener("click", function () {
+            if (window.SFX) SFX.click();
+            var hint = v.querySelector("#ent-hint");
+            restoreBtn.disabled = true;
+            if (hint) hint.textContent = "正在向 App Store 查询…";
+            window.Entitlements.restore(function (res) {
+              restoreBtn.disabled = false;
+              if (res.ok) {
+                window.UI.toast("已恢复购买");
+                rerender();
+              } else {
+                if (hint) hint.textContent = res.err;
+                window.UI.toast(res.err);
+              }
+            });
+          });
+        }
+
+        /* 埋点开关的绑定逻辑已随埋点一起移除(见上方「完全离线」面板处的说明) */
 
         var reportBtn = v.querySelector("#btn-report");
         if (reportBtn && window.Report) {
@@ -1284,6 +1432,10 @@
         if (motionBtn) {
           motionBtn.addEventListener("click", function () {
             var on = document.documentElement.classList.toggle("reduce-motion");
+            /* ⚠️ 这一个键**故意**不走 PlatformStorage:
+               index.html 的内联脚本要在渲染前**同步**读它来避免动画闪烁,
+               而原生 Preferences 是异步的,读不到就会闪一下。
+               它只是可随时重设的 UI 偏好(不是学习进度),丢了也无所谓,所以留在 localStorage。 */
             try { localStorage.setItem("hanziKids.reduceMotion", on ? "1" : "0"); } catch (e) { /* 隐私模式 */ }
             motionBtn.setAttribute("aria-pressed", on ? "true" : "false");
             var sw = motionBtn.querySelector(".switch");

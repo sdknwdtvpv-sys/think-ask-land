@@ -9,12 +9,17 @@
   python3 .build/merge-batch3.py            # 只校验 + 预览(不动 data/)
   python3 .build/merge-batch3.py --apply     # 写入 data/chars-8.js 并更新 data/chars.js
 """
-import json, os, subprocess, sys
+import glob, json, os, shutil, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 ENV = dict(os.environ)
-ENV["PATH"] = "/Users/elliot.li/.workbuddy/binaries/node/versions/22.22.2-3/bin:" + ENV.get("PATH", "")
+# node 需要在 PATH 里(版本要求见 .nvmrc)。不写死某台机器的绝对路径,换设备也能跑。
+if not shutil.which("node", path=ENV.get("PATH", "")):
+    for cand in ["/usr/local/bin", "/opt/homebrew/bin"] + sorted(glob.glob(os.path.expanduser("~/.nvm/versions/node/*/bin"))):
+        if os.path.exists(os.path.join(cand, "node")):
+            ENV["PATH"] = cand + os.pathsep + ENV.get("PATH", "")
+            break
 APPLY = "--apply" in sys.argv
 
 def run_node(code):
