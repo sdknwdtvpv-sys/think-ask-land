@@ -5,6 +5,7 @@
      3) 弹窗:Esc 关最上层(不是被遮住那层)、role=dialog/aria-modal、焦点归还
      4) toast:#toast 具备 role=status + aria-live
      5) 描红手势:描红态横向滑动不得切字;退出描红后同一手势仍能切字
+     6) hidden 属性必须真的隐藏(2026-10-08 修的真 bug:故事页被空覆盖层盖住)
 
    用法(必须先启动静态服务器):
      cd .build && npm i jsdom
@@ -184,6 +185,25 @@ const BENIGN = [
     await sleep(500);
     const leftover = doc.querySelectorAll('[class*="mascot"]').length;
     ok("首页不含任何 mascot 节点", leftover === 0, leftover + " 个");
+
+    /* ---------- 6a. hidden 必须真的隐藏（2026-10-08 修的真 bug）----------
+       背景：#/story 的自读覆盖层 .selfread 写了 display:flex，
+       而 hidden 只由 UA 样式提供 display:none —— 作者样式优先级更高，
+       于是 hidden 完全失效，空覆盖层**从进入故事页起就一直盖在最上层**，
+       孩子看到一个空白页。已确认 srEnter() 只在点按钮时才调用。
+
+       为什么必须补这条断言：这个 bug 存在了很久，40 个套件全绿也没发现 ——
+       **没有任何一个断言"故事正文是可见的"**。界面"看起来不对"有时候
+       不是审美问题，是功能坏了。 */
+    await win.App.navigate("#/story");
+    await sleep(800);
+    const srBox = doc.querySelector("#rd-self");
+    ok("自读覆盖层默认隐藏（hidden 不被 display 覆盖）",
+      !!srBox && win.getComputedStyle(srBox).display === "none",
+      srBox ? "display=" + win.getComputedStyle(srBox).display : "没有 #rd-self");
+    const storyBody = doc.querySelector(".story-body");
+    ok("故事正文确实渲染出来了", !!storyBody && storyBody.textContent.trim().length > 0,
+      storyBody ? storyBody.textContent.trim().slice(0, 24) : "没有 .story-body");
 
     /* ---------- 6b. 图标系统 ---------- */
 
