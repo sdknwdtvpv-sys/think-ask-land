@@ -1017,3 +1017,58 @@ html.v4 .sr-actions .btn.playing {
    图标再带色就会变成"白字 + 蓝图标"，很难看。 */
 html.v4 .btn[data-role="primary"] .ico,
 html.v4 .sr-actions .btn.playing .ico { color: inherit; }
+
+/* ============================================================
+   弹窗与 Toast（跨屏共用）
+   ------------------------------------------------------------
+   验收时发现这三处还是旧配色：
+     .toast      背景 rgba(63,58,82,.94) —— **紫黑**（旧墨色）
+     .modal-mask rgba(43,36,60,.5)       —— 紫色遮罩
+     .modal-card 米黄底 + 白描边 + 紫色外圈阴影
+   另外确认框的"确认"按钮用了 .btn-danger/.btn-coral 的旧渐变。
+   ============================================================ */
+html.v4 .toast {
+  background: rgba(44, 39, 33, .94);           /* 暖墨,不是紫黑 */
+  border-color: rgba(255, 255, 255, .14);
+  box-shadow: var(--e3);
+  font-family: var(--font-display);
+}
+html.v4 .modal-mask { background: rgba(44, 39, 33, .45); }
+html.v4 .modal-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  box-shadow: var(--e3);
+}
+html.v4 .modal-title { font-family: var(--font-display); color: var(--ink); }
+html.v4 .modal-text { color: var(--ink-2); }
+html.v4 .modal-card .btn {
+  box-shadow: none; border-radius: var(--r); font-weight: 700;
+}
+/* 确认框的主行动：实心强调色 */
+html.v4 .modal-card .btn-coral,
+html.v4 .modal-card .btn-mint {
+  background: var(--primary); border: 1px solid var(--primary); color: var(--on-primary);
+}
+/* 破坏性操作：**刻意不做得抢眼** —— 白底 + 柔和红描边，
+   需要点得下去，但不该诱人误点。旧版是珊瑚红渐变 + 硬阴影。 */
+html.v4 .modal-card .btn-danger {
+  background: var(--surface); border: 1.5px solid #E3BFB8; color: var(--bad);
+}
+
+/* 键盘焦点环：旧版是硬编码的橙色 outline（#ff9f43）。
+   ⚠️ 这是**无障碍特性，不能删**（键盘用户靠它知道焦点在哪），
+   只改配色。outline-offset 留出空隙，这样实心强调色按钮上的
+   强调色焦点环也能看清（中间隔着一圈底色）。 */
+html.v4 :focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+html.v4 .group-card:focus-visible,
+html.v4 .menu-btn:focus-visible,
+html.v4 .opt:focus-visible,
+html.v4 .btn:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
