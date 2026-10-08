@@ -451,7 +451,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 }
 .run-end .grade-letter { font-family: var(--font-display); }
 .run-end .grade-stamp.g-S { border-color: var(--gold); background: var(--gold-bg); }
-.run-end .grade-stamp.g-S .grade-letter { color: var(--gold); }
+.run-end .grade-stamp.g-S .grade-letter { color: var(--gold-ink); }
 .run-end .grade-stamp.g-A { border-color: var(--primary); background: var(--primary-bg); }
 .run-end .grade-stamp.g-A .grade-letter { color: var(--primary); }
 .run-end .grade-letter { color: var(--ink-2); }
@@ -1073,7 +1073,7 @@ html.v4 .btn:focus-visible {
   outline-offset: 3px;
 }
 
-/* 金色文字用 --gold-ink（#D9A227 当文字时对比度只有 2.30，不达标）。
-   填充与图标仍用 --gold —— 亮金当色块好看，当文字读不清。 */
-.run-end .grade-stamp.g-S .grade-letter { color: var(--gold-ink); }
+/* 金色文字一律用 --gold-ink（#D9A227 当文字时对比度只有 2.30，不达标）。
+   填充与图标仍用 --gold —— 亮金当色块好看，当文字读不清。
+   （.grade-letter 已在上面的 .g-S 规则里直接用 --gold-ink，这里不重复。） */
 html.v4 .cert-title { color: var(--gold-ink); }

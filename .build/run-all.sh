@@ -74,6 +74,8 @@ NEEDS_SERVER="self-read-test read-quiz-test record-test write-test quest-test ta
 
 # 全部套件(顺序:纯逻辑 → 存档 → 视图 → 视觉)
 SUITES=(
+  # 对比度审查:纯读 CSS 文件算 WCAG 比值,不需要静态服务器 —— 放最前,最快
+  contrast-test
   content-qc
   games-pinyin-test
   phrase-test
