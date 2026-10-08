@@ -902,3 +902,36 @@ html.v4 .parent-note .ico,
 html.v4 .map-sub .ico,
 html.v4 .practice-intro .ico { margin-right: .25em; vertical-align: -.15em; }
 html.v4 .parent-note .ico { margin-left: .1em; }
+
+/* ============================================================
+   第二批旧变量重定向（枚举方式修正后的发现）
+   ------------------------------------------------------------
+   上一轮我是从 style.css 的 :root 枚举的，**漏掉了 v2.css 里的 :root**
+   （--sky-top 那批就是在 v2.css 定义的）。这次改为"扫三个旧 CSS 里所有
+   自定义属性定义"，又多出 14 个，其中两个是大头：
+
+     --shadow-ink   引用 35 次   旧值 rgba(63,58,82,.12) —— **紫灰阴影**。
+                    它散在几十处 box-shadow 里，是"阴影发紫"的根源。
+     --display      引用 30 次   旧字体栈（回退到苹方）。
+                    我的 --font-display 回退是楷体，中文观感更接近绘本。
+
+   其余：--action/--action-deep（橙）、--accent（粉）、--line-strong、
+   --warm-wrong、--r-md、以及地图的 --h1/--h2 岛色与 --hill-*/--meadow 山丘色。
+   ============================================================ */
+html.v4 {
+  --shadow-ink: rgba(44, 39, 33, .10);  /* 紫灰 → 暖墨 */
+  --line-strong: var(--line-2);
+  --action: var(--primary);
+  --action-deep: #A34D20;
+  --accent: var(--primary);
+  --warm-wrong: #C2703A;                /* 答错用暖橙(沿用原设计意图,不用批评红) */
+  --r-md: var(--r);
+  --display: var(--font-display);
+  /* 地图岛的色相变量:旧版 8 套渐变,新版只用一个强调色 */
+  --h1: var(--primary);
+  --h2: var(--primary);
+  /* 旧版山丘(仅 #scene 用,而 #scene 在 v4 已隐藏);一并置为纸色以免漏出 */
+  --hill-1: var(--paper);
+  --hill-2: var(--paper);
+  --meadow: var(--paper);
+}
