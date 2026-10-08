@@ -336,7 +336,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
   color: var(--ink); position: relative; z-index: 1;
 }
 .map-v4 .island.started .isle-num { color: var(--primary); }
-.map-v4 .island.done .isle-num { color: var(--gold); }
+.map-v4 .island.done .isle-num { color: var(--gold-ink); }   /* 文字用深金 */
 
 /* 标签:小径从环之间穿过,标签用纸色垫底保证可读(这条在旧版也是必需的) */
 .map-v4 .isle-name {
@@ -347,7 +347,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
   font-size: var(--fs-xs); color: var(--ink-3);
   background: var(--paper); border-radius: var(--r-pill); padding: 1px 8px;
 }
-.map-v4 .island.done .isle-meta { color: var(--gold); }
+.map-v4 .island.done .isle-meta { color: var(--gold-ink); }  /* 小字,更要用深金 */
 /* 小径:旧版是粗白点(为压住天空的彩底),在暖纸上要收细 */
 .map-v4 .map-path path { stroke: var(--line-2); stroke-width: 6; }
 .map-v4 .map-foot {
@@ -1072,3 +1072,8 @@ html.v4 .btn:focus-visible {
   outline: 3px solid var(--primary);
   outline-offset: 3px;
 }
+
+/* 金色文字用 --gold-ink（#D9A227 当文字时对比度只有 2.30，不达标）。
+   填充与图标仍用 --gold —— 亮金当色块好看，当文字读不清。 */
+.run-end .grade-stamp.g-S .grade-letter { color: var(--gold-ink); }
+html.v4 .cert-title { color: var(--gold-ink); }
