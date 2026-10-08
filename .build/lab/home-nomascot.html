@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* ============================================================
+   首页样板 · 去吉祥物版
+   ------------------------------------------------------------
+   吉祥物原本承担"品牌亮相 + 情感反馈 + 鼓励 + 装饰"四件事。
+   删掉之后，这四件事改由 **汉字本身** 承担 ——
+   对识字 App 而言，主角本来就该是那个字，而不是一只熊。
+   ============================================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-body); background: #cfcfcf; padding: 30px; }
+.phone {
+  width: 390px; height: auto; min-height: 844px; background: var(--paper);
+  border-radius: 44px; overflow: hidden; color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+.pad { padding: 0 var(--s5); }
+
+/* ---------- 顶栏 ---------- */
+.bar { display: flex; align-items: center; justify-content: space-between; padding: var(--s4) var(--s5) var(--s3); }
+.brand { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; }
+.pill {
+  display: inline-flex; align-items: center; gap: var(--s1);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-pill); padding: 5px var(--s3) 5px 9px;
+  font-size: var(--fs-sm); font-weight: 700; color: var(--ink-2);
+}
+.pill .n { font-variant-numeric: tabular-nums; }
+
+/* ---------- 问候 ---------- */
+.hello { padding: var(--s2) var(--s5) var(--s4); }
+.hello h1 { font-size: var(--fs-title); font-weight: 800; }
+.hello p { font-size: var(--fs-body); color: var(--ink-2); margin-top: 4px; }
+.meta { font-size: var(--fs-sm); color: var(--ink-3); display: flex; gap: var(--s3); }
+.meta b { color: var(--ink-2); font-weight: 700; }
+
+/* ---------- 主角:今天的字 ----------
+   这是整屏唯一的"大画"。它取代了原来三只吉祥物的位置,
+   但比吉祥物更贴题:孩子要认的就是这个字。 */
+.today {
+  margin: var(--s5) var(--s5) var(--s5); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-xl);
+  padding: var(--s5) var(--s5) var(--s4); box-shadow: var(--e1);
+}
+.today .cap { display: flex; align-items: baseline; justify-content: space-between; }
+.today .cap b { font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
+.today .cap span { font-size: var(--fs-xs); color: var(--ink-3); }
+/* 田字格:极淡的对角线,不抢字 */
+.grid-box {
+  width: 160px; height: 160px; margin: var(--s4) auto var(--s3); position: relative;
+  border: 1px solid var(--line-2); border-radius: var(--r);
+}
+.grid-box::before, .grid-box::after {
+  content: ""; position: absolute; background: repeating-linear-gradient(90deg, var(--line) 0 5px, transparent 5px 11px);
+}
+.grid-box::before { left: 50%; top: 10px; bottom: 10px; width: 1px; transform: translateX(-.5px); }
+.grid-box::after { top: 50%; left: 10px; right: 10px; height: 1px; transform: translateY(-.5px);
+  background: repeating-linear-gradient(0deg, var(--line) 0 5px, transparent 5px 11px); }
+.grid-box i {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-style: normal; font-size: 104px; font-weight: 500; line-height: 1; color: var(--ink);
+}
+.today .py { text-align: center; font-size: 20px; font-weight: 700; color: var(--primary); letter-spacing: 1px; }
+.today .go {
+  display: flex; align-items: center; justify-content: center; gap: var(--s2);
+  margin-top: var(--s4); background: var(--primary); color: var(--on-primary);
+  border-radius: var(--r); padding: var(--s3) var(--s4);
+  font-size: var(--fs-body); font-weight: 800; letter-spacing: .5px;
+}
+
+/* ---------- 今日任务 ---------- */
+.task {
+  margin: 0 var(--s5) var(--s5); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s4);
+}
+.task .h { display: flex; align-items: baseline; justify-content: space-between; }
+.task .h b { font-size: var(--fs-h); font-weight: 800; }
+.task .h span { font-size: var(--fs-sm); color: var(--ink-3); font-weight: 700; font-variant-numeric: tabular-nums; }
+.track { height: 6px; background: var(--paper-2); border-radius: var(--r-pill); margin: var(--s3) 0 var(--s2); overflow: hidden; }
+.track i { display: block; height: 100%; width: 66%; background: var(--primary); border-radius: var(--r-pill); }
+.task .sub { font-size: var(--fs-sm); color: var(--ink-2); display: flex; gap: var(--s3); }
+.task .sub em { font-style: normal; color: var(--ink-3); }
+
+/* ---------- 分区与网格 ---------- */
+.sec { margin: 0 var(--s5) var(--s3); }
+.sec b { font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); margin: 0 var(--s5) var(--s5); }
+.tile {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  padding: var(--s4); display: flex; flex-direction: column; gap: var(--s2);
+}
+.tile .ic { width: 34px; height: 34px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; }
+.tile .ic svg { width: 20px; height: 20px; }
+.tile b { font-size: var(--fs-body); font-weight: 700; }
+.tile i { font-style: normal; font-size: var(--fs-sm); color: var(--ink-3); }
+
+.parent {
+  display: flex; align-items: center; gap: var(--s3); margin: 0 var(--s5) var(--s6);
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--r); padding: var(--s4);
+}
+.parent b { flex: 1; font-size: var(--fs-body); font-weight: 700; color: var(--ink-2); }
+.parent i { font-style: normal; font-size: var(--fs-sm); color: var(--ink-3); }
+.foot { text-align: center; font-size: var(--fs-xs); color: var(--ink-3); line-height: var(--lh-loose); padding-bottom: var(--s8); }
+
+/* ---------- 反馈态:原来靠吉祥物换表情,现在靠字与色 ---------- */
+.fb { display: flex; align-items: center; gap: var(--s3); }
+.fb .glyph { font-size: 30px; line-height: 1; color: var(--ok); }
+</style></head><body>
+
+<div class="phone">
+
+  <div class="bar">
+    <span class="brand">思问岛</span>
+    <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="var(--gold)" stroke="#C08A1E" stroke-width="1.2" stroke-linejoin="round"><path d="M12 2.9l2.9 5.9 6.5 1-4.7 4.5 1.1 6.5L12 17.7l-5.8 3.1 1.1-6.5L2.6 9.8l6.5-1z"/></svg><span class="n">142</span></span>
+  </div>
+
+  <div class="hello">
+    <h1>下午好，小宝贝</h1>
+    <p>今天想学点什么呢？</p>
+  </div>
+  <div class="meta pad" style="margin-bottom:var(--s4)">
+    <span>连续 <b>1</b> 天</span><span>已学 <b>48</b>/761</span><span>读完 <b>3</b> 篇</span>
+  </div>
+
+  <!-- 主角：今天的字。取代原来三只吉祥物的位置 -->
+  <div class="today">
+    <div class="cap"><b>今天学这个</b><span>第 49 个 · 数字与基础</span></div>
+    <div class="grid-box"><i>日</i></div>
+    <div class="py">rì</div>
+    <div class="go">开始学这个字 <span style="opacity:.85">→</span></div>
+  </div>
+
+  <div class="task">
+    <div class="h"><b>今日任务</b><span>2 / 3</span></div>
+    <div class="track"><i></i></div>
+    <div class="sub"><span>学字 3/3</span><span>答题 3/5</span><em>复习 0</em></div>
+  </div>
+
+  <div class="sec"><b>其他玩法</b></div>
+  <div class="grid">
+    <div class="tile"><span class="ic" style="background:#FBF3DF"><svg viewBox="0 0 24 24" fill="none" stroke="var(--t-amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.6" y="7" width="18.8" height="11" rx="4.2"/><path d="M7.2 10.6v3.2M5.6 12.2h3.2"/><path d="M15.4 11.4h.02M18 13.6h.02"/></svg></span><b>趣味练习</b><i>闯关赚星星</i></div>
+    <div class="tile"><span class="ic" style="background:#EAF4F0"><svg viewBox="0 0 24 24" fill="none" stroke="var(--t-mint)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20.2 4.4v4.2H16"/></svg></span><b>今日复习</b><i>5 个字等着</i></div>
+    <div class="tile"><span class="ic" style="background:#FBF3DF"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v6.2a4 4 0 0 1-8 0z"/><path d="M8 5.6H5.6a2.5 2.5 0 0 0 2.5 4.2M16 5.6h2.4a2.5 2.5 0 0 1-2.5 4.2"/><path d="M12 14.2V17M8.6 20h6.8"/></svg></span><b>我的奖励</b><i>贴纸 · 勋章</i></div>
+    <div class="tile"><span class="ic" style="background:#EEF3F8"><svg viewBox="0 0 24 24" fill="none" stroke="var(--t-sky)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.6h11.4A2.6 2.6 0 0 1 19 7.2v13.2H7.6A2.6 2.6 0 0 1 5 17.8z"/><path d="M5 17.8A2.6 2.6 0 0 1 7.6 15.2H19"/></svg></span><b>读一读</b><i>已读 3/56 篇</i></div>
+    <div class="tile"><span class="ic" style="background:#F5F0FA"><svg viewBox="0 0 24 24" fill="none" stroke="var(--t-plum)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="5.2" width="17.2" height="12.4" rx="4.2"/><path d="M8.6 17.6v3.4l3.8-3.4"/><path d="M8.8 11.4h.02M12 11.4h.02M15.2 11.4h.02"/></svg></span><b>说一说</b><i>看图说话</i></div>
+    <div class="tile"><span class="ic" style="background:#FBF0F3"><svg viewBox="0 0 24 24" fill="none" stroke="var(--t-rose)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.2 5.4h5.6"/><circle cx="10.6" cy="14.6" r="3.8"/><path d="M14.4 10.8v7.6"/></svg></span><b>拼音小课堂</b><i>声母 · 韵母</i></div>
+  </div>
+
+  <div class="parent">
+    <span style="width:30px;height:30px;border-radius:8px;background:#EFEAE0;display:flex;align-items:center;justify-content:center">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t-slate)" stroke-width="2.2" stroke-linecap="round"><circle cx="9.2" cy="8.6" r="3.2"/><path d="M3.4 19.6a5.8 5.8 0 0 1 11.6 0"/><circle cx="17.2" cy="10.4" r="2.5"/><path d="M14.6 19.6a5.2 5.2 0 0 1 6.6-4.9"/></svg>
+    </span>
+    <b>家长中心</b><i>学习报告 · 设置 ›</i>
+  </div>
+
+  <div class="foot">陪着孩子，一起把问题变成答案<br>适合 3~6 岁 · 每天 10 分钟 · <a href="#">隐私说明</a></div>
+</div>
+
+</body></html>
