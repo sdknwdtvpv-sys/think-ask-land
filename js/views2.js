@@ -450,7 +450,7 @@
             '<span class="end-emoji">🎈</span>' +
             '<div class="score-big">复习完成!</div>' +
             '<div class="score-sub">共复习 ' + cards.length + " 个字,认识 " + knew + " 个<br>忘记的字一会儿还会再来找你哦</div>" +
-            '<div class="end-stars">获得 ' + earned + " ⭐</div>" +
+            '<div class="end-stars">获得 ' + earned + " " + Icons.svg("starFill") + "</div>" +
             '<div class="end-btns">' +
               '<button class="btn btn-lg btn-ghost" id="go-home">' + Icons.svg("home") + '回首页</button>' +
             "</div>" +
@@ -657,7 +657,7 @@
               '<button class="kid-face" data-act="switch" aria-label="切换到' + esc(p.name) + '">' + esc(p.emoji) + "</button>" +
               '<span class="kid-info"><span class="kid-name">' + esc(p.name) +
                 (isCur ? '<span class="kid-badge">当前</span>' : "") + "</span>" +
-                '<small>' + s2.learned + " 字 · " + s2.mastered + " 熟练 · " + s2.stars + " ⭐</small></span>" +
+                '<small>' + s2.learned + " 字 · " + s2.mastered + " 熟练 · " + s2.stars + " " + Icons.svg("starFill") + "</small></span>" +
               '<span class="kid-ops">' +
                 (isCur ? "" : '<button class="mini-btn" data-act="switch">切换</button>') +
                 '<button class="mini-btn" data-act="rename">改名</button>' +

@@ -89,6 +89,10 @@ for spec in "$@"; do
   printf '  setTimeout(function () { go(%s); }, %d);\n' "\"$route\"" "$delay" >> www/__many.js
   i=$((i + 1))
 done
+if [ -n "${HZ_AFTER:-}" ]; then
+  # 截前执行一段 JS —— 有些界面要先点一下才出现（比如故事页的"我自己读"自读模式）
+  printf '  setTimeout(function () { %s }, 5200);\n' "$HZ_AFTER" >> www/__many.js
+fi
 cat >> www/__many.js <<'TAIL'
   setTimeout(function () {
     var ok = document.querySelector("#cf-ok");

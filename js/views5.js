@@ -139,7 +139,7 @@
         msg(
           '<div class="tk-top tk-live">🔴 在听你说…</div>' +
           '<div class="tk-sub">还可以说 <b id="tk-left">' + left + "</b> 秒</div>" +
-          '<div class="tk-actions"><button class="btn btn-mint" id="tk-stop">说好了 ✓</button></div>' +
+          '<div class="tk-actions"><button class="btn btn-mint" id="tk-stop">说好了' + Icons.svg("check") + '</button></div>' +
           '<div class="tk-note">' + Icons.svg("lock") + '录音只在这台设备上回放，不上传。</div>'
         );
         panel.querySelector("#tk-stop").addEventListener("click", finish);
@@ -183,7 +183,7 @@
             return '<button class="tk-mark" data-k="' + k + '">' + x.split("|")[1] + "</button>";
           }).join("") +
         "</div>" +
-        '<div class="tk-actions"><button class="btn btn-mint" id="tk-done">说好了，收起来 ✓</button></div>' +
+        '<div class="tk-actions"><button class="btn btn-mint" id="tk-done">说好了，收起来' + Icons.svg("check") + '</button></div>' +
         '<div class="tk-note">' + Icons.svg("lock") + '录音只在这台设备上回放，不上传、不保存。</div>'
       );
       var play = function () {

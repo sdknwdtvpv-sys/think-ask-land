@@ -187,7 +187,7 @@
 
       /* ---------- 拼一拼 ---------- */
       html += '<div class="panel"><h4>' + Icons.svg("game") + '拼一拼</h4>' +
-        '<p class="parent-note">声母 + 韵母,拼出一个音节。答对有星星 ✨</p>' +
+        '<p class="parent-note">声母 + 韵母,拼出一个音节。答对有星星 ' + Icons.svg("sparkle") + '</p>' +
         '<div id="blend-area"></div></div>';
 
       html += "</div>";
@@ -521,7 +521,7 @@
           '<button class="btn btn-sky" id="rd-play">' + Icons.svg("speak") + '读一遍</button>' +
           '<button class="btn btn-sun" id="rd-self-btn">' + Icons.svg("users") + '我自己读</button>' +
           (target ? '<button class="btn btn-grape" id="rd-find">' + Icons.svg("target") + '找「' + esc(target) + "」</button>" : "") +
-          '<button class="btn btn-mint" id="rd-done">读完啦 ✅</button>' +
+          '<button class="btn btn-mint" id="rd-done">读完啦' + Icons.svg("check") + '</button>' +
         "</div>" +
         '<div class="find-hud" id="rd-find-hud" hidden></div>' +
         /* ---- 读后理解题:读完了问一句,答对才算真读懂 ---- */
@@ -538,7 +538,7 @@
           '<div class="sr-actions">' +
             '<button class="btn btn-ghost" id="sr-prev">‹ 上一句</button>' +
             '<button class="btn btn-sky" id="sr-auto">▶ 跟着读</button>' +
-            '<button class="btn btn-mint" id="sr-done">读完了 ✅</button>' +
+            '<button class="btn btn-mint" id="sr-done">读完了' + Icons.svg("check") + '</button>' +
           "</div>" +
         "</div>" +
         "</div>";

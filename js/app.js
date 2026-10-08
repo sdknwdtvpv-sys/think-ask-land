@@ -351,7 +351,7 @@
         '<div class="screen v4 map-v4" data-screen="groups">' +
           '<div class="map-head">' +
             '<div class="section-title">' + Icons.svg("flag") + "已点亮 " + lit + " / " + window.CharDB.GROUPS.length + " 座岛</div>" +
-            '<div class="map-sub">每学会一个字,小岛就亮一点 ✨</div>' +
+            '<div class="map-sub">每学会一个字,小岛就亮一点 ' + Icons.svg("sparkle") + '</div>' +
           "</div>" +
           '<div class="island-map" id="island-map">' +
             '<svg class="map-path" id="map-path" aria-hidden="true"></svg>';
@@ -647,7 +647,7 @@
           recMsg(
             '<div class="rec-top rec-live"><span class="rec-dot"></span>正在录音… 读吧!</div>' +
             '<div class="rec-sub">还可以读 <b id="rec-left">' + left + "</b> 秒</div>" +
-            '<div class="rec-actions"><button class="btn btn-mint" id="rec-stop">读好了 ✓</button></div>' +
+            '<div class="rec-actions"><button class="btn btn-mint" id="rec-stop">读好了' + Icons.svg("check") + '</button></div>' +
             '<div class="rec-note">录音只在这台设备上回放,不会上传。</div>'
           );
           recPanel.querySelector("#rec-stop").addEventListener("click", recFinish);

@@ -878,3 +878,27 @@ html.v4 .bi-voice.on { border-color: var(--primary); background: var(--primary-b
 html.v4 .isle-check, html.v4 .tile-check { background: var(--ok); }
 html.v4 .tone-demo, html.v4 .rc-badge { background: var(--primary-bg); color: var(--primary); }
 html.v4 .opt.py-opt { color: var(--primary); }
+
+/* 补齐遗漏的旧变量（扫描发现这些也在被大量引用）：
+   --ink-light 被引用 **84 次**，值却是紫灰 #6b6480/#8a83a3 ——
+   新令牌里只有 --ink-2/--ink-3，没定义 --ink-light，
+   于是这 84 处次级文字一直还是旧的紫灰色。这是"文字看着不对"的根源。
+   --card-shadow 是带硬偏移的紫阴影（10 处）。
+   --sky-top/mid/low/bot 是整套旧天空渐变（自读模式整屏背景还在用它）。 */
+html.v4 {
+  --ink-light: var(--ink-3);
+  --card-shadow: var(--e1);
+  --radius: var(--r);
+  --sky-top: var(--paper);
+  --sky-mid: var(--paper);
+  --sky-low: var(--paper);
+  --sky-bot: var(--paper);
+}
+
+/* 内联图标：按钮里靠 flex gap 分隔，但正文（<p>/<div>）里没有 gap，
+   图标会贴住文字。给"正文中的图标"一点左间距。
+   （配合上面补的空格，双保险。） */
+html.v4 .parent-note .ico,
+html.v4 .map-sub .ico,
+html.v4 .practice-intro .ico { margin-right: .25em; vertical-align: -.15em; }
+html.v4 .parent-note .ico { margin-left: .1em; }
