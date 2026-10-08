@@ -102,7 +102,7 @@ if [ -d "$PUB" ]; then
   STALE=""
   diff -q "$OUT/index.html" "$PUB/index.html" >/dev/null 2>&1 || STALE="index.html 与 www/ 不一致"
   if ls "$PUB"/__*.js >/dev/null 2>&1; then
-    STALE="${STALE:+$STALE；}public/ 里还有临时测试驱动 $(cd "$PUB" && ls __*.js | tr '\n' ' ')"
+    STALE="${STALE:+${STALE}；}public/ 里还有临时测试驱动 $(cd "$PUB" && ls __*.js | tr '\n' ' ')"
   fi
   if [ -n "$STALE" ]; then
     echo ""

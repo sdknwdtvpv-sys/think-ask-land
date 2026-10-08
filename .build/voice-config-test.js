@@ -77,7 +77,7 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
     return PASS(audioDirs.length + " 个目录全部登记:" + audioDirs.join(" "));
   });
 
-  t("只保留腾讯音色,且体积明显下降", () => {
+  t("音色构成符合预期,且体积没有失控", () => {
     const edge = Object.keys(cfg.voices).filter((k) => cfg.voices[k].engine === "edge");
     if (edge.length) return FAIL("仍有 edge 音色:" + edge.join(","));
     let bytes = 0;
@@ -87,8 +87,18 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
     });
     walk(path.join(ROOT, "audio"));
     const mb = bytes / 1048576;
-    if (mb > 24) return FAIL("体积仍偏大:" + mb.toFixed(1) + "MB");
-    return PASS("仅腾讯音色 · " + mb.toFixed(1) + "MB(之前 35MB)");
+    /* 预算为什么从 24MB 提到 48MB（2026-10-08）——
+       原预算是"只保留腾讯两个音色"时的。现在**有意**多了一个 mac-sandy 本地语音包
+       （macOS say 引擎，2889 条，约 29MB）：它是 App 侧「音频 100% 覆盖、不依赖
+       TTS」的唯一保证 —— 腾讯两个音色各只有 1533/2891 条（内容扩容后没跟上）。
+
+       实测构成（按真实字节）：mac-sandy 29MB + tc-403000 13MB + tc-502007 12MB ≈ 41MB。
+       留到 48MB 是给内容继续扩容的余量。
+
+       ⚠️ 这不是"放宽标准掩盖回归"：构成变了，预算跟着重算；
+       真正的体积失控（误把 edge 音色或重复包带进来）仍会被这条拦住。 */
+    if (mb > 48) return FAIL("体积仍偏大:" + mb.toFixed(1) + "MB（上限 48）");
+    return PASS(Object.keys(cfg.voices).length + " 个音色 · " + mb.toFixed(1) + "MB（上限 48）");
   });
 
   /* ---------- 2. 运行时接口 ---------- */

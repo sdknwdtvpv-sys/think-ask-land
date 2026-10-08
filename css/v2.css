@@ -274,6 +274,12 @@ body::after { /* 全局纸纹,极淡 */
   background: none; border: 0; box-shadow: none; padding: 0;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   border-radius: 0; transition: transform .12s;
+  /* 🔴 这一行是必需的,不是随手加的:
+     .map-path 是 position:absolute,而 CSS 规定**定位元素绘制在静态内容之上** ——
+     卡片没有 position 时,那条虚线会真的**压在文字上面**(不是"从字形间隙透出来",
+     是实打实的层叠压字)。加上 position:relative 让小岛成为定位元素,
+     它在 DOM 里排在 SVG 之后,于是正确地盖住小径。 */
+  position: relative; z-index: 1;
 }
 .group-card.island:active { transform: scale(.95); }
 .island-map .island:nth-of-type(odd) { margin-top: 30px; }   /* S 形错落 */
@@ -301,6 +307,16 @@ body::after { /* 全局纸纹,极淡 */
 .isle-check .ico { width: 14px; height: 14px; stroke-width: 3; }
 .isle-name { font-size: 14.5px; letter-spacing: .5px; text-align: center; margin-top: 4px; }
 .isle-meta { font-size: 11.5px; text-align: center; }
+/* 小径是装饰,但**文字必须永远可读**。
+   即使上面那条 z-index 已经让小岛盖住小径,标签本身没有底色,
+   圆点仍会在字形周围露出来(白点在深字旁边很吵)。给标签一层极淡的暖纸色垫底,
+   和地图上的地名标注一个道理。用 inline-block + 内边距做出贴合文字的小药丸,
+   而不是铺满整行的色带 —— 避免把地图切成一条条横带。 */
+.isle-name, .isle-meta {
+  background: rgba(255, 252, 245, .82);
+  border-radius: 9px;
+  padding: 1px 8px;
+}
 
 /* 已开始 / 已学完 的小岛配色 */
 .island.started[data-hue="0"], .island.done[data-hue="0"] { --h1: #7ec8ff; --h2: #d9efff; }

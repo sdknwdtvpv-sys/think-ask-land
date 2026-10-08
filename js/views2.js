@@ -582,6 +582,10 @@
         /* 连错 3 次锁 10 秒:既挡住乱按的孩子,又不至于把家长挡在门外 */
         function lock() {
           locked = true;
+          /* "被锁 10 秒"是一个**独立事件**,值得一个和"答错"不同、稍重的触觉。
+             普通答错走 SFX.wrong()(温和的 WARNING),这里补一个 ERROR 级别的,
+             让人明确意识到"现在按什么都没用了"。 */
+          try { if (window.Haptics) window.Haptics.gateError(); } catch (e) { /* 忽略 */ }
           var left = 10;
           inp.value = "";
           inp.disabled = true;

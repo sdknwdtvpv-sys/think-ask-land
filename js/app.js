@@ -359,10 +359,16 @@
     render: function (p, view) {
       App.setTopbar("汉字小岛地图", true);
       var st = window.Store.state;
+      /* 内容区**不再重复**顶栏那个标题。
+         原来这里又写了一遍「汉字小岛地图」,和顶栏一字不差,读起来像出了错。
+         换成一个真正有用的信息:整体进度 —— 孩子一眼知道"我点亮了几座岛"。 */
+      var lit = window.CharDB.GROUPS.filter(function (g) {
+        return g.chars.every(function (ch) { return st.chars[ch.c] && st.chars[ch.c].learned; });
+      }).length;
       var html =
         '<div class="screen">' +
           '<div class="map-head">' +
-            '<div class="section-title">' + Icons.svg("flag") + "汉字小岛地图</div>" +
+            '<div class="section-title">' + Icons.svg("flag") + "已点亮 " + lit + " / " + window.CharDB.GROUPS.length + " 座岛</div>" +
             '<div class="map-sub">每学会一个字,小岛就亮一点 ✨</div>' +
           "</div>" +
           '<div class="island-map" id="island-map">' +
@@ -408,7 +414,11 @@
     if (!map || !svg) return;
     var box = map.getBoundingClientRect();
     var pts = [];
-    Array.prototype.forEach.call(map.querySelectorAll(".island"), function (el) {
+    /* 取**圆环**的中心,不是整个卡片的中心。
+       卡片 = 圆环 + 名称 + “已学 x/y 字”,整卡的中心正好落在文字里,
+       于是曲线端点扎进文字、白点直接压过「已学 0 / 44 字」(实测截图可见)。
+       圆环中心才是这条小径真正要串起来的节点。 */
+    Array.prototype.forEach.call(map.querySelectorAll(".isle-ring"), function (el) {
       var r = el.getBoundingClientRect();
       pts.push([r.left - box.left + r.width / 2, r.top - box.top + r.height / 2]);
     });

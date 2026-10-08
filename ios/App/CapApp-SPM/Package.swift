@@ -14,6 +14,7 @@ let package = Package(
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.5.2"),
         .package(name: "CapacitorBrowser", path: "../../../node_modules/@capacitor/browser"),
         .package(name: "CapacitorFilesystem", path: "../../../node_modules/@capacitor/filesystem"),
+        .package(name: "CapacitorHaptics", path: "../../../node_modules/@capacitor/haptics"),
         .package(name: "CapacitorPreferences", path: "../../../node_modules/@capacitor/preferences"),
         .package(name: "CapacitorShare", path: "../../../node_modules/@capacitor/share"),
         .package(name: "CapacitorPluginCdvPurchase", path: "../../../node_modules/capacitor-plugin-cdv-purchase")
@@ -26,6 +27,7 @@ let package = Package(
                 .product(name: "Cordova", package: "capacitor-swift-pm"),
                 .product(name: "CapacitorBrowser", package: "CapacitorBrowser"),
                 .product(name: "CapacitorFilesystem", package: "CapacitorFilesystem"),
+                .product(name: "CapacitorHaptics", package: "CapacitorHaptics"),
                 .product(name: "CapacitorPreferences", package: "CapacitorPreferences"),
                 .product(name: "CapacitorShare", package: "CapacitorShare"),
                 .product(name: "CapacitorPluginCdvPurchase", package: "CapacitorPluginCdvPurchase")

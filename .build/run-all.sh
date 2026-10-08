@@ -73,6 +73,7 @@ SUITES=(
   voice-test
   offline-guard-test
   webview-compat-test
+  haptics-test
   entitlement-test
   report-test
   ux-regression

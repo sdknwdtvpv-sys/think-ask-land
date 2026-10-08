@@ -262,6 +262,15 @@
   };
 
   /* ---------- 音效(合成,无需音频文件) ---------- */
+  /* 触觉反馈与音效**成对出现**,统一走这一个入口。
+     为什么放这里:本项目有几十处 SFX.xxx() 调用点,如果各自去加震动,
+     一定会漏;挂在这里则一处生效、且永远不会出现"有声音没震动"。
+     任何异常都吞掉 —— 震动是锦上添花,绝不能影响学习流程。 */
+  function haptic(name) {
+    try { if (window.Haptics && window.Haptics[name]) window.Haptics[name](); }
+    catch (e) { /* 忽略 */ }
+  }
+
   var SFX = {
     ctx: null,
     unlock: function () {
@@ -289,29 +298,34 @@
         o.start(t0); o.stop(t0 + dur + 0.05);
       } catch (e) { /* 忽略 */ }
     },
-    click: function () { this._tone(880, 0, 0.07, "sine", 0.08); },
+    click: function () { this._tone(880, 0, 0.07, "sine", 0.08); haptic("click"); },
     correct: function () { // 上行琶音 do-mi-sol-do
       this._tone(523.25, 0, 0.12, "sine", 0.16);
       this._tone(659.25, 0.09, 0.12, "sine", 0.16);
       this._tone(783.99, 0.18, 0.16, "sine", 0.18);
       this._tone(1046.5, 0.28, 0.22, "triangle", 0.14);
+      haptic("correct");
     },
     wrong: function () { // 温柔的两声低音(不吓孩子)
       this._tone(330, 0, 0.14, "sine", 0.10);
       this._tone(262, 0.13, 0.2, "sine", 0.10);
+      haptic("wrong");
     },
     star: function () { // 叮~
       this._tone(1318.5, 0, 0.1, "sine", 0.14);
       this._tone(1760, 0.07, 0.18, "sine", 0.12);
+      haptic("star");
     },
     flip: function () {
       this._tone(520, 0, 0.06, "triangle", 0.10);
       this._tone(760, 0.05, 0.08, "triangle", 0.09);
+      haptic("flip");
     },
     fanfare: function () { // 奖励旋律
       var seq = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5];
       for (var i = 0; i < seq.length; i++) this._tone(seq[i], i * 0.13, 0.16, "triangle", 0.16);
       this._tone(1318.5, 0.8, 0.4, "sine", 0.14);
+      haptic("fanfare");
     }
   };
 

@@ -82,7 +82,7 @@ if [ "$NO_PUSH" = "0" ]; then
       GHKEY="$REPO/../.deploy/github_ed25519"
       [ -f "$GHKEY" ] || GHKEY="$HOME/.ssh/id_ed25519"
       if [ ! -f "$GHKEY" ]; then
-        echo "  ⚠️ 远端是 SSH（$REMOTE_URL），但既没有部署密钥也没有默认密钥，跳过推送"
+        echo "  ⚠️ 远端是 SSH（${REMOTE_URL}），但既没有部署密钥也没有默认密钥，跳过推送"
       else
         mkdir -p /tmp/hzdeploy && chmod 700 /tmp/hzdeploy
         cp "$GHKEY" /tmp/hzdeploy/github_ed25519
@@ -147,7 +147,7 @@ if printf "%s" "$DEPLOY_OUT" | grep -q "已阻止部署"; then
   exit 1
 fi
 printf "%s\n" "$DEPLOY_OUT" | grep -E "✅|❌|⚠️" | sed 's/^/  /' || true
-[ "$DEPLOY_RC" = "0" ] || echo "  ⚠️ 部署脚本退出码 $DEPLOY_RC（继续做一致性比对，便于定位）"
+[ "$DEPLOY_RC" = "0" ] || echo "  ⚠️ 部署脚本退出码 ${DEPLOY_RC}（继续做一致性比对，便于定位）"
 
 # ---------- 4. 验证 ----------
 echo "▶ [5/5] 验证"
