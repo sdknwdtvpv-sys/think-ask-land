@@ -1003,3 +1003,17 @@ html.v4 .flip-back { background: var(--surface); }
 html.v4 .voice-row select {
   background: var(--surface) !important; border: 1px solid var(--line); color: var(--ink);
 }
+
+/* 自读模式的"跟着读"按钮：播放中用 .playing
+   （旧规则用 var(--sun)，重定向后变成金色 —— 金色在这个设计里是"奖励"色，
+     不该用来表示"正在播放"。播放中是**进行态**，用强调色。） */
+html.v4 .sr-actions .btn.playing {
+  background: var(--primary); color: var(--on-primary); border-color: var(--primary);
+}
+
+/* 实心按钮里的图标必须跟文字同色。
+   上面 "html.v4 .btn-sky .ico { color: var(--t-sky) }" 那条规则是为**中性底**
+   按钮准备的（靠图标带颜色）；但按钮一旦是实心（primary / .playing），
+   图标再带色就会变成"白字 + 蓝图标"，很难看。 */
+html.v4 .btn[data-role="primary"] .ico,
+html.v4 .sr-actions .btn.playing .ico { color: inherit; }

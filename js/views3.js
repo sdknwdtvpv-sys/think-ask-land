@@ -758,7 +758,7 @@
         srFinished = true;
         var res = window.Store.markRead(story.id);
         srHint.innerHTML = "🎉 这一篇你自己读完啦!" + (res.first ? " 读书 +3 ⭐" : " 又读了一遍,真棒!");
-        srAutoBtn.textContent = "🔁 再读一遍";
+        srAutoBtn.innerHTML = Icons.svg("refresh") + "再读一遍";   /* textContent → innerHTML：图标是 SVG */
         srAutoBtn.classList.remove("playing");
         if (window.SFX) SFX.correct();
         if (window.UI.burst) window.UI.burst(window.innerWidth / 2, window.innerHeight * 0.35, 26);
@@ -803,7 +803,7 @@
         if (srPlaying) { srStop(); return; }
         if (srFinished) { srFinished = false; srSi = 0; srHi = -1; srRender(); }
         srPlaying = true;
-        srAutoBtn.textContent = "⏸ 暂停";
+        srAutoBtn.innerHTML = Icons.svg("pause") + "暂停";
         srAutoBtn.classList.add("playing");
         srHint.textContent = "跟着光标一个字一个字读";
         srStep();

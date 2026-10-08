@@ -515,7 +515,7 @@
           '<div class="badge' + (got ? " got" : " locked") + '">' +
             '<span class="bd-emoji">' + b.e + "</span>" +
             '<span><span class="bd-name">' + b.n + "</span>" +
-            '<span class="bd-desc">' + (got ? "已获得 ✓" : b.d) + "</span></span>" +
+            '<span class="bd-desc">' + (got ? "已获得 " + Icons.svg("check") : b.d) + "</span></span>" +
           "</div>";
       });
       html += "</div></div>";

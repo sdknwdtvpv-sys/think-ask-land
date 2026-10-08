@@ -137,7 +137,7 @@
         handle = h;
         var left = Math.round(h.ms / 1000);
         msg(
-          '<div class="tk-top tk-live">🔴 在听你说…</div>' +
+          '<div class="tk-top tk-live"><span class="rec-dot"></span>在听你说…</div>' +
           '<div class="tk-sub">还可以说 <b id="tk-left">' + left + "</b> 秒</div>" +
           '<div class="tk-actions"><button class="btn btn-mint" id="tk-stop">说好了' + Icons.svg("check") + '</button></div>' +
           '<div class="tk-note">' + Icons.svg("lock") + '录音只在这台设备上回放，不上传。</div>'
