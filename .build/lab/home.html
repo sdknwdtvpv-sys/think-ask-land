@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* ============================================================
+   首页样板（A+C 混合）—— Phase 0 验收稿
+   ------------------------------------------------------------
+   与旧版的三个结构差异：
+     ① "学汉字"升为**整行主行动**(强调色实心),其余入口降为中性小卡 ——
+        旧版 8 个同尺寸同权重的渐变色块,对 4 岁孩子等于"没有选择"
+     ② 颜色从"整块卡片"收到"小图标" —— 旧版 8 块 8 色,等于没有重点
+     ③ 标题/问候/统计合成一个问候区,不再三段式堆叠
+   ============================================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-body); background: #cfcfcf; padding: 30px; }
+.phone {
+  width: 390px; height: auto; min-height: 844px; background: var(--paper); border-radius: 44px;
+  overflow: hidden; position: relative; color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+.scroll { height: 100%; overflow: hidden; }
+.pad { padding: 0 var(--s5); }
+
+/* ---------- 顶栏:品牌左对齐 + 星标右 ---------- */
+.bar { display: flex; align-items: center; justify-content: space-between; padding: var(--s4) var(--s5) var(--s3); }
+.brand { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; color: var(--ink); }
+.pill {
+  display: inline-flex; align-items: center; gap: var(--s1);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-pill); padding: 5px var(--s3) 5px 9px;
+  font-size: var(--fs-sm); font-weight: 700; color: var(--ink-2);
+}
+.pill .n { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+
+/* ---------- 问候区 ---------- */
+.hello { padding: var(--s2) var(--s5) var(--s5); }
+.hello h1 { font-size: var(--fs-title); font-weight: 800; letter-spacing: .2px; }
+.hello p { font-size: var(--fs-body); color: var(--ink-2); margin-top: 5px; }
+.meta { font-size: var(--fs-sm); color: var(--ink-3); margin-top: var(--s3); display: flex; gap: var(--s3); }
+.meta b { color: var(--ink-2); font-weight: 700; }
+
+/* ---------- 今日任务:一行信息,一个进度条 ---------- */
+.task {
+  margin: 0 var(--s5) var(--s5); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s4);
+  box-shadow: var(--e1);
+}
+.task .h { display: flex; align-items: baseline; justify-content: space-between; }
+.task .h b { font-size: var(--fs-h); font-weight: 800; }
+.task .h span { font-family: var(--font-num); font-size: var(--fs-sm); color: var(--ink-3); font-weight: 700; }
+.track { height: 6px; background: var(--paper-2); border-radius: var(--r-pill); margin: var(--s3) 0 var(--s2); overflow: hidden; }
+.track i { display: block; height: 100%; width: 66%; background: var(--primary); border-radius: var(--r-pill); }
+.task .sub { font-size: var(--fs-sm); color: var(--ink-2); display: flex; gap: var(--s3); }
+.task .sub em { font-style: normal; color: var(--ink-3); }
+
+/* ---------- 主行动:整行,强调色实心 ---------- */
+.primary {
+  display: flex; align-items: center; gap: var(--s4); margin: 0 var(--s5) var(--s5);
+  background: var(--primary); color: var(--on-primary);
+  border-radius: var(--r-lg); padding: var(--s4) var(--s5); box-shadow: var(--e2);
+}
+.primary .txt { flex: 1; }
+.primary b { display: block; font-size: var(--fs-h); font-weight: 800; letter-spacing: .3px; }
+.primary i { display: block; font-style: normal; font-size: var(--fs-sm); opacity: .82; margin-top: 3px; }
+.primary .arrow { font-size: 20px; opacity: .9; }
+.primary .pico { width: 34px; height: 34px; flex: 0 0 auto; opacity: .95; }
+.primary .pico svg { width: 100%; height: 100%; }
+.badge-num {
+  font-family: var(--font-num); font-size: var(--fs-display); font-weight: 800;
+  line-height: 1; opacity: .95; font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 分区标题 ---------- */
+.sec { display: flex; align-items: baseline; justify-content: space-between; margin: 0 var(--s5) var(--s3); }
+.sec b { font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
+
+/* ---------- 中性小卡:颜色只在图标上 ---------- */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); margin: 0 var(--s5) var(--s5); }
+.tile {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  padding: var(--s4); display: flex; flex-direction: column; gap: var(--s2);
+}
+.tile .ic { width: 34px; height: 34px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; }
+.tile .ic svg { width: 20px; height: 20px; }
+.tile b { font-size: var(--fs-body); font-weight: 700; }
+.tile i { font-style: normal; font-size: var(--fs-sm); color: var(--ink-3); }
+
+/* ---------- 家长入口:整行、低调 ---------- */
+.parent {
+  display: flex; align-items: center; gap: var(--s3); margin: 0 var(--s5) var(--s6);
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--r); padding: var(--s4);
+}
+.parent b { flex: 1; font-size: var(--fs-body); font-weight: 700; color: var(--ink-2); }
+.parent i { font-style: normal; font-size: var(--fs-sm); color: var(--ink-3); }
+
+.foot { text-align: center; font-size: var(--fs-xs); color: var(--ink-3); line-height: var(--lh-loose); padding-bottom: var(--s8); }
+.foot a { color: var(--ink-2); }
+.mascot { width: 54px; height: 54px; }
+</style></head><body>
+
+<div class="phone"><div class="scroll">
+
+  <div class="bar">
+    <span class="brand">思问岛</span>
+    <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="var(--gold)" stroke="#C08A1E" stroke-width="1.2" stroke-linejoin="round"><path d="M12 2.9l2.9 5.9 6.5 1-4.7 4.5 1.1 6.5L12 17.7l-5.8 3.1 1.1-6.5L2.6 9.8l6.5-1z"/></svg><span class="n">142</span></span>
+  </div>
+
+  <!-- 问候区：一张吉祥物 + 两行字。旧版是"三只吉祥物 + 大标题 + 问候 + 统计"四段堆叠 -->
+  <div class="hello" style="display:flex;gap:var(--s4);align-items:center">
+    <svg class="mascot" viewBox="0 0 64 64" aria-hidden="true">
+      <!-- 占位：这里是问仔(js/mascot.js 的内联 SVG),样板用简化形状代替 -->
+      <circle cx="32" cy="34" r="22" fill="#F6D9B8" stroke="#2C2721" stroke-width="2.2"/>
+      <circle cx="24" cy="30" r="3.4" fill="#2C2721"/><circle cx="40" cy="30" r="3.4" fill="#2C2721"/>
+      <path d="M25 42c4 4 10 4 14 0" fill="none" stroke="#2C2721" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="15" cy="20" r="7" fill="#F6D9B8" stroke="#2C2721" stroke-width="2.2"/>
+      <circle cx="49" cy="20" r="7" fill="#F6D9B8" stroke="#2C2721" stroke-width="2.2"/>
+    </svg>
+    <div style="flex:1">
+      <h1>下午好，小宝贝</h1>
+      <p>今天想学点什么呢？</p>
+    </div>
+  </div>
+
+  <div class="meta pad" style="margin-bottom:var(--s5)">
+    <span>连续 <b>1</b> 天</span><span>已学 <b>48</b>/761</span><span>读完 <b>3</b> 篇</span>
+  </div>
+
+  <!-- 今日任务：一行 + 一条进度。旧版是"进度条 + 2/3 + 三个 chip"把同一件事说了三遍 -->
+  <div class="task">
+    <div class="h"><b>今日任务</b><span>2 / 3</span></div>
+    <div class="track"><i></i></div>
+    <div class="sub"><span>学字 3/3</span><span>答题 3/5</span><em>复习 0</em></div>
+  </div>
+
+  <!-- 主行动：唯一一块实心强调色 -->
+  <div class="primary">
+    <span class="pico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.6" y="3.6" width="16.8" height="16.8" rx="3.4"/><path d="M3.6 12h16.8M12 3.6v16.8"/></svg></span>
+    <span class="txt"><b>学汉字</b><i>接着上次继续 · 今天 10 分钟</i></span>
+    <span class="arrow">→</span>
+  </div>
+
+  <div class="sec"><b>其他玩法</b><span></span></div>
+  <div class="grid">
+    <div class="tile"><span class="ic" style="background:#FBF3DF"><svg viewBox="0 0 24 24" fill="none" stroke="var(--t-amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.6" y="7" width="18.8" height="11" rx="4.2"/><path d="M7.2 10.6v3.2M5.6 12.2h3.2"/><path d="M15.4 11.4h.02M18 13.6h.02"/></svg></span><b>趣味练习</b><i>闯关赚星星</i></div>
+    <div class="tile"><span class="ic" style="background:#EAF4F0"><svg viewBox="0 0 24 24" fill="none" stroke="var(--t-mint)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20.2 4.4v4.2H16"/></svg></span><b>今日复习</b><i>5 个字等着</i></div>
+    <div class="tile"><span class="ic" style="background:#FBF3DF"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v6.2a4 4 0 0 1-8 0z"/><path d="M8 5.6H5.6a2.5 2.5 0 0 0 2.5 4.2M16 5.6h2.4a2.5 2.5 0 0 1-2.5 4.2"/><path d="M12 14.2V17M8.6 20h6.8"/></svg></span><b>我的奖励</b><i>贴纸 · 勋章</i></div>
+    <div class="tile"><span class="ic" style="background:#EEF3F8"><svg viewBox="0 0 24 24" fill="none" stroke="var(--t-sky)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.6h11.4A2.6 2.6 0 0 1 19 7.2v13.2H7.6A2.6 2.6 0 0 1 5 17.8z"/><path d="M5 17.8A2.6 2.6 0 0 1 7.6 15.2H19"/></svg></span><b>读一读</b><i>已读 3/56 篇</i></div>
+    <div class="tile"><span class="ic" style="background:#F5F0FA"><svg viewBox="0 0 24 24" fill="none" stroke="var(--t-plum)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="5.2" width="17.2" height="12.4" rx="4.2"/><path d="M8.6 17.6v3.4l3.8-3.4"/><path d="M8.8 11.4h.02M12 11.4h.02M15.2 11.4h.02"/></svg></span><b>说一说</b><i>看图说话</i></div>
+    <div class="tile"><span class="ic" style="background:#FBF0F3"><svg viewBox="0 0 24 24" fill="none" stroke="var(--t-rose)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.2 5.4h5.6"/><circle cx="10.6" cy="14.6" r="3.8"/><path d="M14.4 10.8v7.6"/></svg></span><b>拼音小课堂</b><i>声母 · 韵母</i></div>
+  </div>
+
+  <div class="parent">
+    <span class="ic" style="width:30px;height:30px;border-radius:8px;background:#EFEAE0;display:flex;align-items:center;justify-content:center">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t-slate)" stroke-width="2.2" stroke-linecap="round"><circle cx="9.2" cy="8.6" r="3.2"/><path d="M3.4 19.6a5.8 5.8 0 0 1 11.6 0"/><circle cx="17.2" cy="10.4" r="2.5"/><path d="M14.6 19.6a5.2 5.2 0 0 1 6.6-4.9"/></svg>
+    </span>
+    <b>家长中心</b><i>学习报告 · 设置 ›</i>
+  </div>
+
+  <div class="foot">陪着孩子，一起把问题变成答案<br>适合 3~6 岁 · 每天 10 分钟 · <a href="#">隐私说明</a></div>
+</div></div>
+
+</body></html>

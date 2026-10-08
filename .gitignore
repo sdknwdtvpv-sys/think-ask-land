@@ -34,3 +34,6 @@ ios/App/App.xcworkspace/xcuserdata/
 # android/app/build/
 # android/.gradle/
 
+.build/render-html
+.build/lab/*.png
+.build/iconwork/

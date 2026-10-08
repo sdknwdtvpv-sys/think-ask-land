@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><style>
+/* ============================================================
+   三个视觉方向的对比稿（首页）
+   同一个信息结构，三种完全不同的视觉语言。
+   我们不改信息架构，只回答一个问题：**这个 App 该长什么样**。
+   ============================================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "PingFang SC", -apple-system, sans-serif;
+  background: #d9d9d9; padding: 28px; display: flex; gap: 28px;
+  -webkit-font-smoothing: antialiased;
+}
+.phone {
+  width: 360px; height: 780px; border-radius: 40px; overflow: hidden;
+  position: relative; flex: 0 0 auto; background: #fff;
+}
+.label {
+  position: absolute; top: -24px; left: 4px; font-size: 13px; font-weight: 700;
+  color: #333; letter-spacing: .5px;
+}
+.wrap { position: relative; }
+.body { padding: 0 18px; }
+.row { display: flex; align-items: center; }
+
+/* 三方向共用的内容块，只靠变量区分 */
+.bar { height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; }
+.title { font-size: 17px; font-weight: 800; }
+.stars { font-size: 13px; font-weight: 700; padding: 5px 11px; border-radius: 999px; }
+.hero { text-align: center; padding: 18px 0 14px; }
+.hero h1 { font-size: 30px; letter-spacing: 2px; }
+.hero p { font-size: 12.5px; margin-top: 5px; }
+.stat { font-size: 11px; margin-top: 7px; }
+.task { border-radius: 16px; padding: 12px 14px; margin-bottom: 14px; }
+.task .h { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; }
+.bar2 { height: 6px; border-radius: 99px; margin: 9px 0 8px; overflow: hidden; }
+.bar2 i { display: block; height: 100%; width: 66%; }
+.chips { display: flex; gap: 6px; font-size: 10.5px; }
+.chips span { padding: 3px 8px; border-radius: 99px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile { border-radius: 16px; padding: 13px 12px; }
+.tile b { display: block; font-size: 14.5px; }
+.tile i { display: block; font-size: 10.5px; font-style: normal; margin-top: 3px; opacity: .72; }
+.tile .ic { width: 30px; height: 30px; border-radius: 9px; margin-bottom: 9px; }
+.foot { text-align: center; font-size: 10.5px; padding: 14px 0 20px; }
+.home-bar { display: none; }
+
+/* ---------------- A 绘本质感 ---------------- */
+.A { background: #FBF6EA; }
+.A .title { color: #3B3226; font-family: "Kaiti SC", "STKaiti", serif; }
+.A .stars { background: #fff; color: #8A6B2E; border: 1.5px solid #E6D9BC; }
+.A .hero h1 { color: #C4622D; font-family: "Kaiti SC", "STKaiti", serif; font-weight: 900; }
+.A .hero p { color: #7A6A52; }
+.A .stat { color: #9A8A70; }
+.A .task { background: #fff; border: 1.5px solid #E9DEC6; box-shadow: 0 2px 0 #E9DEC6; }
+.A .task .h { color: #3B3226; }
+.A .bar2 { background: #F0E7D3; } .A .bar2 i { background: #D98E4A; }
+.A .chips span { background: #F6EFE0; color: #7A6A52; }
+.A .tile { background: #fff; border: 1.5px solid #E9DEC6; box-shadow: 0 2px 0 #E9DEC6; color: #3B3226; }
+.A .tile .ic { background: #F3E7CF; border: 1.5px solid #E0D0AE; }
+.A .tile.hi { background: #FDF0DC; border-color: #E4B77A; box-shadow: 0 2px 0 #E4B77A; }
+.A .foot { color: #A2937A; }
+
+/* ---------------- B 明快玩具 ---------------- */
+.B { background: linear-gradient(180deg,#BFE6FF,#E8F7FF 60%,#D8F3E4); }
+.B .title { color: #23305A; }
+.B .stars { background: #fff; color: #23305A; border: 2.5px solid #23305A; box-shadow: 0 3px 0 #23305A; }
+.B .hero h1 { color: #23305A; font-family: "Yuanti SC", "PingFang SC", sans-serif; font-weight: 900; letter-spacing: 3px;
+  text-shadow: 0 3px 0 #fff, 0 6px 0 rgba(35,48,90,.18); }
+.B .hero p { color: #3C4A78; font-weight: 700; }
+.B .stat { color: #4A5A88; font-weight: 700; }
+.B .task { background: #FFF6D6; border: 2.5px solid #23305A; box-shadow: 0 5px 0 #23305A; }
+.B .task .h { color: #23305A; }
+.B .bar2 { background: #fff; border: 2px solid #23305A; height: 10px; }
+.B .bar2 i { background: #FFB020; }
+.B .chips span { background: #fff; border: 2px solid #23305A; color: #23305A; font-weight: 700; }
+.B .tile { border: 2.5px solid #23305A; box-shadow: 0 5px 0 #23305A; color: #23305A; }
+.B .tile:nth-child(1){background:#8FD3FF} .B .tile:nth-child(2){background:#FFD166}
+.B .tile:nth-child(3){background:#FFA5BC} .B .tile:nth-child(4){background:#C9B6FF}
+.B .tile:nth-child(5){background:#8FE8C4} .B .tile:nth-child(6){background:#FFC08A}
+.B .tile:nth-child(7){background:#A8D8FF} .B .tile:nth-child(8){background:#F3E2B8}
+.B .tile .ic { background: rgba(255,255,255,.85); border: 2px solid #23305A; }
+.B .tile b { font-weight: 900; }
+.B .foot { color: #4A5A88; font-weight: 700; }
+
+/* ---------------- C 现代克制 ---------------- */
+.C { background: #FAFAF9; }
+.C .bar { border-bottom: 1px solid #EFEDE8; }
+.C .title { color: #1C1B1A; font-size: 15px; letter-spacing: .3px; }
+.C .stars { background: #1C1B1A; color: #fff; }
+.C .hero { padding: 26px 0 22px; }
+.C .hero h1 { color: #1C1B1A; font-size: 26px; letter-spacing: 4px; font-weight: 800; }
+.C .hero p { color: #8A857D; font-size: 12px; }
+.C .stat { color: #B0AAA1; }
+.C .task { background: #fff; border: 1px solid #EFEDE8; border-radius: 18px; padding: 14px 16px; }
+.C .task .h { color: #1C1B1A; }
+.C .bar2 { background: #F1EFEB; height: 4px; } .C .bar2 i { background: #1C1B1A; border-radius: 99px; }
+.C .chips span { background: #F6F5F2; color: #8A857D; }
+.C .tile { background: #fff; border: 1px solid #EFEDE8; border-radius: 18px; padding: 14px; }
+.C .tile .ic { background: #F6F5F2; border-radius: 10px; }
+.C .tile b { color: #1C1B1A; font-size: 14px; }
+.C .tile i { color: #B0AAA1; }
+.C .tile.hi { background: #1C1B1A; border-color: #1C1B1A; }
+.C .tile.hi b { color: #fff; } .C .tile.hi i { color: rgba(255,255,255,.6); }
+.C .tile.hi .ic { background: rgba(255,255,255,.14); }
+.C .grid { gap: 9px; }
+.C .foot { color: #C4BFB7; }
+.C .foot b { color: #8A857D; }
+</style></head><body>
+
+<!-- ============ A 绘本质感 ============ -->
+<div class="wrap"><div class="label">A · 绘本质感（纸、墨、插画主导）</div>
+<div class="phone A">
+  <div class="bar"><span style="width:34px"></span><span class="title">思问岛</span><span class="stars">★ 142</span></div>
+  <div class="body">
+    <div class="hero">
+      <div style="font-size:44px;line-height:1">🐻</div>
+      <h1>思问岛</h1>
+      <p>下午好，小宝贝！今天想学什么呢？</p>
+      <div class="stat">连续 1 天 · 已学 48/761 · 读完 3 篇</div>
+    </div>
+    <div class="task"><div class="h"><span>今日任务</span><span>2/3</span></div>
+      <div class="bar2"><i></i></div>
+      <div class="chips"><span>✓ 学字 3/3</span><span>答题 3/5</span><span>复习 0 个</span></div></div>
+    <div class="grid">
+      <div class="tile hi"><div class="ic"></div><b>学汉字</b><i>字卡 · 笔顺</i></div>
+      <div class="tile"><div class="ic"></div><b>趣味练习</b><i>闯关赚星星</i></div>
+      <div class="tile"><div class="ic"></div><b>今日复习</b><i>记得更牢固</i></div>
+      <div class="tile"><div class="ic"></div><b>我的奖励</b><i>贴纸 · 勋章</i></div>
+      <div class="tile"><div class="ic"></div><b>读一读</b><i>已读 3/56 篇</i></div>
+      <div class="tile"><div class="ic"></div><b>说一说</b><i>看图说话</i></div>
+      <div class="tile"><div class="ic"></div><b>拼音小课堂</b><i>声母 · 韵母</i></div>
+      <div class="tile"><div class="ic"></div><b>家长中心</b><i>学习报告</i></div>
+    </div>
+    <div class="foot">陪着孩子，一起把问题变成答案</div>
+  </div>
+</div></div>
+
+<!-- ============ B 明快玩具 ============ -->
+<div class="wrap"><div class="label">B · 明快玩具（高饱和、粗描边、硬阴影）</div>
+<div class="phone B">
+  <div class="bar"><span style="width:34px"></span><span class="title">思问岛</span><span class="stars">★ 142</span></div>
+  <div class="body">
+    <div class="hero">
+      <div style="font-size:44px;line-height:1">🐻</div>
+      <h1>思问岛</h1>
+      <p>下午好，小宝贝！</p>
+      <div class="stat">连续 1 天 · 已学 48/761</div>
+    </div>
+    <div class="task"><div class="h"><span>今日任务</span><span>2/3</span></div>
+      <div class="bar2"><i></i></div>
+      <div class="chips"><span>✓ 学字 3/3</span><span>答题 3/5</span></div></div>
+    <div class="grid">
+      <div class="tile"><div class="ic"></div><b>学汉字</b><i>字卡 · 笔顺</i></div>
+      <div class="tile"><div class="ic"></div><b>趣味练习</b><i>闯关赚星星</i></div>
+      <div class="tile"><div class="ic"></div><b>今日复习</b><i>记得更牢固</i></div>
+      <div class="tile"><div class="ic"></div><b>我的奖励</b><i>贴纸 · 勋章</i></div>
+      <div class="tile"><div class="ic"></div><b>读一读</b><i>已读 3/56 篇</i></div>
+      <div class="tile"><div class="ic"></div><b>说一说</b><i>看图说话</i></div>
+      <div class="tile"><div class="ic"></div><b>拼音小课堂</b><i>声母 · 韵母</i></div>
+      <div class="tile"><div class="ic"></div><b>家长中心</b><i>学习报告</i></div>
+    </div>
+    <div class="foot">陪着孩子，一起把问题变成答案</div>
+  </div>
+</div></div>
+
+<!-- ============ C 现代克制 ============ -->
+<div class="wrap"><div class="label">C · 现代克制（留白、层级、单一强调色）</div>
+<div class="phone C">
+  <div class="bar"><span style="width:34px"></span><span class="title">思问岛</span><span class="stars">★ 142</span></div>
+  <div class="body">
+    <div class="hero">
+      <h1>思问岛</h1>
+      <p>下午好，小宝贝</p>
+      <div class="stat">连续 1 天 · 已学 48 / 761 · 读完 3 篇</div>
+    </div>
+    <div class="task"><div class="h"><span>今日任务</span><span style="color:#8A857D">2 / 3</span></div>
+      <div class="bar2"><i></i></div>
+      <div class="chips"><span>学字 3/3</span><span>答题 3/5</span><span>复习 0</span></div></div>
+    <div class="grid">
+      <div class="tile hi"><div class="ic"></div><b>学汉字</b><i>字卡 · 笔顺</i></div>
+      <div class="tile"><div class="ic"></div><b>趣味练习</b><i>闯关赚星星</i></div>
+      <div class="tile"><div class="ic"></div><b>今日复习</b><i>记得更牢固</i></div>
+      <div class="tile"><div class="ic"></div><b>我的奖励</b><i>贴纸 · 勋章</i></div>
+      <div class="tile"><div class="ic"></div><b>读一读</b><i>已读 3/56 篇</i></div>
+      <div class="tile"><div class="ic"></div><b>说一说</b><i>看图说话</i></div>
+      <div class="tile"><div class="ic"></div><b>拼音小课堂</b><i>声母 · 韵母</i></div>
+      <div class="tile"><div class="ic"></div><b>家长中心</b><i>学习报告</i></div>
+    </div>
+    <div class="foot"><b>陪着孩子，一起把问题变成答案</b></div>
+  </div>
+</div></div>
+
+</body></html>
