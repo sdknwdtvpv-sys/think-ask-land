@@ -439,7 +439,7 @@
       var pct = learned / g.chars.length * 100;
       var C = 2 * Math.PI * 44;
       var html =
-        '<div class="screen">' +
+        '<div class="screen v4 learn-v4" data-screen="learn">' +
           '<div class="learn-head">' +
             '<span class="learn-ring">' +
               '<svg viewBox="0 0 100 100" aria-hidden="true">' +

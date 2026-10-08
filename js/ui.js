@@ -295,12 +295,16 @@
      孩子点到锁住的模块时,不会看到任何"买东西"的入口。 */
   function lockCard(o) {
     o = o || {};
-    return '<div class="screen"><div class="panel lock-card">' +
-        '<div class="lock-emoji">🔒</div>' +
-        '<h3>这部分内容还没解锁</h3>' +
-        '<p class="parent-note">' + (o.what || "该内容") + '属于<b>完整内容包</b>,当前还没有解锁。</p>' +
+    /* 这一屏由 4 个受限模块共用(拼音/读一读 L3~L5/说一说/打印),
+       所以它也必须走 v4 —— 否则受限模块的观感会突然退回旧版。
+       ⚠️ 合规红线:这里**不能**出现购买按钮。锁定态只做说明 + 指向家长门,
+       购买入口只在家长验证之后(见 js/entitlements.js 的说明)。 */
+    return '<div class="screen v4 lock-v4" data-screen="lock"><div class="panel lock-card">' +
+        '<div class="lock-ico">' + (window.Icons ? Icons.svg("lock") : "") + "</div>" +
+        "<h3>这部分内容还没解锁</h3>" +
+        '<p class="parent-note">' + (o.what || "该内容") + "属于<b>完整内容包</b>,当前还没有解锁。</p>" +
         '<p class="parent-note">请家长到 <b>家长中心 → 完整内容</b> 里查看(那里有一道家长验证)。</p>' +
-        '<button class="btn btn-lg btn-sun" id="lock-go">去家长中心</button>' +
+        '<button class="btn btn-lg" id="lock-go" data-role="primary">去家长中心</button>' +
       "</div></div>";
   }
   function wireLock(view, backHash) {

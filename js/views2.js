@@ -339,7 +339,7 @@
       var due = window.Store.dueChars();
       var learnedN = window.Store.counts().learned;
       view.innerHTML =
-        '<div class="screen">' +
+        '<div class="screen v4 review-v4" data-screen="review">' +
           '<div class="review-info">🧠 <b>记忆小秘密:</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现,复习一次就记得更牢,连续答对 4 次就进入<b>长期记忆</b>啦!</div>' +
           (due.length === 0
             ? '<div class="empty-tip"><span class="big">🎈</span>今天没有要复习的字' + (learnedN ? ",学得真棒!<br>明天再来看看,或者去学新字吧" : "<br>先去学几个新字吧") + "</div>" +
@@ -540,7 +540,7 @@
            见 APP-PLAN.md 8.5 风险 2。 */
         var a = 12 + ((Math.random() * 18) | 0), b = 3 + ((Math.random() * 7) | 0);
         v.innerHTML =
-          '<div class="screen"><div class="gate-box">' +
+          '<div class="screen v4 gate-v4" data-screen="gate"><div class="gate-box">' +
             '<div class="gate-emoji">🧮</div><h3>家长验证</h3>' +
             "<p>为了防止小朋友误操作,请<b>家长</b>回答下面这道题:<br>" +
             "小朋友请叫爸爸妈妈来 🙋</p>" +
@@ -739,7 +739,7 @@
         };
         var reduced = document.documentElement.classList.contains("reduce-motion") ? "true" : "false";
         var html =
-          '<div class="screen">' +
+          '<div class="screen v4 parent-v4" data-screen="parent">' +
             kidPanel() +
             '<div class="stats-grid">' +
               statCard("book", c.learned + " / " + total, "已学汉字") +

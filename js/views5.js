@@ -42,7 +42,7 @@
       var list = scenes();
       var done = window.Store.talkCount ? window.Store.talkCount() : 0;
 
-      var html = '<div class="screen">' +
+      var html = '<div class="screen v4 talk-v4" data-screen="talk">' +
         '<div class="practice-intro">🗣️ 看一张图，说一段话。<b>说一句也行，说三句也行</b> —— ' +
           '这里不打分，好听不好听，爸爸妈妈说了算。' +
           (done ? '已经说过 <b>' + done + "</b> 个场景。" : "") + "</div>" +
@@ -75,7 +75,7 @@
     if (!sc) { App.navigate("#/talk"); return; }
     App.setTopbar("说一说", true);
 
-    view.innerHTML = '<div class="screen talk-stage">' +
+    view.innerHTML = '<div class="screen v4 talk-v4 talk-stage" data-screen="talk-stage">' +
       '<div class="talk-scene-big" id="tk-pic">' + sc.emoji + "</div>" +
       '<button class="talk-sentence" id="tk-say">' + esc(sc.scene) + '<span class="tk-spk">' + Icons.svg("speak") + '</span></button>' +
       '<div class="talk-scaffold"><span class="ts-label">照着问</span>' +

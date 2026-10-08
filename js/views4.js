@@ -39,7 +39,7 @@
   function shell(title, sub, body, toolbar) {
     var d = new Date();
     var date = d.getFullYear() + " 年 " + (d.getMonth() + 1) + " 月 " + d.getDate() + " 日";
-    return '<div class="screen print-screen">' +
+    return '<div class="screen v4 print-screen print-v4" data-screen="print">' +
       '<div class="print-toolbar no-print">' + toolbar + "</div>" +
       '<div class="print-sheet">' +
         '<div class="print-head"><span class="ph-brand">思问岛</span>' +
@@ -73,7 +73,7 @@
             '<div class="qc-desc">' + esc(q.desc) + "</div>" +
             '<div class="qc-foot">约 ' + q.min + " 分钟 · " + esc(q.tag) + "</div></div>";
         }).join("") + "</div>";
-        var bar = '<button class="btn btn-sky" id="pr-do">🖨️ 打印</button>' +
+        var bar = '<button class="btn btn-sky" id="pr-do">' + Icons.svg("print") + '打印</button>' +
           '<button class="btn btn-ghost" id="pr-back">‹ 返回</button>' +
           '<span class="print-hint no-print">建议用 A4 纸,横向打印;沿虚线剪开即可。</span>';
         view.innerHTML = shell(title, "每天抽一张,和孩子一起做", body, bar);
@@ -128,7 +128,7 @@
               '<span><b>' + ws.days + "</b>天在学</span>" +
             "</div>" +
             '<div class="cert-line">家长签名：____________　　日期：____________</div></div>';
-        var barP = '<button class="btn btn-sky" id="pr-do">🖨️ 打印整包</button>' +
+        var barP = '<button class="btn btn-sky" id="pr-do">' + Icons.svg("print") + '打印整包</button>' +
           '<button class="btn btn-ghost" id="pr-back">‹ 返回</button>' +
           '<span class="print-hint no-print">建议 A4 纵向；①② 剪开，③④ 让孩子自己拿着。</span>';
         view.innerHTML = shell(title, nameP + " · " + new Date().getMonth() + 1 + " 月这周", bodyP, barP);
@@ -148,7 +148,7 @@
             "一共拿到 <b>" + ws2.stars + "</b> 颗星，有 <b>" + ws2.days + "</b> 天在认真学。</div>" +
           '<div class="cert-emoji">' + ws2.emoji + "</div>" +
           '<div class="cert-foot">家长签字：____________　　思问岛</div></div>';
-        var barC2 = '<button class="btn btn-sky" id="pr-do">🖨️ 打印奖状</button>' +
+        var barC2 = '<button class="btn btn-sky" id="pr-do">' + Icons.svg("print") + '打印奖状</button>' +
           '<button class="btn btn-ghost" id="pr-back">‹ 返回</button>' +
           '<span class="print-hint no-print">建议 A4 纵向；让孩子自己拿着拍照。' +
           (ws2.learned === 0 ? "（这周还没学新字，先学几个再打更开心）" : "") + "</span>";
@@ -165,7 +165,7 @@
             '<div class="wc-grid"><i></i><i></i><i></i><i></i></div>' +
             '<div class="wc-hint">' + (parts ? parts.join(" + ") : "") + "</div></div>";
         }).join("") + "</div>";
-        var barW = '<button class="btn btn-sky" id="pr-do">🖨️ 打印</button>' +
+        var barW = '<button class="btn btn-sky" id="pr-do">' + Icons.svg("print") + '打印</button>' +
           '<button class="btn btn-ghost" id="pr-back">‹ 返回</button>' +
           scopesHtml(scope, p.g);
         view.innerHTML = shell(title, scopeName(scope, p.g) + " · 共 " + list.length + " 字", bodyW, barW);
@@ -180,7 +180,7 @@
             '<div class="pc-py">' + esc(c.p) + "</div>" +
             '<div class="pc-word">' + esc((c.w || []).slice(0, 2).join(" · ")) + "</div></div>";
         }).join("") + "</div>";
-        var barC = '<button class="btn btn-sky" id="pr-do">🖨️ 打印</button>' +
+        var barC = '<button class="btn btn-sky" id="pr-do">' + Icons.svg("print") + '打印</button>' +
           '<button class="btn btn-ghost" id="pr-back">‹ 返回</button>' +
           scopesHtml(scope, p.g);
         view.innerHTML = shell(title, scopeName(scope, p.g) + " · 共 " + list2.length + " 字", bodyC, barC);

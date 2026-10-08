@@ -115,7 +115,7 @@
       var learnedSet = {};
       window.Store.learnedList().forEach(function (c) { learnedSet[c] = 1; });
 
-      var html = '<div class="screen">' +
+      var html = '<div class="screen v4 pinyin-v4" data-screen="pinyin">' +
         '<div class="practice-intro">🔤 拼音是给汉字注音的符号。这个阶段<b>只要求听和认</b>,不要求默写 —— 点一点,听一听就好。</div>';
 
       /* ---------- 声母 ---------- */
@@ -416,7 +416,7 @@
         };
       });
 
-      var html = '<div class="screen">' +
+      var html = '<div class="screen v4 read-v4" data-screen="read">' +
         '<div class="practice-intro">' + Icons.svg("book") + ' 短文按<b>级别</b>分好了。点字能听读音,读完了还能玩找字游戏。' +
         '已读完 <b>' + window.Store.readCount() + "</b> / " + list.length + " 篇 · 已学 <b>" + learnedN + "</b> 字。</div>";
 
@@ -511,7 +511,7 @@
         }).join("") + "</div>";
       }).join("");
 
-      view.innerHTML = '<div class="screen">' +
+      view.innerHTML = '<div class="screen v4 read-v4" data-screen="story">' +
         '<div class="story-head"><span class="sh-emoji">' + story.emoji + "</span>" +
           '<span class="sh-title">' + esc(story.title) + "</span>" +
           '<span class="lvl-tag">' + esc(story.lvl || "L1") + "</span></div>" +

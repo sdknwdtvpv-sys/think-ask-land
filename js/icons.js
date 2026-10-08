@@ -34,6 +34,8 @@
     target: '<circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="3.4"/>',
     /* 部件:一个圆角方框里竖着分成两半 —— 汉字由部件拼合,这个隐喻最直白 */
     parts: '<rect x="3.6" y="3.6" width="16.8" height="16.8" rx="3.4"/><path d="M12 3.6v16.8"/>',
+    /* 打印机:用于线下物料打印 */
+    print: '<path d="M7 9.4V3.8h10v5.6"/><rect x="3.6" y="9.4" width="16.8" height="7.6" rx="2.4"/><path d="M7 14.6h10v5.6H7z"/>',
     pencil: '<path d="M4 20l1.1-4.2L16.4 4.5a2.15 2.15 0 0 1 3 3L8.2 18.9z"/><path d="M14.6 6.4l3 3"/>',
     grid: '<rect x="3.6" y="3.6" width="16.8" height="16.8" rx="3.4"/><path d="M3.6 12h16.8M12 3.6v16.8"/>',
     check: '<path d="M4.6 12.6l5 5 9.8-11"/>',
