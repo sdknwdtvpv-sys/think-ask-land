@@ -201,7 +201,7 @@ t("埋点模块 beacon.js 已彻底移除", !fs.existsSync(path.join(ROOT, "js",
     !/匿名统计|发送匿名/.test(doc.documentElement.innerHTML), "");
 
   /* 把主要路由走一遍:任何一条路径里新增对外请求都会被抓到 */
-  await until(() => q(".menu-btn") || q("#view .menu-btn"), 9000, "首页渲染");
+  await until(() => q('#view [data-screen="home"]'), 9000, "首页渲染");
   const routes = ["#/home", "#/groups", "#/practice", "#/review", "#/rewards",
     "#/pinyin", "#/read", "#/talk", "#/print?type=pack", "#/parent"];
   for (const r of routes) {

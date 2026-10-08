@@ -17,9 +17,11 @@
    这一个键**故意**读 localStorage 而不是 PlatformStorage:后者在原生壳里是异步的,
    读不到就会闪一下;而它只是可重设的 UI 偏好,不是学习进度。见 views2.js 的同一处注释。 */
 try{if(localStorage.getItem("hanziKids.reduceMotion")==="1")document.documentElement.className+=" reduce-motion";}catch(e){}</script>
+<link rel="stylesheet" href="css/tokens.css?v=2.12.0">
 <link rel="stylesheet" href="css/style.css?v=2.12.0">
 <link rel="stylesheet" href="css/style2.css?v=2.12.0">
 <link rel="stylesheet" href="css/v2.css?v=2.12.0">
+<link rel="stylesheet" href="css/v4.css?v=2.12.0">
 </head>
 <body>
 <div id="scene" aria-hidden="true">
@@ -35,7 +37,7 @@ try{if(localStorage.getItem("hanziKids.reduceMotion")==="1")document.documentEle
   <header id="topbar">
     <button id="btn-back" class="icon-btn" aria-label="返回">‹</button>
     <div id="page-title">思问岛</div>
-    <div id="star-pill" class="star-pill"><span class="star-icon">⭐</span><span id="star-count">0</span></div>
+    <div id="star-pill" class="star-pill"><span class="star-icon"><svg viewBox="0 0 24 24" fill="#D9A227" stroke="#C08A1E" stroke-width="1.2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.9l2.9 5.9 6.5 1-4.7 4.5 1.1 6.5L12 17.7l-5.8 3.1 1.1-6.5L2.6 9.8l6.5-1z"/></svg></span><span id="star-count">0</span></div>
   </header>
   <main id="view"></main>
 </div>

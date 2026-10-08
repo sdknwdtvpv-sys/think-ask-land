@@ -1,0 +1,185 @@
+/* ============================================================
+   思问岛 · v4 视觉层（逐屏迁移中）
+   ============================================================
+   为什么单独一层、还要带 body.v4 开关：
+     v4 是**逐屏推进**的。中央渲染（js/app.js 的 App.render）会按
+     "这一屏是否用了 .screen.v4" 在 body 上切换 .v4 类，于是新版底色与顶栏
+     只作用于**已迁移的屏**，不会污染其余尚未迁移的 14 屏。
+     等全部迁移完，把旧 CSS 与本开关一起删掉即可。
+
+   使用纪律见 css/tokens.css 顶部 —— 尤其这条：
+     **不要给整块卡片上渐变。颜色只出现在小图标与"主行动"上。**
+   ============================================================ */
+
+/* html 的底色也要接管:旧 CSS 把 html 设成了天蓝,body 铺不满时会在边缘露出来 */
+html.v4 { background-color: var(--paper); }
+
+/* 关掉旧版场景装饰(太阳/云/山丘)。
+   它们属于旧视觉语言;新版是干净的暖纸底。
+   若将来想要氛围,应当**有意地**重新设计,而不是继承旧装饰。 */
+body.v4 #scene { display: none; }
+
+/* ---------------- 已迁移屏幕：全局底色与顶栏 ---------------- */
+body.v4 { background: var(--paper); }
+
+body.v4 #topbar {
+  background: rgba(251, 248, 241, .88);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  padding: calc(8px + env(safe-area-inset-top)) var(--s4) var(--s2);
+  gap: var(--s2);
+}
+body.v4 #page-title {
+  font-size: var(--fs-h); font-weight: 800; letter-spacing: .3px; color: var(--ink);
+}
+body.v4 .icon-btn {
+  width: 44px; height: 44px; border-radius: var(--r-sm);
+  background: var(--surface); border: 1px solid var(--line); color: var(--ink-2);
+  font-size: 20px; line-height: 1;
+}
+body.v4 .star-pill {
+  background: var(--surface); border: 1px solid var(--line);
+  color: var(--ink-2); box-shadow: none;
+  padding: 5px var(--s3) 5px 9px; border-radius: var(--r-pill);
+  font-size: var(--fs-sm); font-weight: 700;
+}
+body.v4 .star-pill svg { width: 14px; height: 14px; }
+body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
+
+.screen.v4 { background: var(--paper); min-height: 100dvh; padding: 0 0 var(--s6); }
+
+/* ---------------- 首页 ---------------- */
+.home-v4 .pad { padding-left: var(--s5); padding-right: var(--s5); }
+
+/* 问候区 */
+.home-v4 .v4-hello { padding: var(--s2) var(--s5) var(--s4); }
+.home-v4 .v4-hello h1 { font-size: var(--fs-title); font-weight: 800; letter-spacing: .2px; }
+.home-v4 .v4-hello p { font-size: var(--fs-body); color: var(--ink-2); margin-top: var(--s1); }
+.home-v4 .v4-meta {
+  display: flex; gap: var(--s3); font-size: var(--fs-sm); color: var(--ink-3);
+  padding: 0 var(--s5) var(--s5);
+}
+.home-v4 .v4-meta b { color: var(--ink-2); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* 多孩子标识：只在有两个以上档案时出现 */
+.home-v4 .kid-chip {
+  display: inline-flex; align-items: center; gap: var(--s1);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-pill);
+  padding: 4px var(--s3); font-size: var(--fs-sm); color: var(--ink-2); font-weight: 700;
+  margin-bottom: var(--s3);
+}
+
+/* ---------------- 主角：今天的字 ---------------- */
+.home-v4 .v4-today {
+  margin: 0 var(--s5) var(--s5); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-xl);
+  padding: var(--s5) var(--s5) var(--s4); box-shadow: var(--e1);
+}
+.home-v4 .v4-cap { display: flex; align-items: baseline; justify-content: space-between; }
+.home-v4 .v4-cap b { font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
+.home-v4 .v4-cap span { font-size: var(--fs-xs); color: var(--ink-3); }
+.home-v4 .v4-tian {
+  width: 168px; height: 168px; margin: var(--s4) auto var(--s3); position: relative;
+  border: 1px solid var(--line-2); border-radius: var(--r);
+}
+.home-v4 .v4-tian::before, .home-v4 .v4-tian::after {
+  content: ""; position: absolute;
+  background: repeating-linear-gradient(90deg, var(--line) 0 5px, transparent 5px 11px);
+}
+.home-v4 .v4-tian::before { left: 50%; top: 12px; bottom: 12px; width: 1px; }
+.home-v4 .v4-tian::after {
+  top: 50%; left: 12px; right: 12px; height: 1px;
+  background: repeating-linear-gradient(0deg, var(--line) 0 5px, transparent 5px 11px);
+}
+.home-v4 .v4-tian i {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-style: normal; font-size: 108px; line-height: 1; color: var(--ink);
+}
+.home-v4 .v4-py {
+  text-align: center; font-size: 20px; font-weight: 700; color: var(--primary); letter-spacing: 1px;
+}
+.home-v4 .v4-go {
+  display: flex; align-items: center; justify-content: center; gap: var(--s2);
+  width: 100%; margin-top: var(--s4); padding: var(--s3) var(--s4);
+  background: var(--primary); color: var(--on-primary);
+  border-radius: var(--r); font-size: var(--fs-body); font-weight: 800; letter-spacing: .5px;
+}
+.home-v4 .v4-go:active { transform: scale(.985); }
+.home-v4 .v4-allchars {
+  display: block; width: 100%; margin-top: var(--s3);
+  font-size: var(--fs-sm); color: var(--ink-3); text-align: center; padding: var(--s1);
+}
+.home-v4 .v4-done {
+  display: flex; align-items: center; justify-content: center; gap: var(--s2);
+  padding: var(--s6) 0; font-size: var(--fs-h); font-weight: 800; color: var(--ink-2);
+}
+.home-v4 .v4-done .ico { width: 22px; height: 22px; color: var(--gold); }
+
+/* ---------------- 今日任务 ---------------- */
+.home-v4 .v4-task {
+  display: block; width: calc(100% - var(--s5) * 2); text-align: left;
+  margin: 0 var(--s5) var(--s5); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s4);
+}
+.home-v4 .v4-th { display: flex; align-items: baseline; justify-content: space-between; }
+.home-v4 .v4-th b { font-size: var(--fs-h); font-weight: 800; }
+.home-v4 .v4-th span { font-size: var(--fs-sm); font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.home-v4 .v4-track {
+  display: block; height: 6px; background: var(--paper-2); border-radius: var(--r-pill);
+  margin: var(--s3) 0 var(--s2); overflow: hidden;
+}
+.home-v4 .v4-track i { display: block; height: 100%; background: var(--primary); border-radius: var(--r-pill); }
+.home-v4 .v4-tsub { display: block; font-size: var(--fs-sm); color: var(--ink-2); }
+
+/* ---------------- 其他玩法：中性卡 + 彩色小图标 ---------------- */
+.home-v4 .v4-sec { padding: 0 var(--s5) var(--s3); font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
+.home-v4 .v4-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3);
+  padding: 0 var(--s5) var(--s5);
+}
+.home-v4 .v4-tile {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--s2);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  padding: var(--s4); text-align: left;
+}
+.home-v4 .v4-tile:active { transform: scale(.98); }
+.home-v4 .v4-tile b { font-size: var(--fs-body); font-weight: 700; color: var(--ink); }
+.home-v4 .v4-tile i { font-style: normal; font-size: var(--fs-sm); color: var(--ink-3); }
+.home-v4 .v4-ic {
+  width: 34px; height: 34px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.home-v4 .v4-ic .ico { width: 20px; height: 20px; }
+/* 分类色只落在图标底色与线条上 */
+.home-v4 .v4-ic.t-amber { background: #FBF3DF; color: var(--t-amber); }
+.home-v4 .v4-ic.t-mint  { background: #EAF4F0; color: var(--t-mint); }
+.home-v4 .v4-ic.t-gold  { background: #FBF3DF; color: var(--gold); }
+.home-v4 .v4-ic.t-sky   { background: #EEF3F8; color: var(--t-sky); }
+.home-v4 .v4-ic.t-plum  { background: #F5F0FA; color: var(--t-plum); }
+.home-v4 .v4-ic.t-rose  { background: #FBF0F3; color: var(--t-rose); }
+.home-v4 .v4-ic.t-slate { background: #EFEAE0; color: var(--t-slate); }
+
+/* 复习待办的小角标 */
+.home-v4 .v4-tile { position: relative; }
+.home-v4 .v4-due {
+  position: absolute; top: var(--s3); right: var(--s3);
+  min-width: 20px; height: 20px; padding: 0 5px; border-radius: var(--r-pill);
+  background: var(--primary-bg); color: var(--primary);
+  font-size: var(--fs-xs); font-weight: 800; line-height: 20px; text-align: center;
+}
+
+/* ---------------- 家长中心：整行、低调 ---------------- */
+.home-v4 .v4-parent {
+  display: flex; align-items: center; gap: var(--s3);
+  margin: 0 var(--s5) var(--s6); padding: var(--s4);
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r);
+}
+.home-v4 .v4-parent b { flex: 1; font-size: var(--fs-body); font-weight: 700; color: var(--ink-2); }
+.home-v4 .v4-parent i { font-style: normal; font-size: var(--fs-sm); color: var(--ink-3); }
+
+/* ---------------- 页脚 ---------------- */
+.home-v4 .v4-foot {
+  text-align: center; font-size: var(--fs-xs); color: var(--ink-3);
+  line-height: var(--lh-loose); padding: 0 var(--s5) var(--s8);
+}
+.home-v4 .v4-foot a { color: var(--ink-2); }

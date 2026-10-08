@@ -72,7 +72,7 @@ const BENIGN = [
 
   try {
     await until(() => win.App && win.CharDB && win.Store, 15000, "应用脚本加载");
-    await until(() => doc.querySelector("#view .home-title"), 9000, "首页渲染");
+    await until(() => doc.querySelector('#view [data-screen="home"]'), 9000, "首页渲染");
     for (let i = 0; i < 5; i++) {
       const b = doc.querySelector("#modal-root .modal-mask #modal-ok");
       if (!b) break;

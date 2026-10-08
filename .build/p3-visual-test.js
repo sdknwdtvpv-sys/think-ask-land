@@ -40,9 +40,10 @@ function check(name, cond, extra) {
       return 0.2126 * m[0] + 0.7152 * m[1] + 0.0722 * m[2];
     }
     function ratio(a, b) { const l1 = lum(a), l2 = lum(b); const hi = Math.max(l1, l2), lo = Math.min(l1, l2); return (hi + 0.05) / (lo + 0.05); }
-    const note = document.querySelector(".home-sub");
-    const paper = getComputedStyle(document.querySelector(".menu-btn")).backgroundColor;
-    return { text: getComputedStyle(note).color, paper: "rgb(255, 250, 240)", r: +ratio(getComputedStyle(note).color, "rgb(255, 250, 240)").toFixed(2) };
+    const note = document.querySelector('[data-meta="home"]');
+    const paper = getComputedStyle(document.querySelector('[data-screen="home"] [data-go]')).backgroundColor;
+    /* 底色据实从卡片上取，不再写死 —— 改版换底色不该让对比度断言失真 */
+    return { text: getComputedStyle(note).color, paper: paper, r: +ratio(getComputedStyle(note).color, paper).toFixed(2) };
   });
   check("次要文字对比度达 WCAG AA (≥4.5:1)", contrast.r >= 4.5, contrast.text + " on 纸卡 = " + contrast.r + ":1");
 

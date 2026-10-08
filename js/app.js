@@ -90,6 +90,14 @@
       window.scrollTo(0, 0);
       try {
         def.render(r.params, view);
+        /* 迁移期开关:v4 是逐屏推进的。按"这一屏是否用了 .screen.v4"在 body 上
+           切换主题类,新版底色与顶栏就只作用于**已迁移的屏**,不污染其余 14 屏。
+           全部迁移完成后,把这个开关连同旧 CSS 一起删掉。 */
+        var isV4 = !!view.querySelector(".screen.v4");
+        document.body.classList.toggle("v4", isV4);
+        /* 令牌与 html 底色都挂在 html.v4 上(见 css/tokens.css 的说明),
+           所以要一并切换,否则边缘会露出旧版的天蓝底。 */
+        document.documentElement.classList.toggle("v4", isV4);
       } catch (e) {
         console.error("渲染出错:", r.name, e);
         view.innerHTML = '<div class="empty-tip"><span class="big">😵</span>哎呀,出了点小问题<br>返回首页重试吧</div>';
@@ -241,70 +249,72 @@
           '<span class="kid-emoji">' + me.emoji + "</span>" + esc(me.name) + "的进度 ›</button>";
       };
 
+      /* ---------- v4 新版首页 ----------
+         三处结构变化:
+           ① 「今天的字」升为整屏唯一主角 —— 学汉字不再是 8 个等权色块之一
+           ② 颜色从整块卡片收进小图标 —— 旧版 8 块 8 色等于没有重点
+           ③ 问候/统计/任务不再各自成段,信息更密、留白更敢 */
+      var nx = null, nxGi = 0, nxIdx = 0;
+      window.CharDB.GROUPS.some(function (g, gi) {
+        for (var k = 0; k < g.chars.length; k++) {
+          var cx = g.chars[k];
+          if (!(st.chars[cx.c] && st.chars[cx.c].learned)) { nx = cx; nxGi = gi; nxIdx = k; return true; }
+        }
+        return false;
+      });
+      var nxGo = "#/card?g=" + nxGi + "&i=" + nxIdx;
+      var tile = function (go, icon, label, sub, tone) {
+        return '<button class="v4-tile" data-go="' + go + '">' +
+          '<span class="v4-ic t-' + tone + '">' + Icons.svg(icon) + "</span>" +
+          "<b>" + label + "</b><i>" + sub + "</i></button>";
+      };
+
       view.innerHTML =
-        '<div class="screen">' +
-          '<div class="home-hero">' +
+        '<div class="screen v4 home-v4" data-screen="home">' +
+          '<div class="v4-hello">' +
             (kidChip() ? '<div class="kid-chip-row">' + kidChip() + "</div>" : "") +
-            '<div class="home-title">思问岛</div>' +
-            '<div class="home-sub">' + greet() + ",小宝贝!今天想学什么呢?</div>" +
-            '<div class="home-meta">' +
-              "<span>🔥 连续 <b>" + st.streak + "</b> 天</span>" +
-              "<span>📚 已学 <b>" + c.learned + "</b>/" + total + "</span>" +
-              (rd && rd.read ? "<span>" + Icons.svg("book") + " 读完 <b>" + rd.read + "</b> 篇</span>" : "") +
-            "</div>" +
+            "<h1>" + greet() + "，小宝贝</h1>" +
+            "<p>今天想学点什么呢？</p>" +
           "</div>" +
-          '<button class="today-task" data-go="' + taskGo + '">' +
-            '<span class="tt-head">' + Icons.svg("flag") + (allDone ? "今日任务全部完成!" : "今日任务") +
-              '<span class="tt-count">' + doneN + "/3</span></span>" +
-            '<span class="tt-bar"><i style="width:' + Math.round(doneN / 3 * 100) + '%"></i></span>' +
-            '<span class="tt-items">' +
-              chip("book", "学字 " + tLearn + "/" + gLearn, tLearn >= gLearn) +
-              chip("pencil", "答题 " + tQuiz + "/" + gQuiz, tQuiz >= gQuiz) +
-              chip("refresh", "复习 " + tDue + " 个", tDue === 0) +
-            "</span>" +
+          '<div class="v4-meta" data-meta="home">' +
+            "<span>连续 <b>" + st.streak + "</b> 天</span>" +
+            "<span>已学 <b>" + c.learned + "</b>/" + total + "</span>" +
+            (rd && rd.read ? "<span>读完 <b>" + rd.read + "</b> 篇</span>" : "") +
+          "</div>" +
+          /* 主角:今天的字 */
+          '<div class="v4-today">' +
+            (nx
+              ? '<div class="v4-cap"><b>今天学这个</b><span>第 ' + (c.learned + 1) + " 个 · " + esc(window.CharDB.GROUPS[nxGi].name) + "</span></div>" +
+                '<div class="v4-tian"><i>' + esc(nx.c) + "</i></div>" +
+                '<div class="v4-py">' + esc(nx.p) + "</div>" +
+                '<button class="v4-go" data-go="' + nxGo + '">开始学这个字 <span>→</span></button>' +
+                '<button class="v4-allchars" data-go="#/groups">看全部 ' + total + " 个字 ›</button>"
+              : '<div class="v4-cap"><b>全部学完</b></div>' +
+                '<div class="v4-done">' + Icons.svg("trophy") + "761 个字都学完啦!</div>") +
+          "</div>" +
+          /* 今日任务:一行信息 + 一条进度(旧版用"进度条 + 2/3 + 三个 chip"说了三遍) */
+          '<button class="v4-task" data-task="today" data-go="' + taskGo + '">' +
+            '<span class="v4-th"><b>' + (allDone ? "今日任务全部完成!" : "今日任务") + "</b><span>" + doneN + " / 3</span></span>" +
+            '<span class="v4-track"><i style="width:' + Math.round(doneN / 3 * 100) + '%"></i></span>' +
+            '<span class="v4-tsub">学字 ' + tLearn + "/" + gLearn + " · 答题 " + tQuiz + "/" + gQuiz + " · 复习 " + tDue + "</span>" +
           "</button>" +
-          '<div class="menu-grid">' +
-            '<button class="menu-btn c-sky" data-go="#/groups">' +
-              '<span class="menu-ico">' + Icons.svg("book") + '</span><span class="menu-label">学汉字</span>' +
-              '<span class="menu-sub">字卡 · 读音 · 笔顺</span>' +
-              '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
-            '<button class="menu-btn c-sun" data-go="#/practice">' +
-              '<span class="menu-ico">' + Icons.svg("game") + '</span><span class="menu-label">趣味练习</span>' +
-              '<span class="menu-sub">闯关答题赚星星</span>' +
-              '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
-            '<button class="menu-btn c-coral" data-go="#/review">' +
-              '<span class="menu-ico">' + Icons.svg("refresh") + '</span><span class="menu-label">今日复习</span>' +
-              '<span class="menu-sub">记得更牢固</span>' +
-              (due > 0 ? '<span class="due-badge">' + due + "</span>" : "") +
-              '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
-            '<button class="menu-btn c-grape" data-go="#/rewards">' +
-              '<span class="menu-ico">' + Icons.svg("trophy") + '</span><span class="menu-label">我的奖励</span>' +
-              '<span class="menu-sub">贴纸 · 勋章墙</span>' +
-              '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
-            '<button class="menu-btn c-mint" data-go="#/read">' +
-              '<span class="menu-ico">' + Icons.svg("book") + '</span><span class="menu-label">读一读</span>' +
-              '<span class="menu-sub">' + (rd
-                ? (rd.read ? "已读 " + rd.read + "/" + rd.total + " 篇" : "短故事 · 找字") +
-                  (rd.week ? " · 本周 +" + rd.week : "") +
-                  (rd.cur ? " · " + rd.cur : "")
-                : "短故事 · 找字") + '</span>' +
-              '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
-            '<button class="menu-btn c-peach" data-go="#/talk">' +
-              '<span class="menu-ico">' + Icons.svg("speak") + '</span><span class="menu-label">说一说</span>' +
-              '<span class="menu-sub">' + (window.Store.talkCount && window.Store.talkCount()
-                ? "说过 " + window.Store.talkCount() + " 个场景" : "看图说话 · 录下来听听") + '</span>' +
-              '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
-            '<button class="menu-btn c-lilac" data-go="#/pinyin">' +
-              '<span class="menu-ico">' + Icons.svg("speak") + '</span><span class="menu-label">拼音小课堂</span>' +
-              '<span class="menu-sub">声母 · 韵母 · 声调</span>' +
-              '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
-            '<button class="menu-btn c-sand wide" data-go="#/parent">' +
-              '<span class="menu-ico">' + Icons.svg("parent") + "</span>" +
-              '<span><span class="menu-label" style="font-size:18px">家长中心</span>' +
-              '<span class="menu-sub">学习报告 · 复习设置</span></span>' +
-              '<span class="menu-arrow">' + Icons.svg("right") + "</span></button>" +
+          '<div class="v4-sec">其他玩法</div>' +
+          '<div class="v4-grid">' +
+            tile("#/practice", "game", "趣味练习", "闯关答题赚星星", "amber") +
+            tile("#/review", "refresh", "今日复习", due > 0 ? due + " 个字等着" : "暂时没有待复习", "mint") +
+            tile("#/rewards", "trophy", "我的奖励", "贴纸 · 勋章墙", "gold") +
+            tile("#/read", "book", "读一读",
+              rd ? (rd.read ? "已读 " + rd.read + "/" + rd.total + " 篇" : "短故事 · 找字") : "短故事 · 找字", "sky") +
+            tile("#/talk", "speak", "说一说",
+              (window.Store.talkCount && window.Store.talkCount())
+                ? "说过 " + window.Store.talkCount() + " 个场景" : "看图说话 · 录下来听听", "plum") +
+            tile("#/pinyin", "pinyin", "拼音小课堂", "声母 · 韵母 · 声调", "rose") +
           "</div>" +
-          '<div class="home-foot">陪着孩子,一起把问题变成答案<br>适合 3~6 岁 · 每天 10 分钟 · ' + Icons.svg("speak") + ' 打开声音<br>' +
+          '<div class="v4-parent" data-go="#/parent">' +
+            '<span class="v4-ic t-slate">' + Icons.svg("parent") + "</span>" +
+            "<b>家长中心</b><i>学习报告 · 设置 ›</i>" +
+          "</div>" +
+          '<div class="v4-foot">陪着孩子,一起把问题变成答案<br>适合 3~6 岁 · 每天 10 分钟 · ' +
             '<a class="foot-link" href="privacy.html" target="_blank" rel="noopener">隐私说明</a></div>' +
         "</div>";
       view.querySelectorAll("[data-go]").forEach(function (b) {

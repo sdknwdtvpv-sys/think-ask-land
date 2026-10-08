@@ -108,11 +108,11 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
   /* ---------- 3) 首页接入 ---------- */
   await win.App.navigate("#/home"); await sleep(500);
   t("首页显示已读篇数,读一读入口显示进度", () => {
-    const meta = doc.querySelector(".home-meta");
-    if (!meta) return FAIL("没有 .home-meta");
+    const meta = doc.querySelector('[data-meta="home"]');
+    if (!meta) return FAIL("没有首页统计行");
     const g = RD.progress();
     if (meta.textContent.indexOf("读完 " + g.read + " 篇") === -1) return FAIL("home-meta 没有阅读数:" + meta.textContent);
-    const sub = Array.from(doc.querySelectorAll(".menu-btn")).filter((b) => b.getAttribute("data-go") === "#/read")[0];
+    const sub = doc.querySelector('[data-screen="home"] [data-go="#/read"]');
     if (!sub) return FAIL("找不到读一读入口");
     if (sub.textContent.indexOf("已读 " + g.read + "/" + g.total) === -1) return FAIL("入口副标题无进度:" + sub.textContent);
     return PASS("首页口径一致:" + g.read + "/" + g.total);

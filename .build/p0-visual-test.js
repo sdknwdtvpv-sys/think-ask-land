@@ -37,7 +37,7 @@ function check(name, cond, extra) {
   // 1. 字体
   const font = await page.evaluate(async () => {
     await document.fonts.ready;
-    const t = document.querySelector(".home-title");
+    const t = document.querySelector('[data-screen="home"] h1');
     return {
       has: document.fonts.check("20px KuaiLe"),
       family: getComputedStyle(t).fontFamily,
@@ -64,8 +64,8 @@ function check(name, cond, extra) {
 
   // 3. 图标系统
   const icons = await page.evaluate(() => {
-    const uses = Array.from(document.querySelectorAll(".menu-ico svg use"));
-    const btns = document.querySelectorAll(".menu-btn").length;   /* 入口卡数量会随功能增加,断言不写死 */
+    const uses = Array.from(document.querySelectorAll('[data-screen="home"] [data-go] svg use'));
+    const btns = document.querySelectorAll('[data-screen="home"] [data-go]').length;   /* 入口数量会随功能增加,断言不写死 */
     const bad = uses.filter(u => !document.getElementById((u.getAttribute("href") || "").slice(1)));
     const sprite = !!document.getElementById("ico-sprite");
     const syms = document.querySelectorAll("#ico-sprite symbol").length;
@@ -94,7 +94,7 @@ function check(name, cond, extra) {
 
   // 5. 今日任务条
   const task = await page.evaluate(() => {
-    const t = document.querySelector(".today-task");
+    const t = document.querySelector('[data-task="today"]');
     if (!t) return null;
     const r = t.getBoundingClientRect();
     const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
@@ -104,9 +104,9 @@ function check(name, cond, extra) {
 
   // 6. 材质与令牌
   const mat = await page.evaluate(() => {
-    const g = document.querySelector(".group-card") || document.querySelector(".today-task");
+    const g = document.querySelector(".group-card") || document.querySelector('[data-task="today"]');
     const cs = getComputedStyle(g);
-    const menu = document.querySelector(".menu-btn");
+    const menu = document.querySelector('[data-screen="home"] [data-go]');
     return { bg: cs.backgroundColor, radius: getComputedStyle(menu).borderRadius, shadow: cs.boxShadow.slice(0, 40), border: cs.borderTopWidth };
   });
   check("纸卡材质生效(纸色+描边+双层投影)", /255, 250, 240/.test(mat.bg) && parseFloat(mat.border) >= 1, mat.bg + " / " + mat.border);

@@ -71,8 +71,9 @@ const BENIGN = [
     })());
 
     /* 2. 首页 + 欢迎弹窗 */
-    await until(() => q("#view .home-title"), 8000, "首页渲染");
-    ok("首页渲染", q(".home-title").textContent.includes("思问岛"));
+    /* 用语义钩子 [data-screen=home]，不再绑表现层类名 —— 改版不该弄坏测试 */
+    await until(() => q('#view [data-screen="home"]'), 8000, "首页渲染");
+    ok("首页渲染", q("#view [data-screen=home]").querySelector("h1") && q("#page-title").textContent.includes("思问岛"));
     await until(() => q("#modal-root .modal-mask"), 5000, "欢迎弹窗").catch(() => {});
     if (q("#modal-root .modal-mask")) { click(q("#modal-ok")); await sleep(200); ok("首次欢迎弹窗可关闭", !q("#modal-root .modal-mask")); }
 

@@ -52,9 +52,9 @@ function check(name, cond, extra) {
     const f = Array.from(document.fonts).map(x => x.family + ":" + x.status);
     return {
       title: document.title,
-      homeTitle: document.querySelector(".home-title") ? document.querySelector(".home-title").textContent : null,
-      cards: document.querySelectorAll(".menu-btn").length,        /* 入口卡数量随功能增长,断言不写死 */
-      taskCard: !!document.querySelector(".today-task[data-go]"),
+      homeScreen: !!document.querySelector('[data-screen="home"]'),
+      cards: document.querySelectorAll('[data-screen="home"] [data-go]').length,   /* 入口数量随功能增长,断言不写死 */
+      taskCard: !!document.querySelector('[data-task="today"][data-go]'),
       mascot: !!document.querySelector(".home-mascot .mascot"),
       scene: !!document.getElementById("scene"),
       font: document.fonts.check("20px KuaiLe"),

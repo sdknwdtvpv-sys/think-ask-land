@@ -18,7 +18,7 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
   function click(el) { el.dispatchEvent(new win.MouseEvent("click", { bubbles: true, cancelable: true })); }
 
   await sleep(1500);
-  console.log("1. 首页渲染:", !!q(".home-title"));
+  console.log("1. 首页渲染:", !!q('[data-screen="home"]'));
   console.log("2. 欢迎弹窗出现:", !!q("#modal-root .modal-mask"));
 
   // 场景A: 弹窗未关闭时直接点卡片(jsdom无命中测试,仅验证hash链路)

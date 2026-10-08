@@ -45,6 +45,11 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   font-weight: 800; font-size: 16px; box-shadow: 0 3px 0 rgba(74, 68, 88, .12);
 }
 .star-pill .star-icon { font-size: 17px; }
+/* 星标从 emoji 换成内联 SVG 后必须显式给尺寸:
+   旧的 .star-icon 只设了 font-size(emoji 靠字号撑大),而 <svg> 没有宽高,
+   结果在未迁移的旧主题里星星直接不显示 —— 实测在汉字小岛地图上看到的
+   只有一个光秃秃的数字。注意:这条是**全局**的,两套主题都要能显示。 */
+.star-pill .star-icon svg { width: 17px; height: 17px; display: block; }
 #star-count.pop { animation: pop .45s; }
 @keyframes pop { 30% { transform: scale(1.5); color: #ff9f1c; } }
 
