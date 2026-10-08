@@ -161,14 +161,14 @@ html.v4 .t-plum  { background: #F5F0FA; color: var(--t-plum); }
 html.v4 .t-rose  { background: #FBF0F3; color: var(--t-rose); }
 html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 
-/* 复习待办的小角标 */
+/* 首页小卡需要 relative 定位（图标/文字的定位基准） */
 .home-v4 .v4-tile { position: relative; }
-.home-v4 .v4-due {
-  position: absolute; top: var(--s3); right: var(--s3);
-  min-width: 20px; height: 20px; padding: 0 5px; border-radius: var(--r-pill);
-  background: var(--primary-bg); color: var(--primary);
-  font-size: var(--fs-xs); font-weight: 800; line-height: 20px; text-align: center;
-}
+/* 【已删除】.home-v4 .v4-due —— 这是我写首页时"设想"的待办角标，
+   但 tile() 生成函数并没有 due 参数，也就没有对应节点，属于死规则。
+   按"只做视觉层、不改 JS 行为"的纪律删除。
+   若要真做这个角标，需要改 tile() 的签名与调用点（属于功能新增，留待产品决策）。
+   注：今日待复习数已经显示在首页"今日任务"卡里（「学字 3/3 · 答题 0/5 · 复习 0」），
+   信息本身没有丢失。 */
 
 /* ---------------- 家长中心：整行、低调 ---------------- */
 .home-v4 .v4-parent {
@@ -666,7 +666,6 @@ html.v4 .lock-card .btn { margin-top: var(--s4); width: 100%; min-height: 52px; 
    先**统一去掉硬阴影与内高光、换中性底**，之后按需单独调。
    （逐个截图看效果的收益，在这一点上已经很小了。）
    ============================================================ */
-html.v4 .status-chip,
 html.v4 .stat-card,
 html.v4 .tone-card, html.v4 .tone-card.on,
 html.v4 .tone-fam-item,
@@ -738,9 +737,8 @@ html.v4 .read-progress {
   border: 1px solid var(--line); border-radius: var(--r);
 }
 /* 进度条:旧版是薄荷绿渐变 */
-html.v4 .lvl-bar i,
-html.v4 .read-card .rc-bar i,
-html.v4 .pcard .pc-bar i { background: var(--ok); }
+/* 读一读的进度条（.lvl-bar / .pc-bar 是我猜的，代码里没有，已删） */
+html.v4 .read-card .rc-bar i { background: var(--ok); }
 
 /* ============================================================
    [hidden] 必须真的隐藏
@@ -815,9 +813,7 @@ html.v4 .stat-num {
 html.v4 .stat-label { font-size: var(--fs-sm); color: var(--ink-3); }
 
 /* 7 天柱状图:旧版是橙黄渐变条 */
-html.v4 .week-bars i, html.v4 .wb-bar {
-  background: var(--primary); border-radius: var(--r-sm) var(--r-sm) 0 0;
-}
+/* （此处的 .week-bars i / .wb-bar 是猜错的类名，已删 —— 真名是 .wbar，见下方规则） */
 
 /* 修正两处：
    ① .kid-row.active 的蓝框来自 `box-shadow: 0 0 0 2px var(--sky) inset`
@@ -849,16 +845,22 @@ html.v4 {
 }
 
 /* 进度条：旧版蓝/绿/黄各一套，统一用强调色 */
-html.v4 .bar-fill, html.v4 .tt-bar i, html.v4 .rp-bar > i,
-html.v4 .cause-bar > i, html.v4 .rt-bar i, html.v4 .group-bar-fill,
-html.v4 .ab-bar > i {
+/* 只列**代码里真实存在**的进度条类（原先还写了 .bar-fill/.tt-bar/
+   .group-bar-fill，经核实这三个类名在 js/ 里根本不存在 —— 死规则，已删） */
+html.v4 .rp-bar > i,
+html.v4 .cause-bar > i,
+html.v4 .rt-bar i,
+html.v4 .ab-bar > i,
+html.v4 .rc-bar > i {
   background: var(--primary);
 }
 /* 作答进度点：对/错沿用"成功绿 / 中性"，当前题用强调色 */
-html.v4 .dot { background: var(--paper-2); }
-html.v4 .dot.done-ok { background: var(--ok); }
-html.v4 .dot.done-bad { background: #E8B4BE; }
-html.v4 .dot.on { background: var(--primary); }
+/* 答题进度点：真名是 .hud-tick，状态由 JS 加 .ok/.bad
+   （我原先写的 .dot.done-ok/.done-bad **永远不会匹配**，两个状态一直没上色） */
+/* 默认点是**白色**（在强调色进度条上做"挖空"感），不是纸色 —— 纸色在色条上会发灰 */
+html.v4 .hud-tick { background: #fff; box-shadow: 0 0 0 1.5px var(--line); }
+html.v4 .hud-tick.ok { background: var(--ok); box-shadow: 0 0 0 1.5px #fff; }
+html.v4 .hud-tick.bad { background: var(--warm-wrong); box-shadow: 0 0 0 1.5px #fff; }
 html.v4 .hud-tick.ok { background: var(--ok); }
 
 /* 零散的硬编码旧色（不在变量体系里，只能逐个点名） */
