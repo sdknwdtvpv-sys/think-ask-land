@@ -953,3 +953,30 @@ html.v4 .tt-chip {
 html.v4 .card-pos { color: var(--ink-3); }        /* 旧: #7a7391 紫灰 */
 html.v4 .tt-chip { color: var(--ink-3); }
 html.v4 .rc-bar > i, html.v4 .ab-bar > i { background: var(--primary); }
+
+/* ============================================================
+   可打印物料（识字卡 / 描红纸 / 亲子任务卡 / 奖状 / 周物料包）
+   ------------------------------------------------------------
+   这是**给纸用的产物**，配色原则与屏幕不同：
+     · 保留纸张白底与虚线边框（打印时不丢线、省墨）
+     · 但品牌字与拼音要跟新版一致（原来用的是旧蓝 --sky-deep）
+     · 描红淡字与格子线改成暖灰（原来是冷灰 #cfd6e0/#c9cfd8，
+       在暖纸色系里显得"脏"）
+   ============================================================ */
+html.v4 .ph-brand,
+html.v4 .pc-py,
+html.v4 .wc-py { color: var(--primary); }
+/* 描红淡字:孩子要沿着它描,太淡看不见、太深像已写好 —— 暖灰 */
+html.v4 .wc-char { color: #DCD5C7; }
+html.v4 .wc-grid i { border-color: #DCD5C7; }
+/* 虚线边框:旧版用 --line-strong(紫灰),改暖灰 */
+html.v4 .pcard,
+html.v4 .write-cell,
+html.v4 .quest-card { border-color: var(--line-2); }
+html.v4 .pack-sec { border-bottom-color: var(--line-2); }
+html.v4 .print-scope { border-color: var(--line); }
+html.v4 .print-sheet { box-shadow: none; border: 1px solid var(--line); }
+/* 奖状标题:旧版硬编码 #b8860b(darkgoldenrod)。
+   打印要比屏幕更深才看得清,所以不用 --gold 而用更深的金。 */
+html.v4 .cert-title { color: #A87A18; }
+html.v4 .cert-box { background: var(--paper-2); }
