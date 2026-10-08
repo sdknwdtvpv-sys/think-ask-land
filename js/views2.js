@@ -23,25 +23,27 @@
       /* 错题重练:孩子答错过的字单独成池,下一轮会针对各自的错因出题 */
       var wrongs = DB.errorPool();
       var wrongCard = '<button class="scope-card' + (wrongs.length < 4 ? " disabled" : "") + '" data-scope="wrong">' +
-        '<span class="scope-emoji">🎯</span><span><span class="scope-name">错题重练</span>' +
+        '<span class="scope-ico t-rose">' + Icons.svg("target") + '</span><span><span class="scope-name">错题重练</span>' +
         '<span class="scope-meta">' + (wrongs.length < 4 ? "攒够 4 个错过的字就能专项突破(已有 " + wrongs.length + " 个)" : "共 " + wrongs.length + " 个字,按错因重点练") + "</span></span>" +
         '<span class="scope-go">›</span></button>';
       var html =
-        '<div class="screen">' +
-          '<div class="practice-intro">🎮 每轮 10 道题:听词语选字、听写单字、看字选图、看字选拼音、看拼音选字、听音辨调。答对 1 题得 1 颗星,全对还有奖励!</div>' +
-          '<div class="section-title">📚 学过多少练多少</div>' +
+        '<div class="screen v4 practice-v4" data-screen="practice">' +
+          /* 去掉正文里的 emoji:它在句子里只是装饰,却会把整屏拉回"网页感" */
+          '<div class="practice-intro">每轮 10 道题:听词语选字、听写单字、看字选图、看字选拼音、看拼音选字、听音辨调。答对 1 题得 1 颗星,全对还有奖励!</div>' +
+          '<div class="section-title">' + Icons.svg("book") + '学过多少练多少</div>' +
           '<div class="scope-list">' +
           '<button class="scope-card' + (learned.length < 4 ? " disabled" : "") + '" data-scope="learned">' +
-            '<span class="scope-emoji">🌟</span><span><span class="scope-name">我学过的字</span>' +
+            '<span class="scope-ico t-mint">' + Icons.svg("star") + '</span><span><span class="scope-name">我学过的字</span>' +
             '<span class="scope-meta">' + (learned.length < 4 ? "至少学会 4 个字才能开始哦(还差 " + (4 - learned.length) + " 个)" : "共 " + learned.length + " 个字,优先复习薄弱字") + "</span></span>" +
             '<span class="scope-go">›</span></button>' +
           wrongCard +
-          '<div class="section-title" style="margin-top:18px">🗺️ 按主题小岛练</div>';
+          '<div class="section-title" style="margin-top:18px">' + Icons.svg("flag") + '按主题小岛练</div>';
       DB.GROUPS.forEach(function (g, gi) {
         var learnedN = g.chars.filter(function (ch) { return st.chars[ch.c] && st.chars[ch.c].learned; }).length;
         html +=
           '<button class="scope-card" data-scope="g' + gi + '">' +
-            '<span class="scope-emoji">' + g.icon + '</span><span><span class="scope-name">' + esc(g.name) + "</span>" +
+            /* 与地图一致:用岛序号而不是 emoji(见 js/app.js 里地图同款改动的说明) */
+            '<span class="scope-ico t-slate scope-idx">' + (gi + 1) + '</span><span><span class="scope-name">' + esc(g.name) + "</span>" +
             '<span class="scope-meta">全部 ' + g.chars.length + ' 字可练 · 已学 ' + learnedN + "</span></span>" +
             '<span class="scope-go">›</span></button>';
       });
@@ -88,7 +90,7 @@
 
     var combo = 0;
     view.innerHTML =
-      '<div class="screen" id="run-root">' +
+      '<div class="screen v4 run-v4" id="run-root" data-screen="run">' +
         '<div class="run-hud">' +
           '<div class="hud-top">' +
             '<span class="hud-count">' + '第 <b id="rc">1 / ' + qs.length + '</b> 题</span>' +
@@ -142,36 +144,36 @@
       var prompt = "";
       if (q.type === "listen") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">👂 听一听,是哪个字?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听一听,是哪个字?</div>' +
           '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button></div>';
       } else if (q.type === "dictation") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">👂 听写:听到的是哪个字?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听写:听到的是哪个字?</div>' +
           '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button>' +
           '<div class="prompt-hint">仔细听声调哦</div></div>';
       } else if (q.type === "tonePick") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">🎵 听一听,声调对吗?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("pinyin") + '听一听,声调对吗?</div>' +
           '<div class="prompt-char-row"><div class="prompt-char kai">' + esc(q.target.c) + "</div>" +
           '<button class="speak-big small" id="sp-btn">' + Icons.svg("speak") + '</button></div></div>';
       } else if (q.type === "partJoin") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">🧩 这些部件能拼成哪个字?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("parts") + '这些部件能拼成哪个字?</div>' +
           '<div class="part-tiles">' + q.parts.map(function (x) { return '<span class="part-tile kai">' + esc(x) + "</span>"; }).join('<span class="part-plus">+</span>') + "</div></div>";
       } else if (q.type === "partSplit") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">🔍 它是由哪些部件组成的?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("parts") + '它是由哪些部件组成的?</div>' +
           '<div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
       } else if (q.type === "wordDictation") {
         /* 整词听写:听一个词,选出听到的那个词 */
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">👂 听一个词,选出听到的</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听一个词,选出听到的</div>' +
           '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button>' +
           '<div class="prompt-hint">再听一遍就点喇叭</div></div>';
       } else if (q.type === "charEmoji") {
         prompt = '<div class="prompt-area"><div class="prompt-label">这个字是哪幅图呢?</div><div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
       } else if (q.type === "emojiChar") {
-        prompt = '<div class="prompt-area"><div class="prompt-label">🖼️ 看图猜字</div><div class="prompt-emoji">' + q.target.e + "</div></div>";
+        prompt = '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("eye") + '看图猜字</div><div class="prompt-emoji">' + q.target.e + "</div></div>";
       } else if (q.type === "charPinyin") {
         prompt = '<div class="prompt-area"><div class="prompt-label">选出它的拼音</div><div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
       } else {
@@ -290,21 +292,21 @@
       var starRow = "";
       var showN = Math.min(earned, 12);
       for (var si = 0; si < showN; si++) {
-        starRow += '<span class="jump-star" style="animation-delay:' + (si * 90) + 'ms">⭐</span>';
+        starRow += '<span class="jump-star" style="animation-delay:' + (si * 90) + 'ms">' + Icons.svg("starFill") + "</span>";
       }
       if (earned > showN) starRow += '<span class="jump-more">+' + (earned - showN) + "</span>";
       view.innerHTML =
-        '<div class="screen run-end">' +
+        '<div class="screen v4 run-v4 run-end" data-screen="run-end">' +
           '<div class="grade-stamp g-' + grade.k + '">' +
             '<span class="grade-letter">' + grade.k + '</span>' +
             '<span class="grade-word">' + grade.t + "</span>" +
           "</div>" +
           '<div class="score-big">答对 ' + okCount + " / " + qs.length + " 题</div>" +
-          '<div class="score-sub">' + msg + (perfect && qs.length >= 10 ? "<br>🌟 全对奖励 +3 颗星!" : "") + "</div>" +
+          '<div class="score-sub">' + msg + (perfect && qs.length >= 10 ? "<br>全对奖励 +3 颗星!" : "") + "</div>" +
           '<div class="end-star-row">' + starRow + "</div>" +
-          '<div class="end-stars">本轮共获得 ' + earned + " ⭐</div>" +
+          '<div class="end-stars">本轮共获得 ' + earned + Icons.svg("starFill") + "</div>" +
           '<div class="end-btns">' +
-            '<button class="btn btn-lg btn-coral" id="again">' + Icons.svg("game") + "再来一轮</button>" +
+            '<button class="btn btn-lg" id="again" data-role="primary">' + Icons.svg("game") + "再来一轮</button>" +
             '<button class="btn btn-lg btn-ghost" id="go-home">' + Icons.svg("home") + "回首页</button>" +
           "</div>" +
         "</div>";
@@ -373,7 +375,7 @@
         if (idx >= cards.length) { finish(); return; }
         var ch = cards[idx];
         view.innerHTML =
-          '<div class="screen" id="rc-root">' +
+          '<div class="screen v4 run-v4" id="rc-root" data-screen="runcards">' +
             '<div class="run-hud">' +
               '<div class="hud-top">' +
                 '<span class="hud-count">' + '第 <b id="rc">' + (idx + 1) + " / " + cards.length + "</b> 张</span>" +
@@ -444,7 +446,7 @@
 
       function finish() {
         view.innerHTML =
-          '<div class="screen run-end">' +
+          '<div class="screen v4 run-v4 run-end" data-screen="run-end">' +
             '<span class="end-emoji">🎈</span>' +
             '<div class="score-big">复习完成!</div>' +
             '<div class="score-sub">共复习 ' + cards.length + " 个字,认识 " + knew + " 个<br>忘记的字一会儿还会再来找你哦</div>" +

@@ -21,6 +21,7 @@ ROUTE="${1:?用法: shot-ios.sh '<路由>' <输出png> [模拟器名]}"
 OUT="${2:?缺少输出路径}"
 SIM="${3:-iPhone 17 Pro Max}"
 SEED="${HZ_SEED:-0}"
+WAIT="${HZ_WAIT:-13}"   # 截图前的等待秒数:配合 HZ_AFTER 可等到"答完 10 题出现结算页"这类状态
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -56,6 +57,13 @@ cat > www/__shot.js <<SHOT
   }, 3000);
 })();
 SHOT
+# 可选:在截图前执行一段自定义 JS（HZ_AFTER 环境变量）。
+# 用途:有些界面不是"打开就在那儿" —— 比如练习结算页要答完 10 题才出现。
+# 没有这个钩子就只能靠"读代码想象它长什么样",而验收恰恰要看到真实渲染。
+if [ -n "${HZ_AFTER:-}" ]; then
+  printf '\n/* HZ_AFTER */\nsetTimeout(function () { %s }, 4200);\n' "$HZ_AFTER" >> www/__shot.js
+fi
+
 if [ "$SEED" = "1" ]; then
   cat >> www/__shot.js <<'SHOT'
 
@@ -96,6 +104,6 @@ xcrun simctl launch "$SIM" work.elliotli.siwendao >/dev/null 2>&1
 
 echo "▶ [6/6] 截图"
 mkdir -p "$(dirname "$OUT")"
-sleep 13
+sleep "$WAIT"
 xcrun simctl io "$SIM" screenshot "$OUT" >/dev/null 2>&1
 echo "✅ 已保存:$OUT"

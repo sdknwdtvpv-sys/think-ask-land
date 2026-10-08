@@ -150,14 +150,16 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
   display: flex; align-items: center; justify-content: center;
 }
 .home-v4 .v4-ic .ico { width: 20px; height: 20px; }
-/* 分类色只落在图标底色与线条上 */
-.home-v4 .v4-ic.t-amber { background: #FBF3DF; color: var(--t-amber); }
-.home-v4 .v4-ic.t-mint  { background: #EAF4F0; color: var(--t-mint); }
-.home-v4 .v4-ic.t-gold  { background: #FBF3DF; color: var(--gold); }
-.home-v4 .v4-ic.t-sky   { background: #EEF3F8; color: var(--t-sky); }
-.home-v4 .v4-ic.t-plum  { background: #F5F0FA; color: var(--t-plum); }
-.home-v4 .v4-ic.t-rose  { background: #FBF0F3; color: var(--t-rose); }
-.home-v4 .v4-ic.t-slate { background: #EFEAE0; color: var(--t-slate); }
+/* 分类色:抽成**可复用**的色调类(首页小卡与练习屏的卡片共用),
+   只落在小图标的底色与线条上 —— 卡片本身一律中性。
+   作用域在 html.v4 下,不会与旧样式撞名。 */
+html.v4 .t-amber { background: #FBF3DF; color: var(--t-amber); }
+html.v4 .t-mint  { background: #EAF4F0; color: var(--t-mint); }
+html.v4 .t-gold  { background: #FBF3DF; color: var(--gold); }
+html.v4 .t-sky   { background: #EEF3F8; color: var(--t-sky); }
+html.v4 .t-plum  { background: #F5F0FA; color: var(--t-plum); }
+html.v4 .t-rose  { background: #FBF0F3; color: var(--t-rose); }
+html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 
 /* 复习待办的小角标 */
 .home-v4 .v4-tile { position: relative; }
@@ -353,3 +355,118 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
   padding: var(--s5) var(--s5) 0; font-size: var(--fs-sm); color: var(--ink-3);
 }
 .map-v4 .map-foot .ico { width: 15px; height: 15px; color: var(--gold); }
+
+/* ============================================================
+   趣味练习：入口屏 + 答题 + 结算
+   ============================================================ */
+.practice-v4 { padding: 0 var(--s5) var(--s6); }
+
+.practice-v4 .practice-intro {
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--r); padding: var(--s3) var(--s4);
+  font-size: var(--fs-sm); color: var(--ink-2); line-height: var(--lh);
+  margin: var(--s2) 0 var(--s5);
+}
+.practice-v4 .section-title {
+  display: flex; align-items: center; gap: var(--s2);
+  font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3);
+  letter-spacing: 1.2px; margin-bottom: var(--s3);
+}
+.practice-v4 .section-title .ico { width: 16px; height: 16px; color: var(--ink-3); }
+.practice-v4 .scope-list { display: flex; flex-direction: column; gap: var(--s3); }
+
+/* 入口卡:与首页同族 —— 中性卡 + 彩色小图标 + 右侧箭头 */
+.practice-v4 .scope-card {
+  display: flex; align-items: center; gap: var(--s3); width: 100%; text-align: left;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r); padding: var(--s4); box-shadow: none;
+}
+.practice-v4 .scope-card:active { transform: scale(.985); }
+.practice-v4 .scope-card.disabled { opacity: .5; }
+.practice-v4 .scope-ico {
+  width: 38px; height: 38px; flex: 0 0 auto; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.practice-v4 .scope-ico .ico { width: 20px; height: 20px; }
+/* 岛序号:与地图一致,用品牌字 */
+.practice-v4 .scope-ico.scope-idx {
+  font-family: var(--font-display); font-size: 20px; line-height: 1;
+  background: var(--surface-2); color: var(--ink-2);
+}
+.practice-v4 .scope-card > span:nth-child(2) { flex: 1; min-width: 0; }
+.practice-v4 .scope-name { display: block; font-size: var(--fs-body); font-weight: 700; color: var(--ink); }
+.practice-v4 .scope-meta { display: block; font-size: var(--fs-sm); color: var(--ink-3); margin-top: 2px; }
+.practice-v4 .scope-go { color: var(--ink-3); font-size: 18px; }
+
+/* 答题 HUD */
+.run-v4 .run-hud { padding: 0 var(--s5) var(--s3); }
+.run-v4 .hud-count { font-size: var(--fs-sm); color: var(--ink-2); font-weight: 700; }
+.run-v4 .hud-count b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.run-v4 .combo-badge {
+  background: var(--gold-bg); color: var(--warn); border: 0; box-shadow: none;
+  border-radius: var(--r-pill); font-size: var(--fs-xs); font-weight: 800;
+}
+.run-v4 .combo-badge.hot { background: var(--primary-bg); color: var(--primary); box-shadow: none; }
+.run-v4 .hud-bar { background: var(--paper-2); box-shadow: none; height: 10px; }
+.run-v4 #hud-fill { background: var(--primary); }
+
+/* 题干卡 */
+.run-v4 .prompt-area {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-xl); box-shadow: var(--e1);
+}
+.run-v4 .prompt-label {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  font-size: var(--fs-body); font-weight: 700; color: var(--ink-2);
+}
+.run-v4 .prompt-label .ico { width: 17px; height: 17px; color: var(--primary); }
+.run-v4 .prompt-hint { color: var(--ink-3); font-size: var(--fs-sm); opacity: 1; }
+.run-v4 .prompt-py { color: var(--primary); }
+/* 大喇叭:旧版是蓝色渐变球 + 硬阴影,与新版强调色冲突 */
+.run-v4 .speak-big {
+  background: var(--primary); color: var(--on-primary);
+  box-shadow: var(--e2);
+}
+.run-v4 .speak-big.small { box-shadow: var(--e1); }
+.run-v4 .speak-big .ico { width: 46px; height: 46px; }
+.run-v4 .speak-big.small .ico { width: 32px; height: 32px; }
+
+/* 选项:去掉"贴纸式"硬阴影,改用边框做结构 */
+.run-v4 .opt {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r); box-shadow: none; color: var(--ink);
+}
+.run-v4 .opt:active { transform: scale(.98); }
+.run-v4 .opt.correct { border-color: var(--ok); background: #EAF4F0; }
+.run-v4 .opt.wrong { border-color: var(--line-2); background: var(--surface-2); }
+
+/* 结算页 */
+.run-end .score-big { color: var(--ink); font-weight: 800; }
+.run-end .score-sub { color: var(--ink-2); }
+.run-end .end-stars { color: var(--ink-2); }
+
+/* 结算页:成就徽章 + 奖励星 + 按钮 */
+.run-end .grade-stamp {
+  background: var(--surface); border: 2px solid var(--line); box-shadow: none;
+}
+.run-end .grade-letter { font-family: var(--font-display); }
+.run-end .grade-stamp.g-S { border-color: var(--gold); background: var(--gold-bg); }
+.run-end .grade-stamp.g-S .grade-letter { color: var(--gold); }
+.run-end .grade-stamp.g-A { border-color: var(--primary); background: var(--primary-bg); }
+.run-end .grade-stamp.g-A .grade-letter { color: var(--primary); }
+.run-end .grade-letter { color: var(--ink-2); }
+.run-end .grade-word { color: var(--ink-2); }
+/* 奖励星:实心、金色。旧版是 emoji,字形由系统决定 */
+.run-end .jump-star .ico { width: 30px; height: 30px; color: var(--gold); }
+.run-end .end-stars { display: flex; align-items: center; justify-content: center; gap: var(--s2); }
+.run-end .end-stars .ico { width: 17px; height: 17px; color: var(--gold); }
+/* 按钮:去掉粉色渐变与硬阴影 */
+.run-v4 .end-btns .btn {
+  border-radius: var(--r); box-shadow: none; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); font-weight: 700;
+}
+.run-v4 .end-btns .btn[data-role="primary"] {
+  background: var(--primary); color: var(--on-primary); border-color: var(--primary);
+  box-shadow: var(--e2);
+}
+.run-v4 .end-btns .btn .ico { color: inherit; }
