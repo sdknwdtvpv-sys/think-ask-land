@@ -1371,3 +1371,45 @@ html.v4 .emoji-opt-btn { width: 100%; height: 46px; }
    看上去像图没加载。零值不该被"画成矮桩"，而应读作"基线"：给一条清晰的浅线。 */
 html.v4 .wbar.zero { background: var(--line-2); }
 html.v4 .wbar-col { position: relative; }
+
+/* ============================================================
+   字号体系化
+   ------------------------------------------------------------
+   设计师实测：这 16 屏上真的渲染出来的**非令牌字号**有 15 个以上
+   （11.5 / 12 / 13 / 13.5 / 14 / 15 / 16 / 18 / 19 / 20 / 26 …），
+   而令牌只有 6 档：--fs-xs 11 / --fs-sm 12.5 / --fs-body 14.5 /
+   --fs-h 17 / --fs-title 22 / --fs-display 32。
+   "字号层级成体系"就卡在这里 —— 文档里写了 6 档，屏幕上却有十几档。
+
+   映射规则（就近归入，并把相邻的几档合并）：
+     11 / 11.5 / 12 / 12.5 / 13        → --fs-sm    (12.5)
+     13.5 / 14 / 14.5 / 15             → --fs-body  (14.5)
+     16 / 17 / 18 / 19                 → --fs-h     (17)
+     20 / 22 / 26                      → --fs-title (22)   ← 结算大字与家长门的题目
+     30 及以上                          → 内容尺寸（汉字/emoji 的显示级），不属 UI 文字体系
+   ============================================================ */
+html.v4 .gate-box h3 { font-size: var(--fs-h); }
+html.v4 .gate-q { font-size: var(--fs-display); }
+html.v4 .score-big { font-size: var(--fs-title); }
+html.v4 .end-stars { font-size: var(--fs-body); }
+html.v4 .ph-brand { font-size: var(--fs-body); }
+html.v4 .ph-title { font-size: var(--fs-h); }
+html.v4 .pc-py { font-size: var(--fs-body); }
+html.v4 .rp-line { font-size: var(--fs-body); }
+html.v4 .rp-lv { font-size: var(--fs-sm); }
+html.v4 .lvl-name { font-size: var(--fs-h); }
+html.v4 .rd-tip { font-size: var(--fs-sm); }
+html.v4 .bd-desc { font-size: var(--fs-sm); }
+html.v4 .print-scope { font-size: var(--fs-body); }
+html.v4 .print-sub, html.v4 .ph-date { font-size: var(--fs-sm); }
+/* 家长门的输入框与说明也顺手对齐 */
+html.v4 .gate-box p { font-size: var(--fs-body); }
+
+/* 家长门的输入框：旧版描边是一圈**淡紫**（全 App 唯一一处冷色），
+   在暖色体系里看着像"禁用态"。改成暖色描边，聚焦时才用强调色。 */
+html.v4 .gate-input {
+  background: var(--surface); border: 1.5px solid var(--line-2);
+  border-radius: var(--r); color: var(--ink); font-size: var(--fs-title);
+  width: 100%; text-align: center;
+}
+html.v4 .gate-input:focus { border-color: var(--primary); outline: none; }
