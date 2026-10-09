@@ -1131,3 +1131,15 @@ html.v4 .rd-punc { font-size: 30px; }
      性质和"记忆锚点"不同，保留。） */
 html.v4 .pcard { gap: 4px; padding: 12px 6px; }
 html.v4 .pc-char { font-size: 56px; }
+
+/* 原生滚动视图的弹性回弹：关掉。
+   ------------------------------------------------------------
+   真机反馈:"上下拖动时上面和下面多出一块"。
+   根因是两套安全区内边距叠加:
+     · capacitor.config.json 的 ios.contentInset:"always"
+       —— Capacitor 在**原生滚动视图**上再套一层 safe-area 内边距(上62/下34)
+     · 而 CSS 这边**已经自己处理了**(viewport-fit=cover + env(safe-area-inset-*),
+       #topbar 的 padding-top、#view 的 padding-bottom)
+   已把 contentInset 改为 "never"。CSS 的 overscroll-behavior 是第二道保险,
+   去掉超范围滚动时的"拉出一截"手感。 */
+html.v4, body.v4 { overscroll-behavior: none; }
