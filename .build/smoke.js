@@ -136,7 +136,7 @@ const BENIGN = [
       await sleep(1500);
     }
     await until(() => q(".run-end"), 6000, "结算页");
-    ok("全对结算:10/10", q(".score-big").textContent.includes("10 / 10"), q(".score-big").textContent);
+    ok("全对结算:10/10", q(".score-big").textContent.includes("10/10"), q(".score-big").textContent);
     const starsAfterRun = win.Store.state.stars;
     ok("练习赚星(10+3)", starsAfterRun === 24 + 13, "stars=" + starsAfterRun);
     ok("perfectRounds=1", win.Store.state.perfectRounds === 1);
@@ -179,7 +179,8 @@ const BENIGN = [
     await until(() => q(".stats-grid"), 5000, "家长报表");
     /* 不写死 400:断言"已学 / 全库"这个形状,且分母等于字库字数 */
     ok("家长报表渲染",
-      new RegExp("\\d+ / " + win.CharDB.ALL.length + "$").test(q(".stat-num").textContent.trim()),
+      /* 数字对写法 2026-10-09 统一成无空格（"48/761"），断言形状随之一致 */
+      new RegExp("\\d+/" + win.CharDB.ALL.length + "$").test(q(".stat-num").textContent.trim()),
       q(".stat-num").textContent);
     ok("7天柱状图", qa(".wbar").length === 7);
     ok("易错字面板", qa(".panel").length >= 3);

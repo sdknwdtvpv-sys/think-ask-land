@@ -128,7 +128,7 @@
     /* 识字量进度 */
     var pY = 452;
     text(ctx, "识字量", 48, pY, { size: 24, weight: 800 });
-    text(ctx, d.total + " / " + d.allChars + " 字", W - 48, pY, { size: 24, align: "right", color: ACTION, weight: 800 });
+    text(ctx, d.total + "/" + d.allChars + " 字", W - 48, pY, { size: 24, align: "right", color: ACTION, weight: 800 });
     roundRect(ctx, 48, pY + 18, W - 96, 20, 10);
     ctx.fillStyle = "#f1ecdf"; ctx.fill();
     var pct = Math.max(0.02, Math.min(1, d.total / d.allChars));

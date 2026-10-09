@@ -249,7 +249,7 @@
       var bScore = 0, bRound = 0, bTotal = 5;
       function renderBlend() {
         if (bRound >= bTotal) {
-          bArea.innerHTML = '<div class="blend-done">🎉 拼读完成！答对 ' + bScore + " / " + bTotal + " 题" +
+          bArea.innerHTML = '<div class="blend-done">🎉 拼读完成！答对 ' + bScore + "/" + bTotal + " 题" +
             '<div class="backup-btns"><button class="btn btn-sky" id="blend-again">再来 5 题</button></div></div>';
           bArea.querySelector("#blend-again").addEventListener("click", function () {
             bRound = 0; bScore = 0; renderBlend();
@@ -259,7 +259,7 @@
         var q = buildBlend();
         if (!q) { bArea.innerHTML = '<p class="parent-note">先去学几个字，再来拼读吧~</p>'; return; }
         bRound++;
-        bArea.innerHTML = '<div class="blend-hud">第 ' + bRound + " / " + bTotal + " 题 · 答对 " + bScore + "</div>" +
+        bArea.innerHTML = '<div class="blend-hud">第 ' + bRound + "/" + bTotal + " 题 · 答对 " + bScore + "</div>" +
           '<div class="blend-eq">' +
             '<button class="blend-part" data-part="' + esc(q.initial) + '">' + esc(q.initial) + "</button>" +
             '<span class="blend-plus">+</span>' +
@@ -570,7 +570,7 @@
 
       function updateFind() {
         findHud.hidden = false;
-        findHud.innerHTML = "🎯 在短文里找出所有的「<b>" + esc(target) + "</b>」 —— 找到 <b>" + found + " / " + totalTarget + "</b>";
+        findHud.innerHTML = "🎯 在短文里找出所有的「<b>" + esc(target) + "</b>」 —— 找到 <b>" + found + "/" + totalTarget + "</b>";
         if (found >= totalTarget && totalTarget > 0) {
           findOn = false;
           var res = window.Store.markRead(story.id);

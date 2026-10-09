@@ -353,7 +353,7 @@
             '<div class="section-title">' + /* 原来写「已点亮 N / 16 座岛」，而同屏第 1 岛写着「已学 48 / 51 字」、
    进度环已接近闭合 —— 同一屏自相矛盾（"学了 48 个字却一座岛都没点亮"）。
    把"点亮"明确绑到"学完"这个动作上，语义就自洽了。 */
-            Icons.svg("flag") + "已学完 " + lit + " / " + window.CharDB.GROUPS.length + " 座岛</div>" +
+            Icons.svg("flag") + "已学完 " + lit + "/" + window.CharDB.GROUPS.length + " 座岛</div>" +
             '<div class="map-sub">每学会一个字，小岛就亮一点 ' + Icons.svg("sparkle") + '</div>' +
           "</div>" +
           '<div class="island-map" id="island-map">' +
@@ -379,7 +379,7 @@
               "</span>" +
             "</span>" +
             '<span class="group-name isle-name">第' + (gi + 1) + "岛 · " + esc(g.name) + "</span>" +
-            '<span class="group-meta isle-meta">' + (done ? "🎉 学完啦" : "已学 " + learned + " / " + g.chars.length + " 字") + "</span>" +
+            '<span class="group-meta isle-meta">' + (done ? "🎉 学完啦" : "已学 " + learned + "/" + g.chars.length + " 字") + "</span>" +
           "</button>";
       });
       html += "</div>" +
@@ -453,7 +453,7 @@
               '<span class="learn-ring-num">' + (gi + 1) + "</span>" +
             "</span>" +
             '<div><div class="learn-title">' + esc(g.name) + '</div>' +
-            '<div class="learn-sub">已学 ' + learned + " / " + g.chars.length + " · 点一点字卡开始学</div></div>" +
+            '<div class="learn-sub">已学 ' + learned + "/" + g.chars.length + " · 点一点字卡开始学</div></div>" +
           "</div>" +
           '<div class="char-grid">';
       g.chars.forEach(function (ch, i) {
@@ -540,7 +540,7 @@
       view.innerHTML =
         '<div class="screen card-wrap card-v4 v4" id="card-root" data-screen="card">' +
           '<div class="card-pos">' +
-            "<span>第 " + (i + 1) + " / " + g.chars.length + " 个 · " + esc(g.name) + "</span></div>" +
+            "<span>第 " + (i + 1) + "/" + g.chars.length + " 个 · " + esc(g.name) + "</span></div>" +
           '<div class="py-big">' + esc(ch.p) +
             '<button class="mini-speak" id="py-speak" aria-label="读拼音">' + Icons.svg("speak", "ico-solo") + "</button></div>" +
           '<div class="writer-box" id="writer-box">' +
@@ -796,7 +796,7 @@
         inst.quiz({
           onCorrect: function (n, total) {
             if (window.SFX) SFX.click();
-            tip.textContent = "第 " + n + " / " + total + " 笔，写得真棒!";
+            tip.textContent = "第 " + n + "/" + total + " 笔，写得真棒!";
             renderStrokeBar(n);
           },
           onMistake: function (idx) {

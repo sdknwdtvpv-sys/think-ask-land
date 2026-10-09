@@ -114,7 +114,7 @@
 
     function paintHud() {
       var rc = view.querySelector("#rc");
-      if (rc) rc.textContent = (idx + 1) + " / " + qs.length;
+      if (rc) rc.textContent = (idx + 1) + "/" + qs.length;
       var fill = view.querySelector("#hud-fill");
       if (fill) fill.style.width = Math.round(idx / qs.length * 100) + "%";
     }
@@ -301,7 +301,7 @@
             '<span class="grade-letter">' + grade.k + '</span>' +
             '<span class="grade-word">' + grade.t + "</span>" +
           "</div>" +
-          '<div class="score-big">答对 ' + okCount + " / " + qs.length + " 题</div>" +
+          '<div class="score-big">答对 ' + okCount + "/" + qs.length + " 题</div>" +
           '<div class="score-sub">' + msg + (perfect && qs.length >= 10 ? "<br>全对奖励 +3 颗星!" : "") + "</div>" +
           '<div class="end-star-row">' + starRow + "</div>" +
           '<div class="end-stars">本轮共获得 ' + earned + Icons.svg("starFill") + "</div>" +
@@ -383,7 +383,7 @@
           '<div class="screen v4 run-v4" id="rc-root" data-screen="runcards">' +
             '<div class="run-hud">' +
               '<div class="hud-top">' +
-                '<span class="hud-count">' + '第 <b id="rc">' + (idx + 1) + " / " + cards.length + "</b> 张</span>" +
+                '<span class="hud-count">' + '第 <b id="rc">' + (idx + 1) + "/" + cards.length + "</b> 张</span>" +
                 '<span class="hud-knew">' + Icons.svg("check") + ' 已认识 <b id="knew-n">' + knew + "</b></span>" +
               "</div>" +
               '<div class="hud-bar"><i id="hud-fill" style="width:' + Math.round(idx / cards.length * 100) + '%"></i><span class="hud-ticks" id="hud-ticks"></span></div>' +
@@ -747,7 +747,7 @@
           '<div class="screen v4 parent-v4" data-screen="parent">' +
             kidPanel() +
             '<div class="stats-grid">' +
-              statCard("book", c.learned + " / " + total, "已学汉字") +
+              statCard("book", c.learned + "/" + total, "已学汉字") +
               statCard("trophy", c.mastered, "进入长期记忆") +
               statCard("chart", acc === null ? "--" : acc + "%", "练习正确率") +
               statCard("flame", st.streak + " 天", "连续打卡") +
