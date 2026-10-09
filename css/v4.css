@@ -46,18 +46,24 @@ body.v4 .star-pill {
 body.v4 .star-pill svg { width: 14px; height: 14px; }
 body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
 
+/* 左右留白由 **main#view** 统一提供（旧 CSS 里就是 16px），
+   这里**不要再加一层** —— 我一度在这里也写了 var(--s4)，结果变成 32px，
+   量出来首页卡片 left=32 就是这个原因。
+   原先"首页 36px / 其余 16px"的真相是：其余屏吃 main 的 16px，
+   而首页在自己的子元素上又叠了 --s5（20px）→ 36px。
+   所以修法是"**去掉首页那层叠加**"，而不是"在这里统一补一层"。 */
 .screen.v4 { background: var(--paper); min-height: 100dvh; padding: 0 0 var(--s6); }
 
 /* ---------------- 首页 ---------------- */
 .home-v4 .pad { padding-left: var(--s5); padding-right: var(--s5); }
 
 /* 问候区 */
-.home-v4 .v4-hello { padding: var(--s2) var(--s5) var(--s4); }
+.home-v4 .v4-hello { padding: var(--s2) 0 var(--s4); }
 .home-v4 .v4-hello h1 { font-size: var(--fs-title); font-weight: 800; letter-spacing: .2px; }
 .home-v4 .v4-hello p { font-size: var(--fs-body); color: var(--ink-2); margin-top: var(--s1); }
 .home-v4 .v4-meta {
   display: flex; gap: var(--s3); font-size: var(--fs-sm); color: var(--ink-3);
-  padding: 0 var(--s5) var(--s5);
+  padding: 0 0 var(--s5);
 }
 .home-v4 .v4-meta b { color: var(--ink-2); font-weight: 700; font-variant-numeric: tabular-nums; }
 
@@ -71,9 +77,9 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
 
 /* ---------------- 主角：今天的字 ---------------- */
 .home-v4 .v4-today {
-  margin: 0 var(--s5) var(--s5); background: var(--surface);
+  margin: 0 0 var(--s5); background: var(--surface);
   border: 1px solid var(--line); border-radius: var(--r-xl);
-  padding: var(--s5) var(--s5) var(--s4); box-shadow: var(--e1);
+  padding: var(--s5) 0 var(--s4); box-shadow: var(--e1);
 }
 .home-v4 .v4-cap { display: flex; align-items: baseline; justify-content: space-between; }
 .home-v4 .v4-cap b { font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
@@ -117,8 +123,11 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
 
 /* ---------------- 今日任务 ---------------- */
 .home-v4 .v4-task {
-  display: block; width: calc(100% - var(--s5) * 2); text-align: left;
-  margin: 0 var(--s5) var(--s5); background: var(--surface);
+  /* width 原来是 calc(100% - var(--s5)*2) —— 那是旧设计里"首页自带 20px 留白"
+     时的补偿。留白改由 main#view 统一提供后，这个减法会让卡片莫名短 40px。 */
+  width: 100%;
+  display: block; text-align: left;
+  margin: 0 0 var(--s5); background: var(--surface);
   border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s4);
 }
 .home-v4 .v4-th { display: flex; align-items: baseline; justify-content: space-between; }
@@ -132,10 +141,10 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
 .home-v4 .v4-tsub { display: block; font-size: var(--fs-sm); color: var(--ink-2); }
 
 /* ---------------- 其他玩法：中性卡 + 彩色小图标 ---------------- */
-.home-v4 .v4-sec { padding: 0 var(--s5) var(--s3); font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
+.home-v4 .v4-sec { padding: 0 0 var(--s3); font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
 .home-v4 .v4-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3);
-  padding: 0 var(--s5) var(--s5);
+  padding: 0 0 var(--s5);
 }
 .home-v4 .v4-tile {
   display: flex; flex-direction: column; align-items: flex-start; gap: var(--s2);
@@ -173,7 +182,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 /* ---------------- 家长中心：整行、低调 ---------------- */
 .home-v4 .v4-parent {
   display: flex; align-items: center; gap: var(--s3);
-  margin: 0 var(--s5) var(--s6); padding: var(--s4);
+  margin: 0 0 var(--s6); padding: var(--s4);
   background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r);
 }
 .home-v4 .v4-parent b { flex: 1; font-size: var(--fs-body); font-weight: 700; color: var(--ink-2); }
@@ -182,7 +191,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 /* ---------------- 页脚 ---------------- */
 .home-v4 .v4-foot {
   text-align: center; font-size: var(--fs-xs); color: var(--ink-3);
-  line-height: var(--lh-loose); padding: 0 var(--s5) var(--s8);
+  line-height: var(--lh-loose); padding: 0 0 var(--s8);
 }
 .home-v4 .v4-foot a { color: var(--ink-2); }
 
@@ -194,7 +203,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
    重写结构风险远大于收益。视觉层本来就是 CSS 的事。
    主角是那个字；四个动作是**平级**的，不硬造主次。
    ============================================================ */
-.card-v4 { padding: 0 var(--s5) var(--s6); }
+.card-v4 { padding: 0 0 var(--s6); }
 
 .card-v4 .card-pos {
   font-size: var(--fs-sm); color: var(--ink-3); font-weight: 700;
@@ -310,7 +319,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
    ============================================================ */
 .map-v4 { padding: 0 0 var(--s6); }
 
-.map-v4 .map-head { padding: var(--s2) var(--s5) var(--s4); }
+.map-v4 .map-head { padding: var(--s2) 0 var(--s4); }
 .map-v4 .map-head .section-title {
   display: flex; align-items: center; gap: var(--s2);
   font-size: var(--fs-h); font-weight: 800; color: var(--ink);
@@ -319,7 +328,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 .map-v4 .map-sub { font-size: var(--fs-sm); color: var(--ink-3); margin-top: var(--s1); }
 
 /* 岛:环 + 序号 + 名称 + 进度 */
-.map-v4 .island-map { padding: 0 var(--s4) var(--s4); gap: var(--s4) var(--s2); }
+.map-v4 .island-map { padding: 0 0 var(--s4); gap: var(--s4) var(--s2); }
 .map-v4 .isle-ring { width: 96px; height: 96px; }
 .map-v4 .ring-bg { stroke: var(--paper-2); stroke-width: 6; }
 .map-v4 .ring-fg { stroke: var(--primary); stroke-width: 6; }
@@ -352,14 +361,14 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 .map-v4 .map-path path { stroke: var(--line-2); stroke-width: 6; }
 .map-v4 .map-foot {
   display: flex; align-items: center; justify-content: center; gap: var(--s2);
-  padding: var(--s5) var(--s5) 0; font-size: var(--fs-sm); color: var(--ink-3);
+  padding: var(--s5) 0 0; font-size: var(--fs-sm); color: var(--ink-3);
 }
 .map-v4 .map-foot .ico { width: 15px; height: 15px; color: var(--gold); }
 
 /* ============================================================
    趣味练习：入口屏 + 答题 + 结算
    ============================================================ */
-.practice-v4 { padding: 0 var(--s5) var(--s6); }
+.practice-v4 { padding: 0 0 var(--s6); }
 
 .practice-v4 .practice-intro {
   background: var(--surface-2); border: 1px solid var(--line);
@@ -399,7 +408,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 .practice-v4 .scope-go { color: var(--ink-3); font-size: 18px; }
 
 /* 答题 HUD */
-.run-v4 .run-hud { padding: 0 var(--s5) var(--s3); }
+.run-v4 .run-hud { padding: 0 0 var(--s3); }
 .run-v4 .hud-count { font-size: var(--fs-sm); color: var(--ink-2); font-weight: 700; }
 .run-v4 .hud-count b { color: var(--ink); font-variant-numeric: tabular-nums; }
 .run-v4 .combo-badge {
@@ -477,7 +486,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
    贴纸与勋章的图案**是内容,保留 emoji**（那是孩子收集的东西,
    换成 SVG 反而丢掉"贴纸"的丰富感）。改的是容器与装饰。
    ============================================================ */
-.rewards-v4 { padding: 0 var(--s5) var(--s6); }
+.rewards-v4 { padding: 0 0 var(--s6); }
 
 .rewards-v4 .reward-head {
   background: var(--surface); border: 1px solid var(--line);
@@ -610,7 +619,7 @@ html.v4 .lock-card p { margin: 0; }
 html.v4 .lock-card .btn { margin-top: var(--s4); width: 100%; min-height: 52px; }
 
 /* ---------------- 组内字表（#/learn）---------------- */
-.learn-v4 { padding: 0 var(--s5) var(--s6); }
+.learn-v4 { padding: 0 0 var(--s6); }
 .learn-v4 .learn-head { display: flex; align-items: center; gap: var(--s4); padding: var(--s3) 0 var(--s5); }
 .learn-v4 .learn-ring { position: relative; width: 76px; height: 76px; flex: 0 0 auto; display: block; }
 .learn-v4 .learn-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }

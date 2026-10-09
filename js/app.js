@@ -523,7 +523,10 @@
         var bits = [];
         if (rad) {
           bits.push('<span class="zl-item" data-zl="部">部首 <b class="kai">' + esc(rad) + "</b>" +
-            (radName && radName !== rad ? '<small>(' + esc(radName) + "部)</small>" : "<small>(部首)</small>") + "</span>");
+            /* 独体字（一/十/日/月…）的部首就是它自己，radName === rad。
+   原来这种情况回退成字面量 "(部首)"，于是渲染出「部首 一（部首）」——
+   括号里重复一遍"部首"，读起来像坏了。改成整段不输出。 */
+            (radName && radName !== rad ? '<small>(' + esc(radName) + "部)</small>" : "") + "</span>");
         }
         if (parts) {
           bits.push('<span class="zl-item" data-zl="件">部件 ' + parts.map(function (x) { return '<b class="kai">' + esc(x) + "</b>"; }).join(' + ') + "</span>");
