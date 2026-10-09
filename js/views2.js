@@ -518,7 +518,19 @@
         if (i < unlocked) {
           html += '<div class="sticker got" style="--rot:' + rot + 'deg"><span class="st-emoji">' + s.e + '</span><span class="st-name">' + s.n + "</span></div>";
         } else {
-          html += '<div class="sticker locked" style="--rot:' + rot + 'deg"><span class="st-emoji">' + Icons.svg("lock") + '</span><span class="st-name">' + (i + 1) * every + Icons.svg("starFill") + "</span></div>";
+          /* 原来锁态只画一把灰锁 —— 孩子**看不到自己在争取什么**，
+             对 4~8 岁这是最大的动机漏损（设计师称为"整份报告里最可惜的一处"）。
+             改成显示**贴纸本身的剪影**（CSS 做灰度+降低透明度）+ 一个小锁角标：
+             看得见轮廓、猜得到是什么，同时明确"还没到手"。
+             ⚠️ 顺带记一条设计债：贴纸图案是 emoji，**跨平台长得完全不一样**
+                （Android/Windows 孩子看到的不是这套），
+                而且和 App 手绘的 SVG 图标体系是两种语言。这属于素材投入，
+                该换画师素材，不是工程侧能解决的 —— 已记进 DESIGN-TODO。 */
+          html += '<div class="sticker locked" style="--rot:' + rot + 'deg" aria-label="' +
+            (i + 1) * every + ' 颗星解锁">' +
+            '<span class="st-emoji" aria-hidden="true">' + s.e + '</span>' +
+            '<span class="st-lock-mini" aria-hidden="true">' + Icons.svg("lock") + '</span>' +
+            '<span class="st-name">' + (i + 1) * every + Icons.svg("starFill") + "</span></div>";
         }
       });
       html += "</div>" +

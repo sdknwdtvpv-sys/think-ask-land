@@ -1591,3 +1591,20 @@ html.v4 .lock-v4 .lock-parent {
 }
 html.v4 .lock-v4 .lock-parent .ico { width: 15px; height: 15px; color: var(--ink-3); }
 html.v4 .lock-v4 .lock-link { color: var(--ink-2); text-decoration: underline; font-weight: 700; }
+
+/* 奖励页锁态：显示贴纸**剪影**而不是一把灰锁 —— 孩子看得见自己在争取什么。
+   灰度 + 降透明度做出"还没到手"的感觉，但不至于看成损坏的图片。 */
+html.v4 .rewards-v4 .sticker.locked .st-emoji {
+  filter: grayscale(1) contrast(.55) opacity(.34);
+}
+html.v4 .rewards-v4 .sticker.locked { position: relative; }
+/* 小锁角标：只占右上角一点，不盖住轮廓 */
+html.v4 .rewards-v4 .st-lock-mini {
+  position: absolute; top: 4px; right: 4px;
+  width: 18px; height: 18px; border-radius: var(--r-pill);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--paper-2);
+}
+html.v4 .rewards-v4 .st-lock-mini .ico { width: 12px; height: 12px; color: var(--ink-3); }
+/* 全部解锁后不该再有角标（防御性：若标记残留） */
+html.v4 .rewards-v4 .sticker.got .st-lock-mini { display: none; }
