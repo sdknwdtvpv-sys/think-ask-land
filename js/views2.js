@@ -283,10 +283,19 @@
         window.Store.save();
       }
       var ratio = qs.length ? okCount / qs.length : 0;
-      var grade = ratio >= 1 ? { k: "S", t: "完美通关！", m: "cheer" }
-        : ratio >= 0.8 ? { k: "A", t: "很棒哦！", m: "cheer" }
-        : ratio >= 0.6 ? { k: "B", t: "不错，继续！", m: "happy" }
-        : { k: "C", t: "多练练更棒！", m: "think" };
+      /* ⚠️ 这里原来是给孩子看一个**英文字母**（S/A/B/C）。设计师指出三层问题：
+         ① 4~8 岁读不出 C，这个字母对他是纯噪音；
+         ② 它出现在中文儿童语境里，没有任何意义；
+         ③ 它是**终结性评价** —— 而 App 别处都在刻意避免打分（说一说写着
+            "这里不打分"、错因提示刻意不出现"错"字、答错用暖橙不用批评红）。
+            产品在这里自相矛盾。
+         改成**图形符号**（奖杯 > 星 > 勾 > 再来一次），读作"你走到哪一步了"，
+         而不是"你值几分"；鼓励语放大当主标题。
+         `k` 保留并挂到 `data-grade` 上 —— 它是测试契约，也是无障碍标签。 */
+      var grade = ratio >= 1 ? { k: "S", t: "完美通关！", sym: "trophy", m: "cheer" }
+        : ratio >= 0.8 ? { k: "A", t: "很棒哦！", sym: "starFill", m: "cheer" }
+        : ratio >= 0.6 ? { k: "B", t: "不错哦！", sym: "check", m: "happy" }
+        : { k: "C", t: "再试一次！", sym: "refresh", m: "think" };
       var msg = okCount === qs.length ? "全部答对，你是识字小冠军！" : okCount >= qs.length * 0.7 ? "很棒！再练一轮就更好啦！" : "多多练习，你会更厉害！";
       /* 星星逐颗跳出（超过 12 颗折叠显示） */
       var starRow = "";
@@ -297,8 +306,9 @@
       if (earned > showN) starRow += '<span class="jump-more">+' + (earned - showN) + "</span>";
       view.innerHTML =
         '<div class="screen v4 run-v4 run-end" data-screen="run-end">' +
-          '<div class="grade-stamp g-' + grade.k + '">' +
-            '<span class="grade-letter">' + grade.k + '</span>' +
+          '<div class="grade-stamp g-' + grade.k + '" data-grade="' + grade.k +
+            '" role="img" aria-label="' + esc(grade.t) + '">' +
+            '<span class="grade-letter">' + Icons.svg(grade.sym) + '</span>' +
             '<span class="grade-word">' + grade.t + "</span>" +
           "</div>" +
           '<div class="score-big">答对 ' + okCount + "/" + qs.length + " 题</div>" +
@@ -672,7 +682,12 @@
           return '<div class="panel" id="panel-kids"><h4>' + Icons.svg("users") + "孩子档案</h4>" +
             '<div class="kid-list">' + rows + "</div>" +
             '<p class="parent-note">每个孩子有独立的识字进度、星星和贴纸。切换后首页会显示是谁的进度。</p>' +
-            '<details class="kid-add"' + (list.length < 2 ? " open" : "") + ">" +
+            /* 原来是 `list.length < 2` —— **只有一个孩子时表单默认展开**，
+               于是家长中心首屏被"名字输入框 + 8 个头像 + 创建档案"占掉约 380px，
+               而家长唯一能看出"哪里薄弱"的两个面板全被挤到首屏之下。
+               这是买断制产品：家长第一次进这里就是为了"我孩子学得怎么样"。
+               → 只在**一个孩子都没有**时展开（那时确实需要先创建）。 */
+            '<details class="kid-add"' + (list.length === 0 ? " open" : "") + ">" +
               "<summary>" + Icons.svg("plus") + "添加一个孩子</summary>" +
               '<div class="kid-form">' +
                 '<input id="kid-name" type="text" maxlength="12" placeholder="孩子的名字/小名" autocomplete="off">' +

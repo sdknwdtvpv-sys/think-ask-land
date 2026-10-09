@@ -108,7 +108,9 @@ function check(name, cond, extra) {
     const stamp = document.querySelector(".grade-stamp");
     return {
       stamp: !!stamp,
-      letter: stamp ? stamp.querySelector(".grade-letter").textContent : "",
+      /* 评级从"字母"改成了"图形符号"（孩子读不出 S/A/B/C），
+         所以契约改读 data-grade 属性 —— 断言强度不变，仍校验"按正确率给出哪一档"。 */
+      letter: stamp ? stamp.getAttribute("data-grade") : "",
       word: stamp ? stamp.querySelector(".grade-word").textContent : "",
       stars: document.querySelectorAll(".jump-star").length,
       mascot: document.querySelector(".end-mascot .mascot") ? document.querySelector(".end-mascot .mascot").getAttribute("class") : "",

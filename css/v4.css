@@ -1543,3 +1543,17 @@ html.v4 textarea, html.v4 .fb-input, html.v4 #fb-text {
   border-radius: var(--r);
 }
 html.v4 .panel i, html.v4 .report-box i, html.v4 .feedback i { box-shadow: none; }
+
+/* 结算页的评级章：字母换成了图形符号，所以要有图标尺寸；
+   并把鼓励语放大当主标题（它现在是这一屏的主信息）。 */
+html.v4 .grade-letter { display: flex; align-items: center; justify-content: center; }
+html.v4 .grade-letter .ico { width: 52px; height: 52px; }
+/* 圆内只有 134px，说明文字要一行排得下、且不挤压符号 */
+html.v4 .grade-word {
+  font-size: var(--fs-body); font-weight: 800; color: var(--ink);
+  line-height: 1.25; max-width: 108px; text-align: center;
+}
+html.v4 .grade-stamp.g-S .grade-letter .ico { color: var(--gold-ink); }
+html.v4 .grade-stamp.g-A .grade-letter .ico { color: var(--gold-ink); }
+html.v4 .grade-stamp.g-B .grade-letter .ico { color: var(--ok); }
+html.v4 .grade-stamp.g-C .grade-letter .ico { color: var(--primary); }
