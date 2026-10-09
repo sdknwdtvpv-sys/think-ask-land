@@ -40,7 +40,7 @@ body.v4 .icon-btn {
 body.v4 .star-pill {
   background: var(--surface); border: 1px solid var(--line);
   color: var(--ink-2); box-shadow: none;
-  padding: 5px var(--s3) 5px 9px; border-radius: var(--r-pill);
+  padding: var(--s1) var(--s3) var(--s1) var(--s2); border-radius: var(--r-pill);
   font-size: var(--fs-sm); font-weight: 700;
 }
 body.v4 .star-pill svg { width: 14px; height: 14px; }
@@ -249,7 +249,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 /* 部首 / 部件 */
 .card-v4 .zili-row .zl-item {
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--r-pill); color: var(--ink-2); padding: 4px 10px; font-size: var(--fs-sm);
+  border-radius: var(--r-pill); color: var(--ink-2); padding: var(--s1) var(--s2); font-size: var(--fs-sm);
 }
 /* 组词 chips */
 .card-v4 .word-row { gap: var(--s2); margin-top: var(--s3); }
@@ -774,7 +774,7 @@ html.v4 .kid-name { font-size: var(--fs-body); font-weight: 700; color: var(--in
 html.v4 .kid-info small { font-size: var(--fs-sm); color: var(--ink-3); }
 html.v4 .mini-btn {
   background: var(--surface); border: 1px solid var(--line); color: var(--ink-2);
-  border-radius: var(--r-sm); box-shadow: none; font-size: var(--fs-sm); padding: 4px 10px;
+  border-radius: var(--r-sm); box-shadow: none; font-size: var(--fs-sm); padding: var(--s1) var(--s2);
 }
 html.v4 .mini-btn.danger { color: var(--bad); border-color: #EBD5D2; }
 
@@ -792,7 +792,7 @@ html.v4 .kid-form input {
 }
 html.v4 .emoji-opt-btn {
   background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-sm);
-  font-size: 22px; padding: 5px 7px; box-shadow: none;
+  font-size: 22px; padding: var(--s1) var(--s2); box-shadow: none;
 }
 html.v4 .emoji-opt-btn.on { background: var(--primary-bg); border-color: var(--primary); }
 
@@ -1129,7 +1129,7 @@ html.v4 .rd-punc { font-size: 30px; }
    既费彩墨、又不属于品牌色。去掉后卡片更紧凑，同样页数能印更多字。
    （任务卡 .qc-emoji 与奖状 .cert-emoji 是**活动插图/庆祝装饰**，
      性质和"记忆锚点"不同，保留。） */
-html.v4 .pcard { gap: 4px; padding: 12px 6px; }
+html.v4 .pcard { gap: 4px; padding: var(--s3) var(--s1); }
 html.v4 .pc-char { font-size: 56px; }
 
 /* 原生滚动视图的弹性回弹：关掉。
