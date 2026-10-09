@@ -340,7 +340,7 @@
       var learnedN = window.Store.counts().learned;
       view.innerHTML =
         '<div class="screen v4 review-v4" data-screen="review">' +
-          '<div class="review-info">' + Icons.svg("sparkle") + '<b>记忆小秘密：</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现，复习一次就记得更牢，连续答对 4 次就进入<b>长期记忆</b>啦！</div>' +
+          '<div class="review-info">' + Icons.svg("sparkle") + '<b>记忆小秘密：</b>学过的字会在 <b>10 分钟 → 1 天 → 2 天 → 4 天 → 7 天</b> 后悄悄出现，复习一次就记得更牢，连续答对 4 次就进入<b>长期记忆</b>啦！</div>' +
           (due.length === 0
             /* 原来写「今天没有要复习的字」，而同一屏顶部的说明卡写着
                「学过的字会在 10 分钟 → 1 天 → … 后悄悄出现」——按自己的规则
@@ -698,14 +698,14 @@
           if (unlocked) {
             return '<div class="panel" id="panel-entitle"><h4>' + Icons.svg("trophy") + '完整内容</h4>' +
               '<p class="parent-note">' + Icons.svg("check") + '<b>已解锁</b> —— 分级阅读 L3~L5、拼音进阶、说一说、线下物料打印都可以用了。' +
-              '<br>感谢支持！这一份是<b>一次性买断</b>,不会再收费。</p></div>';
+              '<br>感谢支持！这一份是<b>一次性买断</b>，不会再收费。</p></div>';
           }
           var rows = E.paidFeatures().map(function (t) {
             return "<li>" + esc(t) + "</li>";
           }).join("");
           return '<div class="panel" id="panel-entitle"><h4>' + Icons.svg("trophy") + '完整内容</h4>' +
             '<p class="parent-note">免费部分包含：<b>核心字库 · 字卡 · 笔顺描红 · 练习 · 复习 · 分级阅读 L1~L2</b>。' +
-            '<br>下面这些属于<b>完整内容包</b>,一次买断、永久可用：</p>' +
+            '<br>下面这些属于<b>完整内容包</b>，一次买断、永久可用：</p>' +
             '<ul class="ent-list">' + rows + "</ul>" +
             '<div class="backup-btns">' +
               '<button class="btn btn-sun" id="btn-buy">' +
@@ -876,7 +876,7 @@
               ? "还没开始读。短文全部用<b>孩子学过的字</b>写成，点「读一读 → 我自己读」,孩子自己就能读完一篇，不需要您在旁边指字。"
               : (rd.week === 0
                 ? "这周还没读新篇目。每天读一篇就够，重在<b>每天</b>而不是每天读很多。"
-                : "这周读了 <b>" + rd.week + "</b> 篇，保持这个节奏就好。读的时候让孩子<b>指着字读出声</b>,比默读有效得多。")) +
+                : "这周读了 <b>" + rd.week + "</b> 篇，保持这个节奏就好。读的时候让孩子<b>指着字读出声</b>，比默读有效得多。")) +
             "</p></div>";
         }
 
@@ -941,9 +941,9 @@
               '<span class="ab-val">' + yn(rc.supported, "可用", rc.stateName) + "</span></div>" +
             '<p class="parent-note">' + (rc.supported
               ? "孩子可以读一遍自己的声音再听 —— 这是把「认字」变成「会读」的关键一步。"
-              : "这台设备/浏览器用不了录音，或者页面不是 https。<b>不影响其它任何功能</b>,只少了「跟我读」。") +
+              : "这台设备/浏览器用不了录音，或者页面不是 https。<b>不影响其它任何功能</b>，只少了「跟我读」。") +
             "</p>" +
-            '<p class="parent-note">' + Icons.svg("lock") + '录音<b>只在这台设备上回放</b>:不上传、不保存，离开页面立刻释放麦克风。</p>' +
+            '<p class="parent-note">' + Icons.svg("lock") + '录音<b>只在这台设备上回放</b>：不上传、不保存，离开页面立刻释放麦克风。</p>' +
             (rc.lastError ? '<p class="parent-note">上次失败的原因：' + esc(rc.lastError) + "</p>" : "") +
             "</div>";
         }
@@ -1020,7 +1020,7 @@
         html +=
           '<div class="panel"><h4>' + Icons.svg("chart") + '本周学习报告</h4>' +
             '<p class="parent-note">把这一周的学习成果生成一张卡片，可保存到相册或分享给家人。' +
-            '<b>报告在这台设备上本地生成，不上传任何数据</b>,卡片里也不会出现孩子的姓名。</p>' +
+            '<b>报告在这台设备上本地生成，不上传任何数据</b>，卡片里也不会出现孩子的姓名。</p>' +
             '<button class="btn btn-sky" id="btn-report" style="width:100%;margin-top:10px">' +
               Icons.svg("share") + "生成本周报告卡</button>" +
           "</div>";
@@ -1055,7 +1055,7 @@
            ② 隐私说明必须**在 App 内可达**(App Store 5.1.1(i)),不能用 target="_blank" */
         var inApp = !!(window.PlatformStorage && window.PlatformStorage.isNative);
         html +=
-          '<div class="panel"><h4>' + Icons.svg("refresh") + '复习机制说明</h4><p class="parent-note">本应用采用简化版<b>艾宾浩斯间隔重复</b>:孩子标记"我会了"后，字会在 10 分钟后首次回到复习队列;每答对一次，下次复习间隔加倍延长（10分钟 → 1天 → 2天 → 4天 → 7天）;答错则重新开始。连续答对 4 次(box≥4)即视为进入长期记忆。所有数据仅保存在本设备浏览器中。</p></div>' +
+          '<div class="panel"><h4>' + Icons.svg("refresh") + '复习机制说明</h4><p class="parent-note">本应用采用简化版<b>艾宾浩斯间隔重复</b>：孩子标记"我会了"后，字会在 10 分钟后首次回到复习队列;每答对一次，下次复习间隔加倍延长（10 分钟 → 1 天 → 2 天 → 4 天 → 7 天）;答错则重新开始。连续答对 4 次(box≥4)即视为进入长期记忆。所有数据仅保存在本设备浏览器中。</p></div>' +
           '<div class="panel"><h4>' + Icons.svg("sparkle") + '显示设置</h4>' +
           '<button class="switch-row" id="btn-motion" aria-pressed="' + reduced + '"><span>减少动态效果（关闭云朵飘动与庆祝动画）</span><span class="switch" aria-pressed="' + reduced + '"><i></i></span></button>' +
         '</div>' +

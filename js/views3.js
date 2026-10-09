@@ -116,7 +116,7 @@
       window.Store.learnedList().forEach(function (c) { learnedSet[c] = 1; });
 
       var html = '<div class="screen v4 pinyin-v4" data-screen="pinyin">' +
-        '<div class="practice-intro">' + Icons.svg("pinyin") + '拼音是给汉字注音的符号。这个阶段<b>只要求听和认</b>,不要求默写 —— 点一点，听一听就好。</div>';
+        '<div class="practice-intro">' + Icons.svg("pinyin") + '拼音是给汉字注音的符号。这个阶段<b>只要求听和认</b>，不要求默写 —— 点一点，听一听就好。</div>';
 
       /* ---------- 声母 ---------- */
       html += '<div class="panel"><h4>' + Icons.svg("speak") + '声母（23 个）</h4>' +
@@ -452,7 +452,7 @@
           '<span class="lvl-meta">' + esc(lv.hint) + " · " + doneN + "/" + rows.length + " 篇" + "</span></div>";
         if (PAID_LV[lv.id] && !paidUnlocked) {
           html += '<div class="lvl-note">' + Icons.svg("lock") + '' + lv.id + " 共 " + rows.length +
-            " 篇属于<b>完整内容包</b>,还没有解锁。请家长到「家长中心 → 完整内容」查看。</div>";
+            " 篇属于<b>完整内容包</b>，还没有解锁。请家长到「家长中心 → 完整内容」查看。</div>";
           return;                                   // 未解锁就不渲染这些卡片
         }
         if (locked && lv.id !== "L1") {

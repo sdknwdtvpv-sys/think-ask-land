@@ -302,7 +302,7 @@
     return '<div class="screen v4 lock-v4" data-screen="lock"><div class="panel lock-card">' +
         '<div class="lock-ico">' + (window.Icons ? Icons.svg("lock") : "") + "</div>" +
         "<h3>这部分内容还没解锁</h3>" +
-        '<p class="parent-note">' + (o.what || "该内容") + "属于<b>完整内容包</b>,当前还没有解锁。</p>" +
+        '<p class="parent-note">' + (o.what || "该内容") + "属于<b>完整内容包</b>，当前还没有解锁。</p>" +
         '<p class="parent-note">请家长到 <b>家长中心 → 完整内容</b> 里查看（那里有一道家长验证）。</p>' +
         '<button class="btn btn-lg" id="lock-go" data-role="primary">去家长中心</button>' +
       "</div></div>";
