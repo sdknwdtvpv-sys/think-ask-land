@@ -1413,3 +1413,39 @@ html.v4 .gate-input {
   width: 100%; text-align: center;
 }
 html.v4 .gate-input:focus { border-color: var(--primary); outline: none; }
+
+/* ============================================================
+   按设计师审查落地的第五批：跨屏一致性
+   ============================================================ */
+
+/* ① 网格间距: v4 组件统一 12px，但「说一说」与「打印识字卡」是 10px ——
+   同一套视觉语言两种节奏。统一到 12。 */
+html.v4 .talk-grid, html.v4 .card-grid { gap: var(--s3); }
+
+/* ② 两处旧块间距不在 4 的倍数上（家长中心统计网格下 18px、贴纸墙下 22px）。
+   4px 是我们的间距刻度，18/22 是随手给的。 */
+html.v4 .stats-grid { margin-bottom: var(--s4); }
+html.v4 .sticker-wall { margin-bottom: var(--s6); }
+
+/* ③ 说明卡的底色几乎不可分: --surface-2 (#FAF7F0) 与页面 --paper (#FBF8F1)
+   **只差 1/255**，等于没有底色、全靠 1px 描边成立。
+   而 tokens.css 把 --surface-2 定义为"卡片**内**的次级块"，用在页面级卡片上不语义。
+   改用 --paper-2 —— 它明显比纸底深，读作"内凹的说明面板"而不是"又一张卡"，
+   既保住了层级（说明不该和内容卡一样白），也真的看得见。 */
+html.v4 .practice-intro,
+html.v4 .review-info { background: var(--paper-2); }
+
+/* ④ 结算页的成绩章: 58px 的字母 + 12.5px 的说明被塞进同一个圆，余量只剩约 6px。
+   字母降到 44px、说明留在圆内但缩小，并给圆一点内边距。 */
+html.v4 .grade-stamp { padding: var(--s3); }
+html.v4 .grade-letter { font-size: 44px; line-height: 1; }
+html.v4 .grade-word { font-size: var(--fs-sm); }
+
+/* ⑤ 「错题重练」禁用时 `.scope-go`（那个 ›）还在 ——
+   它是最强的"可以点"信号，而该卡 `pointer-events:none`，点下去毫无反应。
+   孩子会反复戳。禁用了就把这个假信号去掉。 */
+html.v4 .practice-v4 .scope-card.disabled .scope-go { display: none; }
+
+/* ⑥ 贴纸名是全 App 最小的中文（11px），而它是这一屏的**内容**（奖品叫什么）。
+   元信息可以 11px，奖品名不该。 */
+html.v4 .rewards-v4 .st-name { font-size: var(--fs-sm); }
