@@ -1457,3 +1457,23 @@ html.v4 .rewards-v4 .st-name { font-size: var(--fs-sm); }
 body.v4 #topbar { box-shadow: 0 6px 18px rgba(44, 39, 33, .06); }
 /* `.rp-lv` 的旧紫灰底（读一读的级别胶囊）上面已改，这里补上它的另一个用途 */
 html.v4 .rp-week { background: var(--surface-2); color: var(--ink-3); }
+
+/* ============================================================
+   iPad 上的字卡：田字格没跟着放大
+   ------------------------------------------------------------
+   `js/app.js` 里书写格的尺寸是 `min(280, vw-64, vh*0.36)` —— 封顶 280px。
+   在 440pt 的 iPhone 上它占屏宽 64%，在 834pt 的 iPad 上只占 34%：
+   孩子在 iPad 上反而看到更小的字，而 iPad 本该是"把字放大"的主场。
+
+   这里在宽屏下把书写格放大。hanzi-writer 渲染的是 **SVG（矢量）**，
+   放大不会糊；`#writer-target::before`（田字格辅助线）用 inset:0 跟随容器。
+   用 !important 是因为 hanzi-writer 会把宽高写成内联样式。
+   ============================================================ */
+@media (min-width: 768px) {
+  .card-v4 #writer-target,
+  .card-v4 #writer-target svg {
+    width: 380px !important; height: 380px !important;
+  }
+  /* 字卡整屏也别太窄 —— 手机上是单列，iPad 上给它一个舒适的阅读宽度 */
+  .card-v4 .card-wrap { max-width: 720px; margin: 0 auto; }
+}
