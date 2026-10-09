@@ -1449,3 +1449,11 @@ html.v4 .practice-v4 .scope-card.disabled .scope-go { display: none; }
 /* ⑥ 贴纸名是全 App 最小的中文（11px），而它是这一屏的**内容**（奖品叫什么）。
    元信息可以 11px，奖品名不该。 */
 html.v4 .rewards-v4 .st-name { font-size: var(--fs-sm); }
+
+/* 顶栏的投影还是旧紫灰 rgba(63,58,82,.06)。
+   这一处在**每一屏**都在（#topbar 是全局的），但很淡、单看截图不容易发现 ——
+   是用运行时脚本遍历计算样式扫出来的（整屏只剩这一处旧色）。
+   换成暖色阴影令牌。 */
+body.v4 #topbar { box-shadow: 0 6px 18px rgba(44, 39, 33, .06); }
+/* `.rp-lv` 的旧紫灰底（读一读的级别胶囊）上面已改，这里补上它的另一个用途 */
+html.v4 .rp-week { background: var(--surface-2); color: var(--ink-3); }
