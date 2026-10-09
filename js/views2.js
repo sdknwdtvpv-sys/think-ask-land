@@ -764,8 +764,21 @@
             '<div class="stats-grid">' +
               statCard("book", c.learned + "/" + total, "已学汉字") +
               statCard("trophy", c.mastered, "进入长期记忆") +
-              statCard("chart", acc === null ? "--" : acc + "%", "练习正确率") +
+              /* 原来是 `"--"` —— 一个空白数据，家长会以为界面出错或者孩子没学。
+                  没有数据时说清楚"为什么没有、怎么才有"。 */
+              statCard("chart", acc === null ? "暂无" : acc + "%", "练习正确率") +
               statCard("flame", st.streak + " 天", "连续打卡") +
+            "</div>" +
+            /* ---- 信任信号：放在统计卡**正下方**（首屏内）----
+               为什么必须有：买断 + 无账号 + 真离线是这个品类**最硬的差异点**，
+               而"犹豫要不要花钱的家长"最大的三个疑虑是
+                 要不要注册？ 是不是订阅？ 我的数据去哪了？
+               原来的「完全离线」面板写在页面很下方，16 张截图里**没有一张拍到它** ——
+               等于在用户几乎已经决定买之后才回答。这里用中性色 + 小图标说清楚，
+               不破坏"颜色只出现在小图标和主行动"的纪律。 */
+            '<div class="trust-row">' +
+              '<span class="trust-item">' + Icons.svg("shield") + "无账号 · 无订阅 · 无广告</span>" +
+              '<span class="trust-item">' + Icons.svg("lock") + "全部内容存在本机，不上传</span>" +
             "</div>" +
             '<div class="panel"><h4>' + Icons.svg("chart") + '最近 7 天获得的星星</h4><div class="week-bars">';
         week.forEach(function (d) {

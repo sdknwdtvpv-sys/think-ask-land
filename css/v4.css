@@ -1557,3 +1557,17 @@ html.v4 .grade-stamp.g-S .grade-letter .ico { color: var(--gold-ink); }
 html.v4 .grade-stamp.g-A .grade-letter .ico { color: var(--gold-ink); }
 html.v4 .grade-stamp.g-B .grade-letter .ico { color: var(--ok); }
 html.v4 .grade-stamp.g-C .grade-letter .ico { color: var(--primary); }
+
+/* 家长中心首屏的信任徽标：中性色 + 小图标，不使用强调色
+   （纪律：颜色只出现在小图标和主行动上）。 */
+html.v4 .trust-row {
+  display: flex; flex-direction: column; gap: var(--s2);
+  margin: var(--s4) 0 var(--s5);
+  padding: var(--s3) var(--s4);
+  background: var(--paper-2); border-radius: var(--r);
+}
+html.v4 .trust-item {
+  display: flex; align-items: center; gap: var(--s2);
+  font-size: var(--fs-sm); font-weight: 700; color: var(--ink-2);
+}
+html.v4 .trust-item .ico { width: 16px; height: 16px; color: var(--ink-3); flex: 0 0 auto; }
