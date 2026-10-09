@@ -1,11 +1,11 @@
 /* ============ 思问岛 · 打印物料(#/print) ============
    为什么值得做:
      屏幕替代不了纸。字卡要能贴在冰箱上、任务卡要能夹在绘本里 ——
-     家长用一次打印,胜过十次弹窗提醒。
+     家长用一次打印，胜过十次弹窗提醒。
    三种物料:
-     cards   字卡(汉字 + 拼音 + 图 + 组词)      scope: group/gXXX · learned · weak · all
-     quests  亲子任务卡(每天一张,线下做)
-     write   描红练习纸(田字格 + 部首部件提示)
+     cards   字卡（汉字 + 拼音 + 图 + 组词）      scope: group/gXXX · learned · weak · all
+     quests  亲子任务卡（每天一张，线下做）
+     write   描红练习纸（田字格 + 部首部件提示）
    实现要点:
      - 同一份 DOM,靠 @media print 切成 A4;屏幕上则是"打印预览"
      - 不引入任何外部依赖,window.print() 直接出纸 */
@@ -35,7 +35,7 @@
     return "全部字";
   }
 
-  /* 打印页统一外壳:标题 + 日期 + 提示 + 内容 */
+  /* 打印页统一外壳：标题 + 日期 + 提示 + 内容 */
   function shell(title, sub, body, toolbar) {
     var d = new Date();
     var date = d.getFullYear() + " 年 " + (d.getMonth() + 1) + " 月 " + d.getDate() + " 日";
@@ -52,10 +52,10 @@
 
   App.register("print", {
     render: function (p, view) {
-      /* 付费门控:线下物料打印属于完整内容包 */
+      /* 付费门控：线下物料打印属于完整内容包 */
       if (window.Entitlements && !window.Entitlements.isUnlocked("print")) {
         App.setTopbar("打印物料", true);
-        view.innerHTML = window.UI.lockCard({ what: "线下物料打印(字卡 / 描红纸 / 活动卡 / 物料包 / 奖状)" });
+        view.innerHTML = window.UI.lockCard({ what: "线下物料打印（字卡 / 描红纸 / 活动卡 / 物料包 / 奖状）" });
         window.UI.wireLock(view);
         return;
       }
@@ -66,7 +66,7 @@
       /* 🐞 修 bug（2026-10-09，看截图时发现）:
          原来只有**未解锁**分支里调了 App.setTopbar,解锁后走的分支没调 ——
          于是顶栏会留着**上一个路由的标题**（实测从"说一说"进打印,
-         顶栏一直显示"说一说"）。title 变量本来就算好了,这里提前设一次即可。 */
+         顶栏一直显示"说一说"）。title 变量本来就算好了，这里提前设一次即可。 */
       App.setTopbar(
         type === "quests" ? "亲子任务卡" :
         type === "pack"   ? "本周物料包" :
@@ -87,13 +87,13 @@
         }).join("") + "</div>";
         var bar = '<button class="btn btn-sky" id="pr-do">' + Icons.svg("print") + '打印</button>' +
           '<button class="btn btn-ghost" id="pr-back">‹ 返回</button>' +
-          '<span class="print-hint no-print">建议用 A4 纸,横向打印;沿虚线剪开即可。</span>';
-        view.innerHTML = shell(title, "每天抽一张,和孩子一起做", body, bar);
+          '<span class="print-hint no-print">建议用 A4 纸，横向打印;沿虚线剪开即可。</span>';
+        view.innerHTML = shell(title, "每天抽一张，和孩子一起做", body, bar);
       } else if (type === "pack") {
         /* ================= 本周物料包 =================
            家长的痛点不是"没有物料",而是"要一张张挑、一张张打"。
-           这里按**这周学过的字**自动出一张综合纸:识字卡 + 描红格 + 任务卡 + 奖状区,
-           一次打印,贴冰箱。字数为 0 时给明确指引,不出一张空白纸。 */
+           这里按**这周学过的字**自动出一张综合纸：识字卡 + 描红格 + 任务卡 + 奖状区,
+           一次打印，贴冰箱。字数为 0 时给明确指引，不出一张空白纸。 */
         title = "本周物料包";
         var ws = window.Store.weekSummary();
         var wk = window.Store.weekLearnedChars();
@@ -145,7 +145,7 @@
         view.innerHTML = shell(title, nameP + " · " + new Date().getMonth() + 1 + " 月这周", bodyP, barP);
       } else if (type === "cert") {
         /* ================= 奖状 =================
-           屏幕上的星星会消失,纸上的奖状会贴在冰箱上很久。
+           屏幕上的星星会消失，纸上的奖状会贴在冰箱上很久。
            这是把"线上进度"变成"线下鼓励"的最短路径。 */
         title = "奖状";
         var ws2 = window.Store.weekSummary();

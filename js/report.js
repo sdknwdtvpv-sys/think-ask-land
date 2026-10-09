@@ -8,16 +8,16 @@
    - 分享路径：支持 Web Share（手机可发微信）→ 退回「下载 PNG」
 
    接口
-     Report.collect()        -> 汇总数据对象(便于测试)
+     Report.collect()        -> 汇总数据对象（便于测试）
      Report.make()           -> Promise<canvas>
-     Report.preview()        -> 打开预览浮层(保存 / 分享)
+     Report.preview()        -> 打开预览浮层（保存 / 分享）
      Report.share()          -> Promise<'shared'|'downloaded'|'canceled'|'unsupported'>
    ============================================================ */
 
 (function () {
   "use strict";
 
-  var W = 750, H = 1000;          // 逻辑尺寸(export 时 2 倍)
+  var W = 750, H = 1000;          // 逻辑尺寸（export 时 2 倍）
   var PAPER = "#fffaf0", INK = "#3f3a52", MUTED = "#8a83a3";
   var ACTION = "#ff9f43", MINT = "#43c99b", GRAPE = "#a78bfa";
 
@@ -49,7 +49,7 @@
     var daily = st.daily || {};
     var days = Object.keys(daily).sort().slice(-7);
     if (days.length < 7) {
-      /* 数据不足 7 天时,按最近 7 个自然日补全(便于新用户也能出报告) */
+      /* 数据不足 7 天时，按最近 7 个自然日补全（便于新用户也能出报告） */
       var all = [];
       for (var i = 6; i >= 0; i--) {
         var d = new Date(); d.setDate(d.getDate() - i);
@@ -86,11 +86,11 @@
   /* ---------- 画卡 ---------- */
   function draw(canvas, d) {
     var ctx = canvas.getContext("2d");
-    var s = 2;                                   // 2 倍导出,手机上更清晰
+    var s = 2;                                   // 2 倍导出，手机上更清晰
     canvas.width = W * s; canvas.height = H * s;
     ctx.scale(s, s);
 
-    /* 背景:天空带 + 纸面 */
+    /* 背景：天空带 + 纸面 */
     ctx.fillStyle = PAPER; ctx.fillRect(0, 0, W, H);
     var g = ctx.createLinearGradient(0, 0, 0, 330);
     g.addColorStop(0, "#8ec9f0"); g.addColorStop(1, "#d9f0ff");
@@ -154,10 +154,10 @@
         text(ctx, ch ? ch.p : "", cx + chipW / 2, cy + chipW + 18, { size: 16, align: "center", color: MUTED, weight: 600 });
       });
     } else {
-      text(ctx, "这一周没有特别的易错字,学得很扎实!", 48, wY + 42, { size: 20, color: MUTED, weight: 600 });
+      text(ctx, "这一周没有特别的易错字，学得很扎实!", 48, wY + 42, { size: 20, color: MUTED, weight: 600 });
     }
 
-    /* 一周柱状图(星星) */
+    /* 一周柱状图（星星） */
     var bY = 800, maxStar = Math.max(4, Math.max.apply(null, d.week.map(function (x) { return x.stars; })));
     text(ctx, "最近 7 天的星星", 48, bY, { size: 22, weight: 800 });
     d.week.forEach(function (day, i) {
@@ -170,7 +170,7 @@
     });
 
     /* 页脚 */
-    text(ctx, "陪着孩子,一起把问题变成答案", W / 2, H - 54, { size: 22, align: "center", color: "#c9a24a", weight: 800 });
+    text(ctx, "陪着孩子，一起把问题变成答案", W / 2, H - 54, { size: 22, align: "center", color: "#c9a24a", weight: 800 });
     text(ctx, "报告由家长在本地生成 · 数据只存在这台设备", W / 2, H - 26, { size: 16, align: "center", color: MUTED, weight: 600 });
     return canvas;
   }
@@ -180,19 +180,19 @@
     var d = collect();
     return Promise.resolve().then(function () {
       var canvas = document.createElement("canvas");
-      /* 等字体就绪,避免标题用回退字体 */
+      /* 等字体就绪，避免标题用回退字体 */
       var ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
       return ready.then(function () { return draw(canvas, d); });
     });
   }
 
   /* ---------- 导出与分享 ---------- */
-  /* (原来这里有个 toBlob 辅助函数,已随导出逻辑一起搬进 js/platform-io.js) */
+  /* (原来这里有个 toBlob 辅助函数，已随导出逻辑一起搬进 js/platform-io.js) */
   function fileName() {
     return "思问岛-学习报告-" + window.Store.dayStr() + ".png";
   }
   /* 保存与分享都走平台桥接层(js/platform-io.js):
-     `<a download>` 在 App 内的 WKWebView 里不被支持,点了没反应;
+     `<a download>` 在 App 内的 WKWebView 里不被支持，点了没反应;
      `navigator.share` 在 WKWebView 里根本不存在。
      两者在原生壳里都会换成"写进 Cache + 唤起系统分享面板"。 */
   function download(canvas) {
@@ -205,12 +205,12 @@
     return p.then(function (cv) {
       return window.PlatformIO.shareImage({
         canvas: cv, filename: fileName(),
-        title: "思问岛 · 本周学习报告", text: "陪着孩子,一起把问题变成答案"
+        title: "思问岛 · 本周学习报告", text: "陪着孩子，一起把问题变成答案"
       });
     });
   }
 
-  /* ---------- 预览浮层(先看再存,避免直接弹出下载) ---------- */
+  /* ---------- 预览浮层（先看再存，避免直接弹出下载） ---------- */
   function preview() {
     return make().then(function (canvas) {
       var mask = document.createElement("div");
@@ -235,12 +235,12 @@
       mask.querySelector("#rp-save").addEventListener("click", function () {
         download(canvas).then(function (res) {
           if (res === "canceled") return;
-          window.UI.toast(res === "shared" ? "已打开分享面板,可存到相册或发给家人" : "已保存,去相册/下载里看看");
+          window.UI.toast(res === "shared" ? "已打开分享面板，可存到相册或发给家人" : "已保存，去相册/下载里看看");
         });
       });
       mask.querySelector("#rp-share").addEventListener("click", function () {
         share(canvas).then(function (res) {
-          if (res === "downloaded") window.UI.toast("已导出图片,可手动发送");
+          if (res === "downloaded") window.UI.toast("已导出图片，可手动发送");
           else if (res === "shared") window.UI.toast("已分享");
         });
       });

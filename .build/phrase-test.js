@@ -102,6 +102,34 @@ t("登记表里没有永远不会被说到的死条目", () => {
   return PASS(PHRASES.length + " 条登记全部有对应口播");
 });
 
+/* ---------- 3b. 登记表 ↔ 音频 必须对得上 ----------
+   🐞 这条是补的盲区（2026-10-09 真踩到）：
+   原来只校验「代码 ↔ 登记表」，**不校验「登记表 ↔ 音频」**。
+   而音频文件名是**文本的 sha1 前 8 位**（gen-audio.py 的 text_hash）。
+   于是出现一种静默损坏：把代码和登记表里的标点**一起**改掉（例如 , → ，），
+   前一条测试照样绿，但 hash 变了、音频文件对不上 ——
+   那几句口播会悄悄退回系统 TTS（音色不一致、iOS 独立 APP 下可能干脆不出声），
+   而且**没有任何测试会红**。
+   我这次批量统一半角标点为全角时正好踩中：6 句是"两边一起改、测试通过、
+   音频已失配"。所以在这里把音频存在性也纳入断言。 */
+t("登记表里每一句都有对应的预置音频（文本 hash 对得上）", () => {
+  const fs = require("fs"), glob = require("glob"), crypto = require("crypto");
+  const dirs = glob.sync(path.join(ROOT, "audio", "*")).filter((d) => fs.statSync(d).isDirectory());
+  if (!dirs.length) return SKIP ? SKIP("没有 audio/ 目录，跳过") : PASS("没有音频目录");
+  const h = (txt) => crypto.createHash("sha1").update(txt, "utf8").digest("hex").slice(0, 8);
+  const missing = [];
+  for (const ph of PHRASES) {
+    const f = "p-" + h(ph) + ".m4a";
+    // 只要**至少一个**音色里有这个文件，就算合成过；全都没有说明文本改过而没重合成
+    if (!dirs.some((d) => fs.existsSync(path.join(d, "p", f)))) missing.push(ph);
+  }
+  if (missing.length) {
+    return FAIL("这些口播没有音频文件（文本改过但没重新合成？）:" + missing.join(" | ") +
+      "  → 跑 .build/gen-audio.py 重新合成");
+  }
+  return PASS(PHRASES.length + " 条口播在 " + dirs.length + " 个音色目录中均有音频");
+});
+
 /* ---------- 4. 规模与成本(预置口播很便宜,别因为省字而漏掉) ---------- */
 t("口播体量可控(便于每次发版都重新合成)", () => {
   const chars = PHRASES.join("").length;

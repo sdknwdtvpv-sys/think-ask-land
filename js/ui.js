@@ -1,8 +1,8 @@
-/* ============ 思问岛 · UI 工具:彩带/星星飞行/提示/弹窗 ============ */
+/* ============ 思问岛 · UI 工具：彩带/星星飞行/提示/弹窗 ============ */
 (function () {
   "use strict";
 
-  /* ---------- 彩带(canvas 粒子) ---------- */
+  /* ---------- 彩带（canvas 粒子） ---------- */
   var cv = null, ctx2d = null, parts = [], raf = 0;
   var PALETTE = ["#ff8fab", "#ffd166", "#6fe3bd", "#7ec8ff", "#b197fc", "#ff9f1c", "#ff5d8f", "#34c99a"];
 
@@ -39,7 +39,7 @@
     }
     if (!raf) raf = requestAnimationFrame(tick);
   }
-  function rain() { // 全屏彩带雨(结算庆祝)
+  function rain() { // 全屏彩带雨（结算庆祝）
     if (!ensureCanvas()) return;
     for (var i = 0; i < 90; i++) {
       parts.push({
@@ -112,7 +112,7 @@
     }, 700);
   }
 
-  /* ---------- 大字飘字反馈(太棒了!) ---------- */
+  /* ---------- 大字飘字反馈（太棒了!） ---------- */
   function wordFlash(text) {
     var d = document.createElement("div");
     d.className = "word-flash";
@@ -132,17 +132,17 @@
     toastTimer = setTimeout(function () { t.classList.remove("show"); }, ms || 2000);
   }
 
-  /* ---------- 弹窗队列(奖励庆祝/确认框) ---------- */
+  /* ---------- 弹窗队列（奖励庆祝/确认框） ---------- */
   var queue = [], showing = false;
-  /* 清空所有弹窗与队列 —— 路由切换时必须调用,防止遮罩挡住新页面 */
+  /* 清空所有弹窗与队列 —— 路由切换时必须调用，防止遮罩挡住新页面 */
   function clearModals() {
     queue = [];
     showing = false;
-    lastFocus = null;   // 路由已切换,原焦点元素多半已被销毁,不再尝试归还
+    lastFocus = null;   // 路由已切换，原焦点元素多半已被销毁，不再尝试归还
     var root = document.getElementById("modal-root");
     if (root) root.innerHTML = "";
   }
-  /* 弹窗无障碍:role=dialog + aria-label;打开时记住焦点,关闭后归还 */
+  /* 弹窗无障碍:role=dialog + aria-label;打开时记住焦点，关闭后归还 */
   function attr(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -171,7 +171,7 @@
     var mask = document.createElement("div");
     mask.className = "modal-mask";
     var title = it.kind === "sticker" ? "获得新贴纸!" : it.kind === "badge" ? "获得新勋章!" : it.title || "";
-    var text = it.kind === "sticker" ? "集满 " + window.Store.STICKER_EVERY + " 颗星星的奖励,继续加油哦!" : it.kind === "badge" ? it.d || "" : it.text || "";
+    var text = it.kind === "sticker" ? "集满 " + window.Store.STICKER_EVERY + " 颗星星的奖励，继续加油哦!" : it.kind === "badge" ? it.d || "" : it.text || "";
     var mood = (it.kind === "sticker" || it.kind === "badge") ? "cheer" : "happy";
     mask.innerHTML =
       '<div class="modal-card" role="dialog" aria-modal="true" aria-label="' + attr(title || "提示") + '">' +
@@ -277,8 +277,8 @@
     }
   }
 
-  /* Esc 关闭弹窗(键盘可达性) —— 必须关「最上面」那一层:
-     旧的 querySelector 只取第一个匹配,多层弹窗时会关掉被遮住的那层,
+  /* Esc 关闭弹窗（键盘可达性） —— 必须关「最上面」那一层:
+     旧的 querySelector 只取第一个匹配，多层弹窗时会关掉被遮住的那层,
      反而把上面的弹窗留在屏幕上。 */
   document.addEventListener("keydown", function (ev) {
     if (ev.key !== "Escape") return;
@@ -291,19 +291,19 @@
 
   /* ---------- 付费内容的"上锁"卡片 ----------
      ⚠️ 儿童类合规(Apple 1.3):应用内的**购买入口必须位于家长门之后**。
-     所以这里刻意**不放购买按钮** —— 只告诉家长去哪里解锁,并跳到家长中心(那里有算术门)。
-     孩子点到锁住的模块时,不会看到任何"买东西"的入口。 */
+     所以这里刻意**不放购买按钮** —— 只告诉家长去哪里解锁，并跳到家长中心（那里有算术门）。
+     孩子点到锁住的模块时，不会看到任何"买东西"的入口。 */
   function lockCard(o) {
     o = o || {};
-    /* 这一屏由 4 个受限模块共用(拼音/读一读 L3~L5/说一说/打印),
+    /* 这一屏由 4 个受限模块共用（拼音/读一读 L3~L5/说一说/打印）,
        所以它也必须走 v4 —— 否则受限模块的观感会突然退回旧版。
-       ⚠️ 合规红线:这里**不能**出现购买按钮。锁定态只做说明 + 指向家长门,
-       购买入口只在家长验证之后(见 js/entitlements.js 的说明)。 */
+       ⚠️ 合规红线：这里**不能**出现购买按钮。锁定态只做说明 + 指向家长门,
+       购买入口只在家长验证之后（见 js/entitlements.js 的说明）。 */
     return '<div class="screen v4 lock-v4" data-screen="lock"><div class="panel lock-card">' +
         '<div class="lock-ico">' + (window.Icons ? Icons.svg("lock") : "") + "</div>" +
         "<h3>这部分内容还没解锁</h3>" +
         '<p class="parent-note">' + (o.what || "该内容") + "属于<b>完整内容包</b>,当前还没有解锁。</p>" +
-        '<p class="parent-note">请家长到 <b>家长中心 → 完整内容</b> 里查看(那里有一道家长验证)。</p>' +
+        '<p class="parent-note">请家长到 <b>家长中心 → 完整内容</b> 里查看（那里有一道家长验证）。</p>' +
         '<button class="btn btn-lg" id="lock-go" data-role="primary">去家长中心</button>' +
       "</div></div>";
   }
@@ -314,7 +314,7 @@
       try { if (window.SFX) window.SFX.click(); } catch (e) { /* 忽略 */ }
       if (window.App && window.App.navigate) window.App.navigate("#/parent");
     });
-    /* 顶栏返回仍然可用(为空的 backHash 只是显式一点) */
+    /* 顶栏返回仍然可用（为空的 backHash 只是显式一点） */
     if (backHash && window.App && window.App.setTopbar) window.App.setTopbar(backHash, true);
   }
 

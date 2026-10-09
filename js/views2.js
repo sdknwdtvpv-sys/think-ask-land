@@ -5,36 +5,36 @@
   var esc = window.escHtml;
   var DB = window.CharDB;
 
-  /* 答错时按错因给一句"怎么改"的提示(不出现"错"字,不吓孩子) */
+  /* 答错时按错因给一句"怎么改"的提示（不出现"错"字，不吓孩子） */
   var CAUSE_HINT = {
-    tone: "声调不一样哦,再听一次 🔊",
-    snd: "它们听起来很像,仔细听~",
-    shp: "这两个字长得像,看清楚哦",
-    sem: "意思记混啦,再看看图",
+    tone: "声调不一样哦，再听一次 🔊",
+    snd: "它们听起来很像，仔细听~",
+    shp: "这两个字长得像，看清楚哦",
+    sem: "意思记混啦，再看看图",
     rcl: "多听几遍就记住啦"
   };
 
-  /* ================= 练习:范围选择 ================= */
+  /* ================= 练习：范围选择 ================= */
   App.register("practice", {
     render: function (p, view) {
       App.setTopbar("趣味练习", true);
       var st = window.Store.state;
       var learned = DB.learnedPool();
-      /* 错题重练:孩子答错过的字单独成池,下一轮会针对各自的错因出题 */
+      /* 错题重练：孩子答错过的字单独成池，下一轮会针对各自的错因出题 */
       var wrongs = DB.errorPool();
       var wrongCard = '<button class="scope-card' + (wrongs.length < 4 ? " disabled" : "") + '" data-scope="wrong">' +
         '<span class="scope-ico t-rose">' + Icons.svg("target") + '</span><span><span class="scope-name">错题重练</span>' +
-        '<span class="scope-meta">' + (wrongs.length < 4 ? "攒够 4 个错过的字就能专项突破(已有 " + wrongs.length + " 个)" : "共 " + wrongs.length + " 个字,按错因重点练") + "</span></span>" +
+        '<span class="scope-meta">' + (wrongs.length < 4 ? "攒够 4 个错过的字就能专项突破（已有 " + wrongs.length + " 个）" : "共 " + wrongs.length + " 个字，按错因重点练") + "</span></span>" +
         '<span class="scope-go">›</span></button>';
       var html =
         '<div class="screen v4 practice-v4" data-screen="practice">' +
-          /* 去掉正文里的 emoji:它在句子里只是装饰,却会把整屏拉回"网页感" */
-          '<div class="practice-intro">每轮 10 道题:听词语选字、听写单字、看字选图、看字选拼音、看拼音选字、听音辨调。答对 1 题得 1 颗星,全对还有奖励!</div>' +
+          /* 去掉正文里的 emoji:它在句子里只是装饰，却会把整屏拉回"网页感" */
+          '<div class="practice-intro">每轮 10 道题：听词语选字、听写单字、看字选图、看字选拼音、看拼音选字、听音辨调。答对 1 题得 1 颗星，全对还有奖励!</div>' +
           '<div class="section-title">' + Icons.svg("book") + '学过多少练多少</div>' +
           '<div class="scope-list">' +
           '<button class="scope-card' + (learned.length < 4 ? " disabled" : "") + '" data-scope="learned">' +
             '<span class="scope-ico t-mint">' + Icons.svg("star") + '</span><span><span class="scope-name">我学过的字</span>' +
-            '<span class="scope-meta">' + (learned.length < 4 ? "至少学会 4 个字才能开始哦(还差 " + (4 - learned.length) + " 个)" : "共 " + learned.length + " 个字,优先复习薄弱字") + "</span></span>" +
+            '<span class="scope-meta">' + (learned.length < 4 ? "至少学会 4 个字才能开始哦(还差 " + (4 - learned.length) + " 个)" : "共 " + learned.length + " 个字，优先复习薄弱字") + "</span></span>" +
             '<span class="scope-go">›</span></button>' +
           wrongCard +
           '<div class="section-title" style="margin-top:18px">' + Icons.svg("flag") + '按主题小岛练</div>';
@@ -42,7 +42,7 @@
         var learnedN = g.chars.filter(function (ch) { return st.chars[ch.c] && st.chars[ch.c].learned; }).length;
         html +=
           '<button class="scope-card" data-scope="g' + gi + '">' +
-            /* 与地图一致:用岛序号而不是 emoji(见 js/app.js 里地图同款改动的说明) */
+            /* 与地图一致：用岛序号而不是 emoji(见 js/app.js 里地图同款改动的说明) */
             '<span class="scope-ico t-slate scope-idx">' + (gi + 1) + '</span><span><span class="scope-name">' + esc(g.name) + "</span>" +
             '<span class="scope-meta">全部 ' + g.chars.length + ' 字可练 · 已学 ' + learnedN + "</span></span>" +
             '<span class="scope-go">›</span></button>';
@@ -58,7 +58,7 @@
     }
   });
 
-  /* ================= 练习:答题 ================= */
+  /* ================= 练习：答题 ================= */
   function poolOf(scope) {
     if (scope === "learned") return DB.learnedPool();
     if (scope === "wrong") return DB.errorPool();
@@ -74,7 +74,7 @@
       var scope = p.scope || "learned";
       var pool = poolOf(scope);
       if (pool.length < 4) {
-        window.UI.toast("字还不够 4 个,先去学几个字吧!");
+        window.UI.toast("字还不够 4 个，先去学几个字吧!");
         App.after(600, function () { App.navigate("#/practice"); });
         return;
       }
@@ -102,7 +102,7 @@
         '<div class="feedback-line" id="fb" aria-live="polite"></div>' +
       "</div>";
 
-    /* 进度条 + 每题结果刻度(替代原来的小圆点) */
+    /* 进度条 + 每题结果刻度（替代原来的小圆点） */
     var ticksEl = view.querySelector("#hud-ticks");
     var tickEls = qs.map(function (q, i) {
       var t = document.createElement("span");
@@ -119,7 +119,7 @@
       if (fill) fill.style.width = Math.round(idx / qs.length * 100) + "%";
     }
 
-    /* 连击徽章:连对 3 题出现,5 题以上"发烫"(纯视觉激励,不加星,避免影响结算数值) */
+    /* 连击徽章：连对 3 题出现,5 题以上"发烫"(纯视觉激励，不加星，避免影响结算数值) */
     function showCombo() {
       var el = view.querySelector("#combo");
       if (!el) return;
@@ -144,16 +144,16 @@
       var prompt = "";
       if (q.type === "listen") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听一听,是哪个字?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听一听，是哪个字?</div>' +
           '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button></div>';
       } else if (q.type === "dictation") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听写:听到的是哪个字?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听写：听到的是哪个字?</div>' +
           '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button>' +
           '<div class="prompt-hint">仔细听声调哦</div></div>';
       } else if (q.type === "tonePick") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("pinyin") + '听一听,声调对吗?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("pinyin") + '听一听，声调对吗?</div>' +
           '<div class="prompt-char-row"><div class="prompt-char kai">' + esc(q.target.c) + "</div>" +
           '<button class="speak-big small" id="sp-btn">' + Icons.svg("speak") + '</button></div></div>';
       } else if (q.type === "partJoin") {
@@ -165,9 +165,9 @@
           '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("parts") + '它是由哪些部件组成的?</div>' +
           '<div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
       } else if (q.type === "wordDictation") {
-        /* 整词听写:听一个词,选出听到的那个词 */
+        /* 整词听写：听一个词，选出听到的那个词 */
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听一个词,选出听到的</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听一个词，选出听到的</div>' +
           '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button>' +
           '<div class="prompt-hint">再听一遍就点喇叭</div></div>';
       } else if (q.type === "charEmoji") {
@@ -177,9 +177,9 @@
       } else if (q.type === "charPinyin") {
         prompt = '<div class="prompt-area"><div class="prompt-label">选出它的拼音</div><div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
       } else {
-        prompt = '<div class="prompt-area"><div class="prompt-label">看拼音,选汉字</div><div class="prompt-py">' + esc(q.target.p) + "</div></div>";
+        prompt = '<div class="prompt-area"><div class="prompt-label">看拼音，选汉字</div><div class="prompt-py">' + esc(q.target.p) + "</div></div>";
       }
-      /* 无障碍:屏幕朗读软件只念可见文字会读成「日」而不说是"第几个选项",
+      /* 无障碍：屏幕朗读软件只念可见文字会读成「日」而不说是"第几个选项",
          所以每个选项补一个 aria-label(说明它是选项、第几个、内容是什么)。 */
       var opts = '<div class="opts-grid" role="group" aria-label="选项">';
       q.options.forEach(function (o, oi) {
@@ -194,7 +194,7 @@
       area.innerHTML = prompt + opts;
       view.querySelector("#fb").textContent = "";
       view.querySelector("#fb").className = "feedback-line";
-      /* 反馈行对屏幕朗读软件宣告(答对/答错的提示要说出来) */
+      /* 反馈行对屏幕朗读软件宣告（答对/答错的提示要说出来） */
       view.querySelector("#fb").setAttribute("aria-live", "polite");
 
       if (q.speak) {
@@ -204,9 +204,9 @@
           window.Speech.speak(q.speak, q.type === "listen" ? 0.75 : 0.7);
         };
         /* 有 speak 内容就必须有喇叭。但**不能假设它一定在** ——
-           曾经因为漏给「整词听写」加喇叭分支,这里对 null 调 addEventListener,
-           整道题直接崩掉(而且是静默的:只有控制台报错,孩子看到的是点了没反应)。
-           兜底:没有喇叭也照样自动朗读,只是少了"再听一遍"的按钮。 */
+           曾经因为漏给「整词听写」加喇叭分支，这里对 null 调 addEventListener,
+           整道题直接崩掉（而且是静默的：只有控制台报错，孩子看到的是点了没反应）。
+           兜底：没有喇叭也照样自动朗读，只是少了"再听一遍"的按钮。 */
         var spBtn = view.querySelector("#sp-btn");
         if (spBtn) spBtn.addEventListener("click", spk);
         App.after(350, spk);
@@ -240,7 +240,7 @@
         window.UI.burst(r.left + r.width / 2, r.top + r.height / 2, 26);
         fb.textContent = ["太棒了!", "答对啦!", "真厉害!", "完全正确!", "好聪明!"][(Math.random() * 5) | 0] + " ⭐+1";
         fb.classList.add("good");
-        /* 固定句而非"连对N个":动态拼接无法预置音频,而表扬声恰恰最不能在
+        /* 固定句而非"连对N个":动态拼接无法预置音频，而表扬声恰恰最不能在
            iOS 独立 APP 里静默。连对的数字继续显示在上方 HUD 里。 */
         window.Speech.speak(combo >= 3 ? "连对啦,太厉害了!" : "答对了,真棒", 0.9);
         if (combo === 3 || combo === 5 || combo === 8) {
@@ -254,7 +254,7 @@
         showCombo();
         btn.classList.add("wrong");
         if (tick) tick.classList.add("bad");
-        /* 错因分类:孩子为什么选错 → 记进档案,家长端能看到,下一轮优先练对应题型 */
+        /* 错因分类：孩子为什么选错 → 记进档案，家长端能看到，下一轮优先练对应题型 */
         var chosenOpt = q.options[oi] || {};
         var cause = (window.Games && Games.classify) ? Games.classify(q.target, chosenOpt.ref, q.type) : null;
         window.Store.quizResult(q.target.c, false, cause, (window.Games && Games.dimOf) ? Games.dimOf(q.type) : null);
@@ -285,10 +285,10 @@
       var ratio = qs.length ? okCount / qs.length : 0;
       var grade = ratio >= 1 ? { k: "S", t: "完美通关!", m: "cheer" }
         : ratio >= 0.8 ? { k: "A", t: "很棒哦!", m: "cheer" }
-        : ratio >= 0.6 ? { k: "B", t: "不错,继续!", m: "happy" }
+        : ratio >= 0.6 ? { k: "B", t: "不错，继续!", m: "happy" }
         : { k: "C", t: "多练练更棒!", m: "think" };
-      var msg = okCount === qs.length ? "全部答对,你是识字小冠军!" : okCount >= qs.length * 0.7 ? "很棒!再练一轮就更好啦!" : "多多练习,你会更厉害!";
-      /* 星星逐颗跳出(超过 12 颗折叠显示) */
+      var msg = okCount === qs.length ? "全部答对，你是识字小冠军!" : okCount >= qs.length * 0.7 ? "很棒！再练一轮就更好啦!" : "多多练习，你会更厉害!";
+      /* 星星逐颗跳出（超过 12 颗折叠显示） */
       var starRow = "";
       var showN = Math.min(earned, 12);
       for (var si = 0; si < showN; si++) {
@@ -314,7 +314,7 @@
       if (window.SFX) SFX.fanfare();
       view.querySelector("#again").addEventListener("click", function () {
         if (window.SFX) SFX.click();
-        App.clearTimers();                 // 不经过 render 的重开:先清残留定时器
+        App.clearTimers();                 // 不经过 render 的重开：先清残留定时器
         if (window.UI.clearModals) window.UI.clearModals(); // 和弹窗遮罩
         startRun(view, scope, poolOf(scope).length >= 4 ? poolOf(scope) : pool);
       });
@@ -332,7 +332,7 @@
     renderQ();
   }
 
-  /* ================= 复习:入口 ================= */
+  /* ================= 复习：入口 ================= */
   App.register("review", {
     render: function (p, view) {
       App.setTopbar("今日复习", true);
@@ -340,14 +340,14 @@
       var learnedN = window.Store.counts().learned;
       view.innerHTML =
         '<div class="screen v4 review-v4" data-screen="review">' +
-          '<div class="review-info">' + Icons.svg("sparkle") + '<b>记忆小秘密:</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现,复习一次就记得更牢,连续答对 4 次就进入<b>长期记忆</b>啦!</div>' +
+          '<div class="review-info">' + Icons.svg("sparkle") + '<b>记忆小秘密:</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现，复习一次就记得更牢，连续答对 4 次就进入<b>长期记忆</b>啦!</div>' +
           (due.length === 0
-            ? '<div class="empty-tip"><span class="big">🎈</span>今天没有要复习的字' + (learnedN ? ",学得真棒!<br>明天再来看看,或者去学新字吧" : "<br>先去学几个新字吧") + "</div>" +
+            ? '<div class="empty-tip"><span class="big">🎈</span>今天没有要复习的字' + (learnedN ? ",学得真棒!<br>明天再来看看，或者去学新字吧" : "<br>先去学几个新字吧") + "</div>" +
               '<button class="btn btn-lg btn-sky" id="go-learn">' + Icons.svg("book") + '去学新字</button>'
             : '<div style="text-align:center;margin:26px 0">' +
                 '<div style="font-size:74px">' + Icons.svg("mail") + '</div>' +
                 '<div style="font-size:22px;font-weight:900;margin:10px 0 4px">有 ' + due.length + " 个字想见你!</div>" +
-                '<div style="color:var(--ink-light);font-size:14px;font-weight:600">翻翻卡,想一想,你还认识它们吗?</div>' +
+                '<div style="color:var(--ink-light);font-size:14px;font-weight:600">翻翻卡，想一想，你还认识它们吗?</div>' +
               "</div>" +
               '<button class="btn btn-lg btn-mint" id="go-review">' + Icons.svg("refresh") + '开始复习(' + Math.min(due.length, 20) + "张卡)</button>") +
         "</div>";
@@ -361,7 +361,7 @@
     }
   });
 
-  /* ================= 复习:翻卡 ================= */
+  /* ================= 复习：翻卡 ================= */
   App.register("runcards", {
     render: function (p, view) {
       var due = window.Store.dueChars().slice(0, 20);
@@ -437,7 +437,7 @@
             window.UI.wordFlash(["记得真牢!", "太棒了!", "厉害!"][(Math.random() * 3) | 0]);
           } else {
             if (window.SFX) SFX.wrong();
-            window.UI.toast("没关系,多看几遍就记住啦 💪");
+            window.UI.toast("没关系，多看几遍就记住啦 💪");
             window.Speech.speakSeq([ch.c, ch.w[0], ch.s], 0.8);
           }
           App.after(ok ? 900 : 1600, function () { idx++; renderCard(); });
@@ -449,7 +449,7 @@
           '<div class="screen v4 run-v4 run-end" data-screen="run-end">' +
             '<span class="end-emoji">🎈</span>' +
             '<div class="score-big">复习完成!</div>' +
-            '<div class="score-sub">共复习 ' + cards.length + " 个字,认识 " + knew + " 个<br>忘记的字一会儿还会再来找你哦</div>" +
+            '<div class="score-sub">共复习 ' + cards.length + " 个字，认识 " + knew + " 个<br>忘记的字一会儿还会再来找你哦</div>" +
             '<div class="end-stars">获得 ' + earned + " " + Icons.svg("starFill") + "</div>" +
             '<div class="end-btns">' +
               '<button class="btn btn-lg btn-ghost" id="go-home">' + Icons.svg("home") + '回首页</button>' +
@@ -488,7 +488,7 @@
         '<div class="screen v4 rewards-v4" data-screen="rewards">' +
           '<div class="reward-head">' +
             '<div class="reward-stars">' + Icons.svg("starFill") + st.stars + "</div>" +
-            '<div class="reward-next">' + (allGot ? "全部贴纸都集齐啦,太厉害了!" : "再得 " + need + " 颗星,解锁下一张贴纸!") + "</div>" +
+            '<div class="reward-next">' + (allGot ? "全部贴纸都集齐啦，太厉害了!" : "再得 " + need + " 颗星，解锁下一张贴纸!") + "</div>" +
             (allGot ? "" :
               '<div class="reward-track">' +
                 '<span class="rt-next">' + nextSticker.e + "</span>" +
@@ -499,7 +499,7 @@
           '<div class="section-title">' + Icons.svg("sparkle") + "贴纸册(" + unlocked + "/" + window.Store.STICKERS.length + ")</div>" +
           '<div class="sticker-wall">';
       window.Store.STICKERS.forEach(function (s, i) {
-        var rot = [-3, 2, -1.5, 3, -2.5][i % 5];   // 手账式轻旋转,固定值避免抖动
+        var rot = [-3, 2, -1.5, 3, -2.5][i % 5];   // 手账式轻旋转，固定值避免抖动
         if (i < unlocked) {
           html += '<div class="sticker got" style="--rot:' + rot + 'deg"><span class="st-emoji">' + s.e + '</span><span class="st-name">' + s.n + "</span></div>";
         } else {
@@ -535,14 +535,14 @@
         App.setTopbar("家长中心", true);
         /* 家长门必须是「成人级任务」——这是 Apple 儿童类 Guideline 1.3 的判据
            ("adult-level tasks"),而我们的年龄带是 5 and under。
-           原来是 6~8 × 3~8 的个位数乘法,对 5~6 岁孩子偏低;
+           原来是 6~8 × 3~8 的个位数乘法，对 5~6 岁孩子偏低;
            改成**两位数 × 一位数**(12~29 × 3~9,积 36~261),再加语音提示与错误锁定。
            见 APP-PLAN.md 8.5 风险 2。 */
         var a = 12 + ((Math.random() * 18) | 0), b = 3 + ((Math.random() * 7) | 0);
         v.innerHTML =
           '<div class="screen v4 gate-v4" data-screen="gate"><div class="gate-box">' +
             '<div class="gate-emoji">' + Icons.svg("math") + '</div><h3>家长验证</h3>' +
-            "<p>为了防止小朋友误操作,请<b>家长</b>回答下面这道题:<br>" +
+            "<p>为了防止小朋友误操作，请<b>家长</b>回答下面这道题:<br>" +
             "小朋友请叫爸爸妈妈来 🙋</p>" +
             '<div class="gate-q">' + a + " × " + b + " = ?</div>" +
             '<input class="gate-input" id="gate-in" type="number" inputmode="numeric" autocomplete="off">' +
@@ -550,8 +550,8 @@
             '<button class="btn btn-lg btn-sky" id="gate-ok">确 定</button>' +
           "</div></div>";
 
-        /* 语音提示:Apple 明确建议"面向尚未识字的孩子时用语音提示,让他知道要找家长"。
-           这里是家长门,念一句不会打扰谁;TTS 不可用就静默跳过。 */
+        /* 语音提示:Apple 明确建议"面向尚未识字的孩子时用语音提示，让他知道要找家长"。
+           这里是家长门，念一句不会打扰谁;TTS 不可用就静默跳过。 */
         try {
           if (window.Speech && window.Speech.speak) {
             App.after(320, function () { window.Speech.speak("这道题请家长来完成", 0.92); });
@@ -572,7 +572,7 @@
           App.after(500, function () { box.style.animation = ""; });
         }
 
-        /* 连错 3 次锁 10 秒:既挡住乱按的孩子,又不至于把家长挡在门外 */
+        /* 连错 3 次锁 10 秒：既挡住乱按的孩子，又不至于把家长挡在门外 */
         function lock() {
           locked = true;
           /* "被锁 10 秒"是一个**独立事件**,值得一个和"答错"不同、稍重的触觉。
@@ -593,7 +593,7 @@
               el.textContent = "可以再试了";
               return;
             }
-            el.textContent = "错得有点多,请等 " + left + " 秒再试";
+            el.textContent = "错得有点多，请等 " + left + " 秒再试";
             left--;
             App.after(1000, tick);
           };
@@ -612,7 +612,7 @@
           tries++;
           if (window.SFX) SFX.wrong();
           if (tries >= 3) { lock(); return; }
-          errEl().textContent = "答案不对,再算算~";
+          errEl().textContent = "答案不对，再算算~";
           inp.value = "";
           shake();
         };
@@ -623,17 +623,17 @@
       /* 把自检结果翻译成"该怎么办"(家长不需要看懂 API) */
       function sndAdvice(d, ap) {
         if (ap.state !== 2 && !d.ttsSupported) {
-          return "⚠️ 这台设备两条发声通道都不可用:预置音频没加载成功,浏览器也不支持朗读。请先连一次网络再打开本页,让音频配置加载进来。";
+          return "⚠️ 这台设备两条发声通道都不可用：预置音频没加载成功，浏览器也不支持朗读。请先连一次网络再打开本页，让音频配置加载进来。";
         }
         if (ap.state === 2 && !ap.unlocked) {
-          return "在屏幕上任意点一下,声音就会被激活 —— 主屏幕 APP 需要先有一次点击才能播放。";
+          return "在屏幕上任意点一下，声音就会被激活 —— 主屏幕 APP 需要先有一次点击才能播放。";
         }
         if (ap.state !== 2 && d.ttsZh === 0) {
-          return "⚠️ 预置音频没加载,而且系统里没有中文朗读音色。建议:连一次网络重新打开本页;或在系统设置里安装中文语音包。";
+          return "⚠️ 预置音频没加载，而且系统里没有中文朗读音色。建议：连一次网络重新打开本页;或在系统设置里安装中文语音包。";
         }
-        if (ap.state !== 2) return "预置音频暂不可用,当前回退到浏览器朗读。连一次网络后重新打开本页即可恢复。";
-        if (d.ttsZh === 0) return "预置音频正常 ✓ 系统没有中文朗读音色,但常用字都有预置音频,基本不影响使用。";
-        return "两条通道都正常 ✓ 预置音频优先,没有预置的条目会自动用浏览器朗读兜底。";
+        if (ap.state !== 2) return "预置音频暂不可用，当前回退到浏览器朗读。连一次网络后重新打开本页即可恢复。";
+        if (d.ttsZh === 0) return "预置音频正常 ✓ 系统没有中文朗读音色，但常用字都有预置音频，基本不影响使用。";
+        return "两条通道都正常 ✓ 预置音频优先，没有预置的条目会自动用浏览器朗读兜底。";
       }
 
       function renderDash(v) {
@@ -646,7 +646,7 @@
         var week = window.Store.weekActivity();
         var maxStar = Math.max(4, Math.max.apply(null, week.map(function (d) { return d.stars; })));
 
-        /* ---- 孩子档案:一台设备上给每个孩子独立进度 ---- */
+        /* ---- 孩子档案：一台设备上给每个孩子独立进度 ---- */
         var kidPanel = function () {
           var list = window.Store.profiles();
           var active = window.Store.activeProfile().id;
@@ -680,10 +680,10 @@
               "</div></details></div>";
         };
 
-        /* ---- 完整内容(内购解锁) ----
+        /* ---- 完整内容（内购解锁） ----
            整个购买/恢复入口都**只在这里** —— 家长中心已经在家长门之后,
            满足 Apple 1.3「purchasing opportunities 必须位于 parental gate 之后」。
-           被锁住的模块页里刻意不放购买按钮(见 js/ui.js 的 lockCard)。 */
+           被锁住的模块页里刻意不放购买按钮（见 js/ui.js 的 lockCard）。 */
         var entitlePanel = function () {
           var E = window.Entitlements;
           if (!E) return "";
@@ -693,7 +693,7 @@
           if (unlocked) {
             return '<div class="panel" id="panel-entitle"><h4>' + Icons.svg("trophy") + '完整内容</h4>' +
               '<p class="parent-note">' + Icons.svg("check") + '<b>已解锁</b> —— 分级阅读 L3~L5、拼音进阶、说一说、线下物料打印都可以用了。' +
-              '<br>感谢支持!这一份是<b>一次性买断</b>,不会再收费。</p></div>';
+              '<br>感谢支持！这一份是<b>一次性买断</b>,不会再收费。</p></div>';
           }
           var rows = E.paidFeatures().map(function (t) {
             return "<li>" + esc(t) + "</li>";
@@ -710,15 +710,15 @@
             '<p class="parent-note" id="ent-hint">' +
               (r.nativeEnv
                 ? "购买需要通过 App Store 连一次网;买完之后所有内容都能<b>离线</b>使用。换手机后用「恢复购买」找回。"
-                : "当前是网页版,全部内容都可直接使用。") +
+                : "当前是网页版，全部内容都可直接使用。") +
             "</p></div>";
         };
 
-        /* ---- 备份与搬家:存档导出/导入 ---- */
+        /* ---- 备份与搬家：存档导出/导入 ---- */
         var backupPanel = function () {
           var hasBackup = window.Store.hasImportBackup();
           return '<div class="panel" id="panel-backup"><h4>' + Icons.svg("shield") + "备份与换手机</h4>" +
-            '<p class="parent-note">进度保存在本机浏览器里。换手机、清理浏览器数据前,先导出一份存档(一个 json 文件),在新设备上导入即可继续。</p>' +
+            '<p class="parent-note">进度保存在本机浏览器里。换手机、清理浏览器数据前，先导出一份存档（一个 json 文件）,在新设备上导入即可继续。</p>' +
             '<div class="backup-btns">' +
               '<button class="btn btn-sky" id="btn-export">' + Icons.svg("down") + '导出存档</button>' +
               '<button class="btn btn-ghost" id="btn-import">' + Icons.svg("up") + '导入存档</button>' +
@@ -726,8 +726,8 @@
             '<input type="file" id="import-file" accept=".json,application/json" style="display:none">' +
             '<div id="import-preview" class="import-preview" hidden></div>' +
             (hasBackup ? '<button class="btn btn-ghost" id="btn-undo-import">↩️ 撤销上次导入</button>' : "") +
-            '<details class="text-mode"><summary>用文字复制/粘贴(适合微信传给自己)</summary>' +
-              '<textarea id="save-text" rows="4" placeholder="点上面的「导出存档」后,这里会出现一段文字;或把另一台设备的存档文字粘进来。"></textarea>' +
+            '<details class="text-mode"><summary>用文字复制/粘贴（适合微信传给自己）</summary>' +
+              '<textarea id="save-text" rows="4" placeholder="点上面的「导出存档」后，这里会出现一段文字;或把另一台设备的存档文字粘进来。"></textarea>' +
               '<div class="backup-btns"><button class="btn btn-ghost" id="btn-text-out">生成文字</button>' +
               '<button class="btn btn-ghost" id="btn-text-in">从文字导入</button></div>' +
             "</details></div>";
@@ -759,7 +759,7 @@
         html += "</div></div>";
 
         var weak = window.Store.weakChars(10);
-        html += '<div class="panel"><h4>' + Icons.svg("pencil") + "需要巩固的字(答错较多)</h4>";
+        html += '<div class="panel"><h4>' + Icons.svg("pencil") + "需要巩固的字（答错较多）</h4>";
         if (weak.length) {
           html += '<div class="weak-list">';
           weak.forEach(function (w) {
@@ -772,24 +772,24 @@
           html += "</div><p class=\"parent-note\" style=\"margin-top:10px\">点字可听读音。这些字会在练习和复习中自动优先出现;" +
             Icons.svg("flame") + " 标记表示错得比较多。</p>";
         } else {
-          html += '<p class="parent-note">暂时没有容易错的字,学得很扎实!' + (due ? " 当前有 " + due + " 个字到期待复习。" : "") + "</p>";
+          html += '<p class="parent-note">暂时没有容易错的字，学得很扎实!' + (due ? " 当前有 " + due + " 个字到期待复习。" : "") + "</p>";
         }
         html += "</div>";
 
-        /* ---- 错因分析:孩子到底"错在哪",并给一句可执行的建议 ---- */
+        /* ---- 错因分析：孩子到底"错在哪",并给一句可执行的建议 ---- */
         var causes = window.Store.errorSummary().filter(function (x) { return x.n > 0; });
         var causeAdvice = {
-          tone: "同一音节不同声调容易混(如 mā / mǎ)。建议用「听音辨调」多练,家长读的时候把声调夸张一点。",
-          snd: "声母或韵母听混(如 b/p、an/ang)。建议多听单字跟读,再玩「听写」。",
-          shp: "字形相近的字看混(如 木 / 本)。建议配合笔顺描红,边写边说出部件。",
-          sem: "主题相近的词义记混(比如动物类串了)。建议结合实物或图片一起认。",
-          rcl: "还没记牢,属于正常遗忘。按复习节奏多见面几次就会稳。"
+          tone: "同一音节不同声调容易混（如 mā / mǎ）。建议用「听音辨调」多练，家长读的时候把声调夸张一点。",
+          snd: "声母或韵母听混（如 b/p、an/ang）。建议多听单字跟读，再玩「听写」。",
+          shp: "字形相近的字看混（如 木 / 本）。建议配合笔顺描红，边写边说出部件。",
+          sem: "主题相近的词义记混（比如动物类串了）。建议结合实物或图片一起认。",
+          rcl: "还没记牢，属于正常遗忘。按复习节奏多见面几次就会稳。"
         };
         var causeTotal = causes.reduce(function (a, x) { return a + x.n; }, 0);
         var maxCause = causes.length ? causes[0].n : 1;
-        html += '<div class="panel"><h4>' + Icons.svg("chart") + "错在哪里(错因分析)</h4>";
+        html += '<div class="panel"><h4>' + Icons.svg("chart") + "错在哪里（错因分析）</h4>";
         if (!causeTotal) {
-          html += '<p class="parent-note">做过几轮练习后,这里会显示孩子容易错在哪一类:音近、声调、字形还是词义。</p>';
+          html += '<p class="parent-note">做过几轮练习后，这里会显示孩子容易错在哪一类：音近、声调、字形还是词义。</p>';
         } else {
           html += '<div class="cause-list">';
           causes.forEach(function (x) {
@@ -802,14 +802,14 @@
           html += '<p class="parent-note">' + Icons.svg("bulb") + '主要在<b>' + esc(top.name) + "</b>上出错:" + causeAdvice[top.k] + "</p>";
           var topPool = DB.errorPool(top.k);
           if (topPool.length >= 4) {
-            html += '<button class="btn btn-sky" id="btn-drill" data-cause="' + top.k + '">' + Icons.svg("target") + '针对「' + esc(top.name) + '」练一轮(' + topPool.length + " 字)</button>";
+            html += '<button class="btn btn-sky" id="btn-drill" data-cause="' + top.k + '">' + Icons.svg("target") + '针对「' + esc(top.name) + '」练一轮（' + topPool.length + " 字）</button>";
           } else {
-            html += '<p class="parent-note">同类错的字还不到 4 个,先在「趣味练习 → 错题重练」里综合练。</p>';
+            html += '<p class="parent-note">同类错的字还不到 4 个，先在「趣味练习 → 错题重练」里综合练。</p>';
           }
         }
         html += "</div>";
 
-        /* ---- 说一说(口语表达):产品从"认字"走到"表达"的第一步 ---- */
+        /* ---- 说一说（口语表达）:产品从"认字"走到"表达"的第一步 ---- */
         var tk = window.Store.talkReport ? window.Store.talkReport() : null;
         if (tk && tk.runs) {
           html += '<div class="panel"><h4>' + Icons.svg("speak") + '说一说（看图说话）</h4>' +
@@ -830,7 +830,7 @@
             "</div>";
         }
 
-        /* ---- 书写:描红做得多不多、写得好不好、哪个字的哪一笔最容易错 ---- */
+        /* ---- 书写：描红做得多不多、写得好不好、哪个字的哪一笔最容易错 ---- */
         var sr = window.Store.strokeReport ? window.Store.strokeReport() : null;
         if (sr && sr.runs) {
           html += '<div class="panel"><h4>' + Icons.svg("pencil") + "书写（描红）</h4>" +
@@ -854,7 +854,7 @@
           html += "</div>";
         }
 
-        /* ---- 阅读进度:读一读是唯一"孩子自己就能做"的环节,值得单独给家长看 ---- */
+        /* ---- 阅读进度：读一读是唯一"孩子自己就能做"的环节，值得单独给家长看 ---- */
         var rd = (window.ReadDrill && window.ReadDrill.progress) ? window.ReadDrill.progress() : null;
         if (rd && rd.total) {
           html += '<div class="panel"><h4>' + Icons.svg("book") + "阅读进度</h4>" +
@@ -868,14 +868,14 @@
               return '<span class="rp-lv' + (full ? " full" : "") + '"><i>' + l.id + "</i>" + l.read + "/" + l.total + "</span>";
             }).join("") + "</div>" +
             '<p class="parent-note">' + Icons.svg("bulb") + '' + (rd.read === 0
-              ? "还没开始读。短文全部用<b>孩子学过的字</b>写成,点「读一读 → 我自己读」,孩子自己就能读完一篇,不需要您在旁边指字。"
+              ? "还没开始读。短文全部用<b>孩子学过的字</b>写成，点「读一读 → 我自己读」,孩子自己就能读完一篇，不需要您在旁边指字。"
               : (rd.week === 0
-                ? "这周还没读新篇目。每天读一篇就够,重在<b>每天</b>而不是每天读很多。"
-                : "这周读了 <b>" + rd.week + "</b> 篇,保持这个节奏就好。读的时候让孩子<b>指着字读出声</b>,比默读有效得多。")) +
+                ? "这周还没读新篇目。每天读一篇就够，重在<b>每天</b>而不是每天读很多。"
+                : "这周读了 <b>" + rd.week + "</b> 篇，保持这个节奏就好。读的时候让孩子<b>指着字读出声</b>,比默读有效得多。")) +
             "</p></div>";
         }
 
-        /* ---- 能力地图:把"总正确率"拆成不同能力,家长才知道该练什么 ---- */
+        /* ---- 能力地图：把"总正确率"拆成不同能力，家长才知道该练什么 ---- */
         var amap = window.Store.abilityMap();
         var amax = 100;
         html += '<div class="panel"><h4>' + Icons.svg("chart") + "能力地图</h4>" +
@@ -891,7 +891,7 @@
           }).join("") + "</div>" +
           '<p class="parent-note">' + Icons.svg("bulb") + '' + esc(window.Store.abilityAdvice()) + "</p></div>";
 
-        /* ---- 亲子任务:每天一张,线下做 ---- */
+        /* ---- 亲子任务：每天一张，线下做 ---- */
         var quests = window.QUESTS || [];
         if (quests.length) {
           var dayIdx = Math.floor(Date.now() / 86400000) % quests.length;
@@ -905,13 +905,13 @@
               '<button class="btn btn-ghost" id="btn-quest-next">换一个</button>' +
               '<button class="btn btn-sky" id="btn-print-quests">' + Icons.svg("print") + '打印任务卡</button>' +
             "</div>" +
-            '<p class="parent-note">3~6 岁识字的主战场在家里。这些任务都不用备课,照着念就能做。</p></div>';
+            '<p class="parent-note">3~6 岁识字的主战场在家里。这些任务都不用备课，照着念就能做。</p></div>';
         }
 
-        /* ---- 打印物料:第一行是"一次搞定"的整包/奖状,第二行才是单项 ---- */
+        /* ---- 打印物料：第一行是"一次搞定"的整包/奖状，第二行才是单项 ---- */
         var wsq = window.Store.weekSummary ? window.Store.weekSummary() : { learned: 0 };
         html += '<div class="panel"><h4>' + Icons.svg("book") + "打印物料</h4>" +
-          '<p class="parent-note">屏幕上练,纸上也要练。<b>懒人做法</b>：直接打「本周物料包」——' +
+          '<p class="parent-note">屏幕上练，纸上也要练。<b>懒人做法</b>：直接打「本周物料包」——' +
             "它会按这周学过的字自动出识字卡 + 描红格 + 今日任务 + 记录表，一次打印贴冰箱。</p>" +
           '<div class="backup-btns">' +
             '<button class="btn btn-sun" id="pr-pack">' + Icons.svg("package") + '本周物料包' +
@@ -924,21 +924,21 @@
             '<button class="btn btn-ghost" id="pr-quests">' + Icons.svg("game") + '任务卡</button>' +
           "</div></div>";
 
-        /* ---- 声音自检:手机上"没声音"时,这张表能直接指出是哪一环断了 ---- */
+        /* ---- 声音自检：手机上"没声音"时，这张表能直接指出是哪一环断了 ---- */
         var snd = window.Speech.diag();
         var sndAp = snd.audio || { state: -1, stateName: "未加载", entries: 0, unlocked: false, lastError: "" };
         var yn = function (ok, yes, no) { return '<span class="' + (ok ? "snd-ok" : "snd-bad") + '">' + (ok ? yes : no) + "</span>"; };
-        /* ---- 麦克风:跟读录音是唯一需要授权的功能,单独说清"授权/不授权会怎样" ---- */
+        /* ---- 麦克风：跟读录音是唯一需要授权的功能，单独说清"授权/不授权会怎样" ---- */
         var rc = (window.Recorder && window.Recorder.diag) ? window.Recorder.diag() : null;
         if (rc) {
-          html += '<div class="panel"><h4>' + Icons.svg("mic") + '麦克风(跟我读)</h4>' +
+          html += '<div class="panel"><h4>' + Icons.svg("mic") + '麦克风（跟我读）</h4>' +
             '<div class="ab-row"><span class="ab-name">录音能力</span>' +
               '<span class="ab-val">' + yn(rc.supported, "可用", rc.stateName) + "</span></div>" +
             '<p class="parent-note">' + (rc.supported
               ? "孩子可以读一遍自己的声音再听 —— 这是把「认字」变成「会读」的关键一步。"
-              : "这台设备/浏览器用不了录音,或者页面不是 https。<b>不影响其它任何功能</b>,只少了「跟我读」。") +
+              : "这台设备/浏览器用不了录音，或者页面不是 https。<b>不影响其它任何功能</b>,只少了「跟我读」。") +
             "</p>" +
-            '<p class="parent-note">' + Icons.svg("lock") + '录音<b>只在这台设备上回放</b>:不上传、不保存,离开页面立刻释放麦克风。</p>' +
+            '<p class="parent-note">' + Icons.svg("lock") + '录音<b>只在这台设备上回放</b>:不上传、不保存，离开页面立刻释放麦克风。</p>' +
             (rc.lastError ? '<p class="parent-note">上次失败的原因:' + esc(rc.lastError) + "</p>" : "") +
             "</div>";
         }
@@ -948,10 +948,10 @@
             '<div class="snd-row"><span>打开方式</span><span>' + (snd.standalone ? "主屏幕 APP" : "浏览器") + "</span></div>" +
             '<div class="snd-row"><span>预置朗读音频</span><span>' + esc(sndAp.stateName) +
               (sndAp.entries ? " · " + sndAp.entries + " 条 · " + esc(sndAp.label || sndAp.voice || "") : "") + "</span></div>" +
-            '<div class="snd-row"><span>音频解锁</span><span>' + yn(sndAp.unlocked, "已解锁 ✓", "未解锁(点一下屏幕即可)") + "</span></div>" +
-            '<div class="snd-row"><span>浏览器朗读</span><span>' + yn(snd.ttsSupported, "支持", "不支持(该浏览器没有语音合成)") + "</span></div>" +
-            '<div class="snd-row"><span>可用中文音色</span><span>' + (snd.ttsZh ? snd.ttsZh + " 个" : yn(false, "", "0 个(需要在系统里装中文语音包)")) + "</span></div>" +
-            '<div class="snd-row"><span>网络</span><span>' + (snd.online ? "在线" : yn(false, "", "离线(预置音频仍可用)")) + "</span></div>" +
+            '<div class="snd-row"><span>音频解锁</span><span>' + yn(sndAp.unlocked, "已解锁 ✓", "未解锁（点一下屏幕即可）") + "</span></div>" +
+            '<div class="snd-row"><span>浏览器朗读</span><span>' + yn(snd.ttsSupported, "支持", "不支持（该浏览器没有语音合成）") + "</span></div>" +
+            '<div class="snd-row"><span>可用中文音色</span><span>' + (snd.ttsZh ? snd.ttsZh + " 个" : yn(false, "", "0 个（需要在系统里装中文语音包）")) + "</span></div>" +
+            '<div class="snd-row"><span>网络</span><span>' + (snd.online ? "在线" : yn(false, "", "离线（预置音频仍可用）")) + "</span></div>" +
             (sndAp.lastError ? '<div class="snd-row"><span>最近一次异常</span><span class="snd-bad">' + esc(sndAp.lastError) + "</span></div>" : "") +
           "</div>" +
           '<div class="backup-btns">' +
@@ -960,15 +960,15 @@
           "</div>" +
           '<p class="parent-note" id="snd-tip">' + sndAdvice(snd, sndAp) + "</p></div>";
 
-        /* ---- 朗读声音:内置音色(主角)+ 系统音色(兜底) ----
-           这里原来的问题是:只列了手机系统音色,而孩子实际听到的是我们内置的 mp3,
-           家长在自己的选择里找不到"智小虎",就以为没内置进去。现在两层都摆出来,并说清分工。 */
+        /* ---- 朗读声音：内置音色（主角）+ 系统音色（兜底） ----
+           这里原来的问题是：只列了手机系统音色，而孩子实际听到的是我们内置的 mp3,
+           家长在自己的选择里找不到"智小虎",就以为没内置进去。现在两层都摆出来，并说清分工。 */
         var builtin = (window.AudioPack && window.AudioPack.voiceList) ? window.AudioPack.voiceList() : [];
         var voices = window.Speech.supported ? window.Speech.listVoices() : [];
         var curVoice = window.Speech.voice;
         var curId = curVoice ? (curVoice.voiceURI || curVoice.name) : "";
         html += '<div class="panel"><h4>' + Icons.svg("speak") + '朗读声音</h4>' +
-          '<p class="parent-note">孩子听到的声音分两层:<b>内置音色</b>优先(音质一致、离线可用),' +
+          '<p class="parent-note">孩子听到的声音分两层:<b>内置音色</b>优先（音质一致、离线可用）,' +
           '内置音频里还没有的条目才用<b>手机系统音色</b>兜底。</p>';
 
         if (builtin.length) {
@@ -983,14 +983,14 @@
               '<button class="mini-btn" data-act="try">' + Icons.svg("speak") + '试听</button>' +
             "</div>";
           });
-          html += '</div><p class="parent-note" id="bi-tip">选中一个内置音色,全站(字/词/例句/角色台词)都用它。</p>';
+          html += '</div><p class="parent-note" id="bi-tip">选中一个内置音色，全站（字/词/例句/角色台词）都用它。</p>';
         } else {
-          html += '<p class="parent-note">内置音频还没加载(一般是首次打开或离线)。连一次网络后回到这里即可看到。</p>';
+          html += '<p class="parent-note">内置音频还没加载（一般是首次打开或离线）。连一次网络后回到这里即可看到。</p>';
         }
 
-        html += '<details class="text-mode"' + (builtin.length ? "" : " open") + '><summary>手机系统音色(仅兜底用)</summary>';
+        html += '<details class="text-mode"' + (builtin.length ? "" : " open") + '><summary>手机系统音色（仅兜底用）</summary>';
         if (!voices.length) {
-          html += '<p class="parent-note">当前浏览器还没提供中文音色。可以试试:用 Chrome/Safari 打开,或在系统里安装中文语音包。</p>';
+          html += '<p class="parent-note">当前浏览器还没提供中文音色。可以试试：用 Chrome/Safari 打开，或在系统里安装中文语音包。</p>';
         } else {
           var hasHQ = voices.some(function (x) { return window.Speech.isHQ({ name: x.name, voiceURI: x.id }); });
           html += '<p class="parent-note">只在内置音频没有该条目时才会用到它。带 ✨ 的是系统里的高音质音色。</p>' +
@@ -1002,25 +1002,25 @@
           });
           html += '</select><button class="btn btn-sky" id="voice-try">' + Icons.svg("speak") + '试听</button></div>';
           if (!hasHQ) {
-            html += '<p class="parent-note">' + Icons.svg("bulb") + '想要更自然的兜底声音:在系统里下载「增强/高级」中文音色。<br>' +
-              "macOS:系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 中文(普通话),选带「增强」的下载<br>" +
-              "Windows:设置 → 时间和语言 → 语音 → 管理语音 → 添加语音(中文)<br>" +
+            html += '<p class="parent-note">' + Icons.svg("bulb") + '想要更自然的兜底声音：在系统里下载「增强/高级」中文音色。<br>' +
+              "macOS:系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 中文（普通话）,选带「增强」的下载<br>" +
+              "Windows:设置 → 时间和语言 → 语音 → 管理语音 → 添加语音（中文）<br>" +
               "iPhone/iPad:设置 → 辅助功能 → 朗读内容 → 声音 → 中文</p>";
           }
         }
         html += "</details>";
         html += "</div>";
 
-        /* 本周学习报告:本地生成一张可保存/分享的卡片(数据不出设备) */
+        /* 本周学习报告：本地生成一张可保存/分享的卡片（数据不出设备） */
         html +=
           '<div class="panel"><h4>' + Icons.svg("chart") + '本周学习报告</h4>' +
-            '<p class="parent-note">把这一周的学习成果生成一张卡片,可保存到相册或分享给家人。' +
-            '<b>报告在这台设备上本地生成,不上传任何数据</b>,卡片里也不会出现孩子的姓名。</p>' +
+            '<p class="parent-note">把这一周的学习成果生成一张卡片，可保存到相册或分享给家人。' +
+            '<b>报告在这台设备上本地生成，不上传任何数据</b>,卡片里也不会出现孩子的姓名。</p>' +
             '<button class="btn btn-sky" id="btn-report" style="width:100%;margin-top:10px">' +
               Icons.svg("share") + "生成本周报告卡</button>" +
           "</div>";
 
-        /* 匿名使用数据:可关闭、可重置标识(隐私优先) */
+        /* 匿名使用数据：可关闭、可重置标识（隐私优先） */
         var fb = window.CONTACT || {};
         html +=
           '<div class="panel"><h4>' + Icons.svg("speak") + '意见反馈</h4>' +
@@ -1033,26 +1033,26 @@
             '<p class="parent-note" id="fb-hint" style="margin-top:8px"></p>' +
           "</div>";
 
-        /* 这里原本是「帮助改进(匿名统计)」开关。按"真离线"路线,埋点已**整体移除**:
+        /* 这里原本是「帮助改进（匿名统计）」开关。按"真离线"路线，埋点已**整体移除**:
            它会向 /api/beacon 发请求 → 中国区"单机不联网免备案"的豁免失效、
            隐私标签无法填"不收集数据"、且儿童类对任何统计都极敏感。
-           现在改成把"零联网"当作卖点如实告诉家长,而不是留一个开关。 */
+           现在改成把"零联网"当作卖点如实告诉家长，而不是留一个开关。 */
         html +=
-          '<div class="panel"><h4>' + Icons.svg("lock") + '完全离线(不联网、不收集)</h4>' +
+          '<div class="panel"><h4>' + Icons.svg("lock") + '完全离线（不联网、不收集）</h4>' +
             '<p class="parent-note"><b>本应用不向任何外部服务器发送数据</b> —— 没有账号、没有服务器、没有统计 SDK。' +
-            '<br>学习进度只存在这台设备上;录音只在本机回放,不上传、不保存。' +
+            '<br>学习进度只存在这台设备上;录音只在本机回放，不上传、不保存。' +
             '<br>换设备时请用下面的<b>导出存档</b>把进度带走。</p>' +
           "</div>";
 
         var VER = (document.querySelector('meta[name="app-version"]') || {}).content || "dev";
-        /* 在 App 里这几处说法要更准确(见下方页脚):
+        /* 在 App 里这几处说法要更准确（见下方页脚）:
            ① 进度落在 App 私有存储(Capacitor Preferences),不是"浏览器"
            ② 隐私说明必须**在 App 内可达**(App Store 5.1.1(i)),不能用 target="_blank" */
         var inApp = !!(window.PlatformStorage && window.PlatformStorage.isNative);
         html +=
-          '<div class="panel"><h4>' + Icons.svg("refresh") + '复习机制说明</h4><p class="parent-note">本应用采用简化版<b>艾宾浩斯间隔重复</b>:孩子标记"我会了"后,字会在 10 分钟后首次回到复习队列;每答对一次,下次复习间隔加倍延长(10分钟 → 1天 → 2天 → 4天 → 7天);答错则重新开始。连续答对 4 次(box≥4)即视为进入长期记忆。所有数据仅保存在本设备浏览器中。</p></div>' +
+          '<div class="panel"><h4>' + Icons.svg("refresh") + '复习机制说明</h4><p class="parent-note">本应用采用简化版<b>艾宾浩斯间隔重复</b>:孩子标记"我会了"后，字会在 10 分钟后首次回到复习队列;每答对一次，下次复习间隔加倍延长（10分钟 → 1天 → 2天 → 4天 → 7天）;答错则重新开始。连续答对 4 次(box≥4)即视为进入长期记忆。所有数据仅保存在本设备浏览器中。</p></div>' +
           '<div class="panel"><h4>' + Icons.svg("sparkle") + '显示设置</h4>' +
-          '<button class="switch-row" id="btn-motion" aria-pressed="' + reduced + '"><span>减少动态效果(关闭云朵飘动与庆祝动画)</span><span class="switch" aria-pressed="' + reduced + '"><i></i></span></button>' +
+          '<button class="switch-row" id="btn-motion" aria-pressed="' + reduced + '"><span>减少动态效果（关闭云朵飘动与庆祝动画）</span><span class="switch" aria-pressed="' + reduced + '"><i></i></span></button>' +
         '</div>' +
         entitlePanel() +
         backupPanel() +
@@ -1083,7 +1083,7 @@
           });
         }
 
-        /* ---------- 孩子档案:切换 / 改名 / 删除 / 新建 ---------- */
+        /* ---------- 孩子档案：切换 / 改名 / 删除 / 新建 ---------- */
         var rerender = function () { renderDash(v); };
         v.querySelectorAll(".kid-row").forEach(function (row) {
           var id = row.getAttribute("data-id");
@@ -1113,10 +1113,10 @@
                 });
               } else if (act === "del") {
                 var p2 = window.Store.profiles().filter(function (x) { return x.id === id; })[0];
-                /* window.confirm 同上:在 WKWebView 里静默返回 false,删除会"点了没反应" */
+                /* window.confirm 同上：在 WKWebView 里静默返回 false,删除会"点了没反应" */
                 window.UI.confirm({
                   title: "删除「" + (p2 ? p2.name : "") + "」的档案?",
-                  text: "该孩子的识字进度、星星和贴纸会一起删除,无法撤销。",
+                  text: "该孩子的识字进度、星星和贴纸会一起删除，无法撤销。",
                   emoji: "🗑️", danger: true, okText: "删除",
                   onOk: function () {
                     var rd = window.Store.removeProfile(id);
@@ -1160,13 +1160,13 @@
             try { text = JSON.stringify(window.Store.exportData()); }
             catch (e) { window.UI.toast("导出失败:" + e.message); return; }
             /* 走平台桥接层:`<a download>` 在 App 内的 WKWebView 里**不被支持**,
-               点了会静默失败 —— 而存档是"换手机不丢进度"的唯一途径,不能没反应。 */
+               点了会静默失败 —— 而存档是"换手机不丢进度"的唯一途径，不能没反应。 */
             window.PlatformIO.saveText({
               filename: window.Store.exportFileName(),
               text: text, mime: "application/json"
             }).then(function (res) {
               if (res === "canceled") return;
-              window.UI.toast(res === "shared" ? "已打开分享面板,可存到「文件」或发给家人" : "存档已导出,请保存好这个文件");
+              window.UI.toast(res === "shared" ? "已打开分享面板，可存到「文件」或发给家人" : "存档已导出，请保存好这个文件");
             }).catch(function (e) {
               window.UI.toast("导出失败:" + ((e && e.message) || e));
             });
@@ -1175,7 +1175,7 @@
         var impBtn = v.querySelector("#btn-import");
         var impFile = v.querySelector("#import-file");
         var impBox = v.querySelector("#import-preview");
-        /* 预览 + 二次确认:导入会覆盖,必须让家长看清"这份存档是谁的、有多少内容" */
+        /* 预览 + 二次确认：导入会覆盖，必须让家长看清"这份存档是谁的、有多少内容" */
         var previewImport = function (text, fromFile) {
           var r = window.Store.parseImport(text);
           if (!r.ok) { window.UI.toast(r.err); return; }
@@ -1183,13 +1183,13 @@
           impBox.hidden = false;
           impBox.innerHTML = '<div class="imp-head">这份存档来自「' + esc(s2.name) + "」</div>" +
             '<div class="imp-meta">' + s2.learned + " 个已学汉字 · " + s2.stars + " ⭐ · " + s2.days + " 天记录</div>" +
-            '<div class="imp-ask">导入会<b>覆盖当前孩子(' + esc(window.Store.activeProfile().name) + ")的进度</b>(导入前会自动备份,可撤销)</div>" +
+            '<div class="imp-ask">导入会<b>覆盖当前孩子(' + esc(window.Store.activeProfile().name) + ")的进度</b>(导入前会自动备份，可撤销)</div>" +
             '<div class="backup-btns"><button class="btn btn-sky" id="imp-ok">确认覆盖导入</button>' +
             '<button class="btn btn-ghost" id="imp-cancel">取消</button></div>';
           v.querySelector("#imp-ok").addEventListener("click", function () {
             var ar = window.Store.applyImport(text);
             if (!ar.ok) { window.UI.toast(ar.err); return; }
-            window.UI.toast("导入成功!已恢复 " + ar.summary.learned + " 个字");
+            window.UI.toast("导入成功！已恢复 " + ar.summary.learned + " 个字");
             rerender();
           });
           v.querySelector("#imp-cancel").addEventListener("click", function () { impBox.hidden = true; impBox.innerHTML = ""; });
@@ -1214,7 +1214,7 @@
           textOut.addEventListener("click", function () {
             saveText.value = JSON.stringify(window.Store.exportData());
             saveText.select();
-            window.UI.toast("已生成存档文字,可长按复制");
+            window.UI.toast("已生成存档文字，可长按复制");
           });
         }
         if (textIn && saveText) {
@@ -1239,7 +1239,7 @@
           });
         }
 
-        /* 内置音色:选中即全站生效(走 AudioPack.setVoice);试听只临时切换,不改设置 */
+        /* 内置音色：选中即全站生效（走 AudioPack.setVoice）;试听只临时切换，不改设置 */
         v.querySelectorAll(".bi-voice").forEach(function (row) {
           var key = row.getAttribute("data-key");
           row.querySelectorAll("[data-act]").forEach(function (btn) {
@@ -1255,8 +1255,8 @@
                 return;
               }
               window.AudioPack.setVoice(key).then(function (ok) {
-                if (!ok) { window.UI.toast("切换失败,请稍后再试"); return; }
-                window.UI.toast("已切换内置音色,全站生效");
+                if (!ok) { window.UI.toast("切换失败，请稍后再试"); return; }
+                window.UI.toast("已切换内置音色，全站生效");
                 renderDash(v);
               });
             });
@@ -1266,16 +1266,16 @@
         var sndTest = v.querySelector("#snd-test");
         if (sndTest) {
           sndTest.addEventListener("click", function () {
-            /* 依次验证两条通道:先试预置音频(读「山」),没命中就由 TTS 接手。
-               哪条没响,配合上面的「最近一次异常」就能定位。 */
+            /* 依次验证两条通道：先试预置音频（读「山」）,没命中就由 TTS 接手。
+               哪条没响，配合上面的「最近一次异常」就能定位。 */
             window.Speech.warmup();
             var tip = v.querySelector("#snd-tip");
             var handled = window.AudioPack ? window.AudioPack.play("山", null, null, "") : false;
             window.Speech.speak("山", 0.8, function () {
               if (!tip) return;
               tip.textContent = handled === false
-                ? "刚才走的是浏览器朗读(这条预置音频没找到)。完全没声音的话,请看上面的「最近一次异常」。"
-                : "刚才播放的是预置音频。没听到声音,请先确认手机音量,再点「重新检测」。";
+                ? "刚才走的是浏览器朗读（这条预置音频没找到）。完全没声音的话，请看上面的「最近一次异常」。"
+                : "刚才播放的是预置音频。没听到声音，请先确认手机音量，再点「重新检测」。";
             });
           });
         }
@@ -1305,7 +1305,7 @@
             var box = v.querySelector(".today-quest");
             var list = window.QUESTS || [];
             if (!list.length || !box) return;
-            /* 轮流看下一张(不写存档:只是家长翻看) */
+            /* 轮流看下一张（不写存档：只是家长翻看） */
             var cur = box.getAttribute("data-i");
             var next = ((cur ? parseInt(cur, 10) : 0) + 1) % list.length;
             var q2 = list[next];
@@ -1326,7 +1326,7 @@
           });
         }
 
-        /* ---------- 意见反馈:打开邮件/问卷 + 复制联系方式 ---------- */
+        /* ---------- 意见反馈：打开邮件/问卷 + 复制联系方式 ---------- */
         var fbHint = v.querySelector("#fb-hint");
         var fbSay = function (msg, ok) {
           if (!fbHint) return;
@@ -1337,7 +1337,7 @@
         var fbBtn = v.querySelector("#btn-feedback");
         if (fbBtn) fbBtn.addEventListener("click", function () {
           if (window.SFX) SFX.click();
-          if (!fbTarget || fbTarget === "mailto:") { fbSay("尚未配置反馈渠道(见 js/contact.js)", false); return; }
+          if (!fbTarget || fbTarget === "mailto:") { fbSay("尚未配置反馈渠道（见 js/contact.js）", false); return; }
           var href = fbTarget;
           if (!fb.url) {
             href += "?subject=" + encodeURIComponent(fb.subject || "思问岛 · 意见反馈") +
@@ -1347,7 +1347,7 @@
             /* 外链走平台桥接层:WebView 里 window.open 需要交给系统浏览器才会动。
                ⚠️ 儿童类要求所有外链位于家长门之后 —— 这里已经在门后了。 */
             window.PlatformIO.openExternal(href, function () {
-              fbSay("没能打开,请用下面的「复制联系方式」手动联系", false);
+              fbSay("没能打开，请用下面的「复制联系方式」手动联系", false);
             });
           } else {
             try { window.location.href = href; }
@@ -1368,7 +1368,7 @@
           } catch (e) { fail(); }
         });
 
-        /* 内购:购买与恢复都在家长门之后。文案要如实 —— 购买要联网,买完能离线。 */
+        /* 内购：购买与恢复都在家长门之后。文案要如实 —— 购买要联网，买完能离线。 */
         var buyBtn = v.querySelector("#btn-buy");
         if (buyBtn && window.Entitlements) {
           buyBtn.addEventListener("click", function () {
@@ -1384,10 +1384,10 @@
                 return;
               }
               if (window.Entitlements.unlocked()) {
-                window.UI.toast("已解锁,谢谢你!");
+                window.UI.toast("已解锁，谢谢你!");
                 rerender();
               } else if (hint) {
-                hint.textContent = "购买已提交,正在等 App Store 确认…";
+                hint.textContent = "购买已提交，正在等 App Store 确认…";
               }
             });
           });
@@ -1412,7 +1412,7 @@
           });
         }
 
-        /* 埋点开关的绑定逻辑已随埋点一起移除(见上方「完全离线」面板处的说明) */
+        /* 埋点开关的绑定逻辑已随埋点一起移除（见上方「完全离线」面板处的说明） */
 
         var reportBtn = v.querySelector("#btn-report");
         if (reportBtn && window.Report) {
@@ -1420,7 +1420,7 @@
             if (window.SFX) SFX.click();
             reportBtn.disabled = true;
             window.Report.preview()
-              .catch(function () { window.UI.toast("生成失败,请稍后再试"); })
+              .catch(function () { window.UI.toast("生成失败，请稍后再试"); })
               .then(function () { reportBtn.disabled = false; });
           });
         }
@@ -1431,13 +1431,13 @@
             var on = document.documentElement.classList.toggle("reduce-motion");
             /* ⚠️ 这一个键**故意**不走 PlatformStorage:
                index.html 的内联脚本要在渲染前**同步**读它来避免动画闪烁,
-               而原生 Preferences 是异步的,读不到就会闪一下。
-               它只是可随时重设的 UI 偏好(不是学习进度),丢了也无所谓,所以留在 localStorage。 */
+               而原生 Preferences 是异步的，读不到就会闪一下。
+               它只是可随时重设的 UI 偏好（不是学习进度）,丢了也无所谓，所以留在 localStorage。 */
             try { localStorage.setItem("hanziKids.reduceMotion", on ? "1" : "0"); } catch (e) { /* 隐私模式 */ }
             motionBtn.setAttribute("aria-pressed", on ? "true" : "false");
             var sw = motionBtn.querySelector(".switch");
             if (sw) sw.setAttribute("aria-pressed", on ? "true" : "false");
-            window.UI.toast(on ? "已开启:减少动态效果" : "已恢复动画效果");
+            window.UI.toast(on ? "已开启：减少动态效果" : "已恢复动画效果");
           });
         }
 
@@ -1449,15 +1449,15 @@
         v.querySelector("#btn-reset").addEventListener("click", function () {
           window.UI.confirm({
             emoji: "🗑️", title: "清空学习记录?", danger: true,
-            text: "将删除全部星星、贴纸、勋章和学习进度,且无法恢复。",
+            text: "将删除全部星星、贴纸、勋章和学习进度，且无法恢复。",
             okText: "确定清空", cancelText: "取消",
             onOk: function () {
               window.UI.confirm({
                 emoji: "❗", title: "最后确认", danger: true,
-                text: "真的要清空所有数据吗?", okText: "是的,清空", cancelText: "再想想",
+                text: "真的要清空所有数据吗?", okText: "是的，清空", cancelText: "再想想",
                 onOk: function () {
                   window.Store.reset();
-                  window.UI.toast("已清空,重新开始吧");
+                  window.UI.toast("已清空，重新开始吧");
                   App.navigate("#/home");
                   App.render();
                 }

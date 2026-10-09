@@ -2,11 +2,11 @@
 (function () {
   "use strict";
 
-  /* ---------- 字理数据(部首/部件) ----------
+  /* ---------- 字理数据（部首/部件） ----------
      来自 data/hanzi-parts.js(由 .build/gen-hanzi-parts.py 依据 Unicode Unihan + cjkvi-ids 生成),
      不是手写内容 —— 教给孩子的部首/部件必须可追溯、可复现。 */
   var HP = window.HANZI_PARTS || {};
-  /* 补充配图:字库自带的优先,其次才是补充表(见 data/emoji-extra.js) */
+  /* 补充配图：字库自带的优先，其次才是补充表（见 data/emoji-extra.js） */
   var EMOJI_EXTRA = window.CHAR_EMOJI_EXTRA || {};
   function emojiOf(ch) { return ch.e || EMOJI_EXTRA[ch.c] || ""; }
   function partsOf(ch) {
@@ -26,7 +26,7 @@
   var ALL = [];
   (window.CHAR_GROUPS || []).forEach(function (g, gi) {
     g.chars.forEach(function (ch, i) {
-      /* rad 优先用字理数据的权威部首;lvl/str 字库里可能缺,统一带上便于各题型复用 */
+      /* rad 优先用字理数据的权威部首;lvl/str 字库里可能缺，统一带上便于各题型复用 */
       ALL.push({
         c: ch.c, p: ch.p, w: ch.w, s: ch.s, e: emojiOf(ch),
         rad: radOf(ch.c) || ch.rad || "", lvl: ch.lvl || 0, str: ch.str || "",
@@ -34,12 +34,12 @@
       });
     });
   });
-  /* 有部件拆分的字(可出"部件拼字"题) */
+  /* 有部件拆分的字（可出"部件拼字"题） */
   var PART_POOL = ALL.filter(function (c) { return !!partsOf(c.c); });
   var BY_CHAR = {};
   ALL.forEach(function (ch) { BY_CHAR[ch.c] = ch; });
 
-  /* 朗读用的词:优先选包含本字的组词(避免多音字读错,如"蝉→鸣蝉") */
+  /* 朗读用的词：优先选包含本字的组词（避免多音字读错，如"蝉→鸣蝉"） */
   function wordForListen(ch) {
     for (var i = 0; i < ch.w.length; i++) if (ch.w[i].indexOf(ch.c) > -1) return ch.w[i];
     return ch.w[0];
@@ -53,7 +53,7 @@
     return a;
   }
 
-  /* 干扰项:同组优先(贴近但不同),不足用全库 */
+  /* 干扰项：同组优先（贴近但不同）,不足用全库 */
   function pickDistractors(target, filterFn, count) {
     var same = [], rest = [];
     for (var i = 0; i < ALL.length; i++) {
@@ -66,8 +66,8 @@
   }
 
   /* ---------- 出题 ---------- */
-  /* 听写干扰项:按"音近程度"分级挑选(只差声调最难 → 同韵 → 同声 → 无关)
-     同组字优先,让干扰项尽量来自刚学的内容 */
+  /* 听写干扰项：按"音近程度"分级挑选（只差声调最难 → 同韵 → 同声 → 无关）
+     同组字优先，让干扰项尽量来自刚学的内容 */
   function pickBySound(target, tiers, count) {
     var buckets = {}, Py = window.Py;
     for (var i = 0; i < ALL.length; i++) {
@@ -93,12 +93,12 @@
   /* ---------- 整词听写 ----------
      为什么要有它:
        单字听写只听一个音节;真实语言里孩子要一次留住两三个音节。
-       词听写难一档,而且是"组词"这个学习动作的直接检验。
-     干扰项怎么挑(质量的关键):
+       词听写难一档，而且是"组词"这个学习动作的直接检验。
+     干扰项怎么挑（质量的关键）:
        不是随便抓三个词 —— 要挑**听起来接近**的:
-         · 至少有一个音节的相似度高(声母或韵母相同,如「妈妈 màma」vs「马马」…)
-         · 长度相同优先(两个字的词配两个字的词,长短不一孩子能靠"有几个音"蒙对)
-         · 绝不选同音词(听不出来),也绝不让两个选项的拼音完全一样(否则两个答案都对)
+         · 至少有一个音节的相似度高（声母或韵母相同，如「妈妈 màma」vs「马马」…）
+         · 长度相同优先（两个字的词配两个字的词，长短不一孩子能靠"有几个音"蒙对）
+         · 绝不选同音词（听不出来）,也绝不让两个选项的拼音完全一样（否则两个答案都对）
   */
   var WORD_POOL = null;
   function wordPool() {
@@ -108,7 +108,7 @@
       (ch.w || []).forEach(function (w) {
         if (!w || w.length < 2 || w.length > 3) return;
         if (seen[w]) return;
-        /* 每个字都得在库内,否则读不出来 */
+        /* 每个字都得在库内，否则读不出来 */
         var ok = true;
         for (var i = 0; i < w.length; i++) if (!BY_CHAR[w[i]]) { ok = false; break; }
         if (!ok) return;
@@ -138,7 +138,7 @@
     for (var i = 0; i < pa.length; i++) s += Py.likeness(pa[i], pb[i]);
     return s;
   }
-  /* 为某个字挑一个"有教学价值"的词(优先含本字、长度 2) */
+  /* 为某个字挑一个"有教学价值"的词（优先含本字、长度 2） */
   function wordForDictation(ch) {
     var ws = (ch.w || []).filter(function (w) { return w.length >= 2 && w.length <= 3; });
     if (!ws.length) return "";
@@ -152,11 +152,11 @@
     for (var i = 0; i < pool.length; i++) {
       var w = pool[i];
       if (w === ans) continue;
-      if (samePinyin(w, ans)) continue;              /* 同音词听不出来,不能当干扰项 */
+      if (samePinyin(w, ans)) continue;              /* 同音词听不出来，不能当干扰项 */
       var lk = wordLikeness(w, ans);
       scored.push({ w: w, lk: lk, len: w.length });
     }
-    /* 同类优先:先"听感最像",同分时长度相同优先 */
+    /* 同类优先：先"听感最像",同分时长度相同优先 */
     scored.sort(function (a, b) { return a.lk - b.lk || (a.len === ans.length ? -1 : 1); });
     var out = [], used = {}, usedPy = {};
     usedPy[wordPinyin(ans).join(" ")] = 1;
@@ -166,7 +166,7 @@
       used[scored[k].w] = 1; usedPy[py] = 1;
       out.push(scored[k].w);
     }
-    /* 不够就从词池里随便补(仍然排除同音) */
+    /* 不够就从词池里随便补（仍然排除同音） */
     for (var m = 0; m < pool.length && out.length < count; m++) {
       var w2 = pool[m], py2 = wordPinyin(w2).join(" ");
       if (w2 === ans || used[w2] || usedPy[py2]) continue;
@@ -181,13 +181,13 @@
     if (window.Py) {
       types.push("dictation");
       if (window.Py.variants(target.p).length >= 2) types.push("tonePick");
-      /* 词听写:只有当这个字有一个能读的组词、且能凑出 3 个不同音的干扰词时才出 */
+      /* 词听写：只有当这个字有一个能读的组词、且能凑出 3 个不同音的干扰词时才出 */
       if (wordForDictation(target) && pickWordDistractors(target, 3).length === 3) types.push("wordDictation");
     }
     var myParts = partsOf(target.c);
     if (myParts && PART_POOL.length >= 8) { types.push("partJoin", "partSplit"); }
     if (avoidType && types.length > 1) types = types.filter(function (t) { return t !== avoidType; });
-    /* 因材施教:这个字上次错在"声调/音近/字形/词义",这一轮优先练对应题型 */
+    /* 因材施教：这个字上次错在"声调/音近/字形/词义",这一轮优先练对应题型 */
     var type;
     if (preferType && types.indexOf(preferType) > -1) type = preferType;
     else type = types[(Math.random() * types.length) | 0];
@@ -277,7 +277,7 @@
       q.answerIdx = opts6.findIndex(function (o) { return o.ref.c === target.c; });
 
     } else if (type === "partSplit") {
-      /* 拆字:看字,选出它的部件组合 */
+      /* 拆字：看字，选出它的部件组合 */
       q.parts = myParts;
       var want = myParts.join(" + ");
       var seenSet = {}; seenSet[want] = 1;
@@ -297,7 +297,7 @@
       q.answerIdx = opts9.findIndex(function (o) { return o.value === want; });
 
     } else if (type === "partJoin") {
-      /* 部件拼字:给几个部件,选出能拼成的字。干扰项优先同部首(更像),且不能与答案同部件 */
+      /* 部件拼字：给几个部件，选出能拼成的字。干扰项优先同部首（更像）,且不能与答案同部件 */
       q.parts = myParts;
       var key = myParts.slice().sort().join("");
       var sameRad = [], others = [];
@@ -315,10 +315,10 @@
       q.options = opts8;
       q.answerIdx = opts8.findIndex(function (o) { return o.ref.c === target.c; });
 
-    } else { /* tonePick 辨调:看字+听音,选出正确的声调拼音 */
+    } else { /* tonePick 辨调：看字+听音，选出正确的声调拼音 */
       q.speak = target.c;
       var vs = window.Py.variants(target.p).slice(0, 3);
-      /* ref 用"伪字"承载错误读音:辨调题的干扰项都是同一个字的其它声调,
+      /* ref 用"伪字"承载错误读音：辨调题的干扰项都是同一个字的其它声调,
          这样错因判定(classify)能通过 ref.p 看出"只是声调不同" */
       var opts7 = vs.map(function (v) { return { kind: "py", value: v, ref: { c: target.c + "@" + v, p: v, gi: -1 } }; });
       opts7.push({ kind: "py", value: target.p, ref: { c: target.c + "@ok", p: target.p, gi: -1 } });
@@ -329,7 +329,7 @@
     return q;
   }
 
-  /* 目标排序:到期复习的字、错得多的字优先 */
+  /* 目标排序：到期复习的字、错得多的字优先 */
   function orderTargets(pool) {
     var st = window.Store.state;
     var now = Date.now();
@@ -346,28 +346,28 @@
     });
   }
 
-  /* ---------- 错因分类:孩子答错时判断"为什么错" ----------
+  /* ---------- 错因分类：孩子答错时判断"为什么错" ----------
      返回 Store.CAUSES 里的键:
-       tone 声调没分清(只差声调) / snd 音近混淆(同声母或同韵母)
-       shp  字形看混(同部首)       / sem 意思记混(同主题组) / rcl 还没记牢
-     用途:① 家长端说明错在哪 ② 下一轮优先练对应题型(因材施教) */
+       tone 声调没分清（只差声调） / snd 音近混淆（同声母或同韵母）
+       shp  字形看混（同部首）       / sem 意思记混（同主题组） / rcl 还没记牢
+     用途:① 家长端说明错在哪 ② 下一轮优先练对应题型（因材施教） */
   function classify(target, chosen, qtype) {
     if (!chosen || !chosen.c || chosen.c === target.c) return null;
     var Py = window.Py;
 
-    /* 看图选字 / 看字选图:选项是图,选错说明词义没分清 */
+    /* 看图选字 / 看字选图：选项是图，选错说明词义没分清 */
     if (qtype === "charEmoji" || qtype === "emojiChar") {
       return chosen.gi === target.gi ? "sem" : "rcl";
     }
-    /* 一切与读音有关的错,先看是不是"音"的问题 */
+    /* 一切与读音有关的错，先看是不是"音"的问题 */
     if (Py) {
       if (Py.sameBase(chosen.p, target.p)) return "tone";
       var lk = Py.likeness(chosen.p, target.p);
       if (lk === 2 || lk === 3) return "snd";
     }
-    /* 部件拼字题:选错说明部件组合没记清,一律算字形问题 */
+    /* 部件拼字题：选错说明部件组合没记清，一律算字形问题 */
     if (qtype === "partJoin" || qtype === "partSplit") return "shp";
-    /* 拼音题不涉及字形;其余题型(选项是汉字)再看字形:共同部件 > 同部首 */
+    /* 拼音题不涉及字形;其余题型（选项是汉字）再看字形：共同部件 > 同部首 */
     var isPyQ = (qtype === "charPinyin" || qtype === "tonePick");
     var tp = partsOf(target.c), cp = partsOf(chosen.c);
     if (!isPyQ && tp && cp && tp.some(function (x) { return cp.indexOf(x) > -1; })) return "shp";
@@ -376,7 +376,7 @@
     return "rcl";
   }
 
-  /* 题型 → 能力维度(家长端能力地图按这个归类) */
+  /* 题型 → 能力维度（家长端能力地图按这个归类） */
   var TYPE_DIM = {
     listen: "listen", dictation: "listen",
     charPinyin: "pinyin", pinyinChar: "pinyin", tonePick: "pinyin",
@@ -385,7 +385,7 @@
   };
   function dimOf(type) { return TYPE_DIM[type] || ""; }
 
-  /* 错因 → 最该练的题型(因材施教) */
+  /* 错因 → 最该练的题型（因材施教） */
   var CAUSE_DRILL = { tone: "tonePick", snd: "dictation", shp: "pinyinChar", sem: "charEmoji", rcl: "listen" };
 
   /* 生成一轮题目: pool=字对象数组(≥4), n=题数 */
@@ -395,7 +395,7 @@
     var targets = [];
     if (ordered.length >= n) targets = ordered.slice(0, n);
     else {
-      /* 字不够:每字出一题后循环补足(题型不同) */
+      /* 字不够：每字出一题后循环补足（题型不同） */
       targets = ordered.slice();
       var guard = 0;
       while (targets.length < n && guard++ < 200) targets.push(ordered[guard % ordered.length]);
@@ -405,7 +405,7 @@
     targets.forEach(function (t) {
       var prefer = null;
       if (st && window.Store.topCause) prefer = CAUSE_DRILL[window.Store.topCause(t.c)] || null;
-      /* 有明确错因时:因材施教优先,允许与上一题同题型(针对性重复本身就是训练手段),
+      /* 有明确错因时：因材施教优先，允许与上一题同题型（针对性重复本身就是训练手段）,
          不再传 avoidType 以免把偏好题型过滤掉;没有错因时才做"避免连续同题型"的多样化处理 */
       var q = makeQuestion(t, prefer ? null : lastType, prefer);
       qs.push(q);

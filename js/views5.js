@@ -1,16 +1,16 @@
 /* ============ 思问岛 · 看图说话(#/talk) ============
    这是产品从「识字工具」走向「表达启蒙」的第一步。
 
-   核心判断(值得写下来):
+   核心判断（值得写下来）:
      说话这件事**不需要机器判分**。
      录音放给孩子自己听 + 家长在旁边说一句"你说得真清楚" —— 闭环就成立了。
-     而一旦引入自动判分,就必须联网、必须把孩子的声音传上云,
+     而一旦引入自动判分，就必须联网、必须把孩子的声音传上云,
      这与我们"纯本地、离线可用、不外传"的三条底线直接冲突。
      所以这个模块里**一个"对/错"都不会出现**。
 
-   三段式脚手架(家长照着问就行,不用备课):
+   三段式脚手架（家长照着问就行，不用备课）:
      有谁? → 在哪里? → 在做什么?
-     —— 这三问正好也是理解题的结构(谁/哪里),孩子练熟了,
+     —— 这三问正好也是理解题的结构（谁/哪里）,孩子练熟了,
         读短文时自然会把同样的框架用上去。
 */
 (function () {
@@ -29,11 +29,11 @@
   /* ---------- 场景列表 ---------- */
   App.register("talk", {
     render: function (p, view) {
-      /* 付费门控:说一说属于完整内容包。
-         放在最前面 —— 列表页与单个场景页都要拦住(直接改 URL 也不行)。 */
+      /* 付费门控：说一说属于完整内容包。
+         放在最前面 —— 列表页与单个场景页都要拦住（直接改 URL 也不行）。 */
       if (window.Entitlements && !window.Entitlements.isUnlocked("talk")) {
         App.setTopbar("说一说", true);
-        view.innerHTML = window.UI.lockCard({ what: "说一说(看图说话,24 个场景)" });
+        view.innerHTML = window.UI.lockCard({ what: "说一说（看图说话,24 个场景）" });
         window.UI.wireLock(view);
         return;
       }
@@ -69,7 +69,7 @@
     }
   });
 
-  /* ---------- 单个场景:看 → 听 → 说 → 回放 → 自评 ---------- */
+  /* ---------- 单个场景：看 → 听 → 说 → 回放 → 自评 ---------- */
   function renderTalk(view, id) {
     var sc = findScene(id);
     if (!sc) { App.navigate("#/talk"); return; }
@@ -103,7 +103,7 @@
     /* ---- 录音与自评 ---- */
     var panel = view.querySelector("#tk-panel");
     var handle = null, url = "", marks = { full: false, word: false, clear: false };
-    var MAX = 10000;   /* 说话比读单字长,给 10 秒 */
+    var MAX = 10000;   /* 说话比读单字长，给 10 秒 */
 
     function msg(html, cls) {
       panel.className = "talk-panel" + (cls ? " " + cls : "");
@@ -189,7 +189,7 @@
       var play = function () {
         try {
           var a = new Audio(audioUrl);
-          a.play().catch(function () { /* 自动播放被拦:由用户再点一次 */ });
+          a.play().catch(function () { /* 自动播放被拦：由用户再点一次 */ });
         } catch (e) { /* 忽略 */ }
       };
       panel.querySelector("#tk-play").addEventListener("click", play);
