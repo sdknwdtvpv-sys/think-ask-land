@@ -91,11 +91,11 @@
   }
 
   /* ---------- 整词听写 ----------
-     为什么要有它:
+     为什么要有它：
        单字听写只听一个音节;真实语言里孩子要一次留住两三个音节。
        词听写难一档，而且是"组词"这个学习动作的直接检验。
      干扰项怎么挑（质量的关键）:
-       不是随便抓三个词 —— 要挑**听起来接近**的:
+       不是随便抓三个词 —— 要挑**听起来接近**的：
          · 至少有一个音节的相似度高（声母或韵母相同，如「妈妈 màma」vs「马马」…）
          · 长度相同优先（两个字的词配两个字的词，长短不一孩子能靠"有几个音"蒙对）
          · 绝不选同音词（听不出来）,也绝不让两个选项的拼音完全一样（否则两个答案都对）
@@ -261,7 +261,7 @@
       q.word = wans;
 
     } else if (type === "dictation") {
-      /* 听单字音 → 选出这个字。干扰项按音近程度分级:1只差声调 / 2同韵 / 3同声 / 9无关 */
+      /* 听单字音 → 选出这个字。干扰项按音近程度分级：1只差声调 / 2同韵 / 3同声 / 9无关 */
       q.speak = target.c;
       var dsd = pickBySound(target, [1, 2, 3], 3);
       if (dsd.length < 3) {
@@ -318,7 +318,7 @@
     } else { /* tonePick 辨调：看字+听音，选出正确的声调拼音 */
       q.speak = target.c;
       var vs = window.Py.variants(target.p).slice(0, 3);
-      /* ref 用"伪字"承载错误读音：辨调题的干扰项都是同一个字的其它声调,
+      /* ref 用"伪字"承载错误读音：辨调题的干扰项都是同一个字的其它声调，
          这样错因判定(classify)能通过 ref.p 看出"只是声调不同" */
       var opts7 = vs.map(function (v) { return { kind: "py", value: v, ref: { c: target.c + "@" + v, p: v, gi: -1 } }; });
       opts7.push({ kind: "py", value: target.p, ref: { c: target.c + "@ok", p: target.p, gi: -1 } });
@@ -347,10 +347,10 @@
   }
 
   /* ---------- 错因分类：孩子答错时判断"为什么错" ----------
-     返回 Store.CAUSES 里的键:
+     返回 Store.CAUSES 里的键：
        tone 声调没分清（只差声调） / snd 音近混淆（同声母或同韵母）
        shp  字形看混（同部首）       / sem 意思记混（同主题组） / rcl 还没记牢
-     用途:① 家长端说明错在哪 ② 下一轮优先练对应题型（因材施教） */
+     用途：① 家长端说明错在哪 ② 下一轮优先练对应题型（因材施教） */
   function classify(target, chosen, qtype) {
     if (!chosen || !chosen.c || chosen.c === target.c) return null;
     var Py = window.Py;
@@ -388,7 +388,7 @@
   /* 错因 → 最该练的题型（因材施教） */
   var CAUSE_DRILL = { tone: "tonePick", snd: "dictation", shp: "pinyinChar", sem: "charEmoji", rcl: "listen" };
 
-  /* 生成一轮题目: pool=字对象数组(≥4), n=题数 */
+  /* 生成一轮题目： pool=字对象数组(≥4), n=题数 */
   function buildRound(pool, n) {
     n = n || 10;
     var ordered = orderTargets(pool);
@@ -424,7 +424,7 @@
       var learned = window.Store.learnedList();
       return learned.map(function (c) { return BY_CHAR[c]; }).filter(Boolean);
     },
-    /* 专项练习字池:cause 省略 → 所有犯过错的字 */
+    /* 专项练习字池：cause 省略 → 所有犯过错的字 */
     errorPool: function (cause) {
       var list = window.Store.charsByCause(cause);
       return list.map(function (c) { return BY_CHAR[c]; }).filter(Boolean);

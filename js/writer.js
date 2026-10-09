@@ -3,11 +3,11 @@
      描红错了，以前只说"这一笔再试试" —— 孩子不知道错在哪，只能瞎试;
      说了"再试试"还是错，就变成挫败。
      其实每一笔要往哪边走，数据里写得清清楚楚（medians 的首尾点）,
-     所以可以直接告诉他:「第 3 笔要从上往下写 ↓」,再把这一笔演一遍。
+     所以可以直接告诉他：「第 3 笔要从上往下写 ↓」,再把这一笔演一遍。
 
    ⚠️ 坐标系有个坑（踩过）:
      STROKE_DATA 的 medians 用的是 **y 轴向上**的坐标（和 hanzi-writer 内部一致）,
-     而屏幕是 y 轴向下。所以比较首尾点时必须把 dy 取反,
+     而屏幕是 y 轴向下。所以比较首尾点时必须把 dy 取反，
      否则"竖"会被判成"从下往上",给孩子的提示就正好说反了。
      .build/write-test.js 里用「十」「大」「木」这些方向确定的字守着这一点。
 */
@@ -32,7 +32,7 @@
 
   /* 八种走向 → 说给孩子听的话 + 箭头。
      用"从…往…"的句式，因为他要的是动作，不是笔画名称
-     (「横」「撇」这些名称是小学才学的,3~6 岁听不懂)。 */
+     (「横」「撇」这些名称是小学才学的，3~6 岁听不懂)。 */
   var DIR = {
     right:     { tip: "从左往右", arrow: "→" },
     left:      { tip: "从右往左", arrow: "←" },
@@ -50,7 +50,7 @@
   }
 
   /* 方向判定的置信阈值。为什么是"三段 + 一个不确定区":
-     只有首尾两个点可用时,**"竖"和"撇"在几何上是分不开的** —— 实测:
+     只有首尾两个点可用时，**"竖"和"撇"在几何上是分不开的** —— 实测：
        大 的第 2 笔（撇）   ax=0.340
        中 的第 1 笔（竖）   ax=0.345
      差 0.005,任何阈值在这两个之间都是掷硬币。
@@ -126,7 +126,7 @@
         highlightColor: COLORS.highlightColor
       });
     } catch (e) {
-      console.warn("writer创建失败:", e);
+      console.warn("writer创建失败：", e);
       return null;
     }
 
@@ -146,7 +146,7 @@
           writer.animateStroke(n, { onComplete: function () { if (onComplete) onComplete(); } });
         } catch (e) { if (onComplete) onComplete(); }
       },
-      /* 描红测验: cb = { onCorrect(i,total), onMistake(i), onDone(summary) } */
+      /* 描红测验： cb = { onCorrect(i,total), onMistake(i), onDone(summary) } */
       quiz: function (cb) {
         cb = cb || {};
         try {

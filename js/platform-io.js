@@ -10,7 +10,7 @@
 
    设计原则（与 js/storage.js 一致）:
      - **浏览器里逐字节等同旧行为**:全部走原来的实现，不换写法。
-     - 原生壳里特性探测 Capacitor 插件;插件不在就退回浏览器实现,
+     - 原生壳里特性探测 Capacitor 插件;插件不在就退回浏览器实现，
        绝不因为"少装一个插件"而让功能整个消失。
      - 面向家长的操作必须**有明确成功/失败反馈**,不能静默。
 
@@ -135,7 +135,7 @@
   var PlatformIO = {
     isNative: isNative,
 
-    /* 导出存档:JSON 文本存成文件 */
+    /* 导出存档：JSON 文本存成文件 */
     saveText: function (o) {
       o = o || {};
       var filename = o.filename || "save.json";

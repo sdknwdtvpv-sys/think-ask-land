@@ -119,7 +119,7 @@
       if (fill) fill.style.width = Math.round(idx / qs.length * 100) + "%";
     }
 
-    /* 连击徽章：连对 3 题出现,5 题以上"发烫"(纯视觉激励，不加星，避免影响结算数值) */
+    /* 连击徽章：连对 3 题出现，5 题以上"发烫"(纯视觉激励，不加星，避免影响结算数值) */
     function showCombo() {
       var el = view.querySelector("#combo");
       if (!el) return;
@@ -340,7 +340,7 @@
       var learnedN = window.Store.counts().learned;
       view.innerHTML =
         '<div class="screen v4 review-v4" data-screen="review">' +
-          '<div class="review-info">' + Icons.svg("sparkle") + '<b>记忆小秘密:</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现，复习一次就记得更牢，连续答对 4 次就进入<b>长期记忆</b>啦！</div>' +
+          '<div class="review-info">' + Icons.svg("sparkle") + '<b>记忆小秘密：</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现，复习一次就记得更牢，连续答对 4 次就进入<b>长期记忆</b>啦！</div>' +
           (due.length === 0
             /* 原来写「今天没有要复习的字」，而同一屏顶部的说明卡写着
                「学过的字会在 10 分钟 → 1 天 → … 后悄悄出现」——按自己的规则
@@ -547,7 +547,7 @@
         v.innerHTML =
           '<div class="screen v4 gate-v4" data-screen="gate"><div class="gate-box">' +
             '<div class="gate-emoji">' + Icons.svg("math") + '</div><h3>家长验证</h3>' +
-            "<p>为了防止小朋友误操作，请<b>家长</b>回答下面这道题:<br>" +
+            "<p>为了防止小朋友误操作，请<b>家长</b>回答下面这道题：<br>" +
             "小朋友请叫爸爸妈妈来 🙋</p>" +
             '<div class="gate-q">' + a + " × " + b + " = ?</div>" +
             '<input class="gate-input" id="gate-in" type="number" inputmode="numeric" autocomplete="off">' +
@@ -555,7 +555,7 @@
             '<button class="btn btn-lg btn-sky" id="gate-ok">确 定</button>' +
           "</div></div>";
 
-        /* 语音提示:Apple 明确建议"面向尚未识字的孩子时用语音提示，让他知道要找家长"。
+        /* 语音提示：Apple 明确建议"面向尚未识字的孩子时用语音提示，让他知道要找家长"。
            这里是家长门，念一句不会打扰谁;TTS 不可用就静默跳过。 */
         try {
           if (window.Speech && window.Speech.speak) {
@@ -581,7 +581,7 @@
         function lock() {
           locked = true;
           /* "被锁 10 秒"是一个**独立事件**,值得一个和"答错"不同、稍重的触觉。
-             普通答错走 SFX.wrong()(温和的 WARNING),这里补一个 ERROR 级别的,
+             普通答错走 SFX.wrong()(温和的 WARNING),这里补一个 ERROR 级别的，
              让人明确意识到"现在按什么都没用了"。 */
           try { if (window.Haptics) window.Haptics.gateError(); } catch (e) { /* 忽略 */ }
           var left = 10;
@@ -686,7 +686,7 @@
         };
 
         /* ---- 完整内容（内购解锁） ----
-           整个购买/恢复入口都**只在这里** —— 家长中心已经在家长门之后,
+           整个购买/恢复入口都**只在这里** —— 家长中心已经在家长门之后，
            满足 Apple 1.3「purchasing opportunities 必须位于 parental gate 之后」。
            被锁住的模块页里刻意不放购买按钮（见 js/ui.js 的 lockCard）。 */
         var entitlePanel = function () {
@@ -704,8 +704,8 @@
             return "<li>" + esc(t) + "</li>";
           }).join("");
           return '<div class="panel" id="panel-entitle"><h4>' + Icons.svg("trophy") + '完整内容</h4>' +
-            '<p class="parent-note">免费部分包含:<b>核心字库 · 字卡 · 笔顺描红 · 练习 · 复习 · 分级阅读 L1~L2</b>。' +
-            '<br>下面这些属于<b>完整内容包</b>,一次买断、永久可用:</p>' +
+            '<p class="parent-note">免费部分包含：<b>核心字库 · 字卡 · 笔顺描红 · 练习 · 复习 · 分级阅读 L1~L2</b>。' +
+            '<br>下面这些属于<b>完整内容包</b>,一次买断、永久可用：</p>' +
             '<ul class="ent-list">' + rows + "</ul>" +
             '<div class="backup-btns">' +
               '<button class="btn btn-sun" id="btn-buy">' +
@@ -804,7 +804,7 @@
           });
           html += "</div>";
           var top = causes[0];
-          html += '<p class="parent-note">' + Icons.svg("bulb") + '主要在<b>' + esc(top.name) + "</b>上出错:" + causeAdvice[top.k] + "</p>";
+          html += '<p class="parent-note">' + Icons.svg("bulb") + '主要在<b>' + esc(top.name) + "</b>上出错：" + causeAdvice[top.k] + "</p>";
           var topPool = DB.errorPool(top.k);
           if (topPool.length >= 4) {
             html += '<button class="btn btn-sky" id="btn-drill" data-cause="' + top.k + '">' + Icons.svg("target") + '针对「' + esc(top.name) + '」练一轮（' + topPool.length + " 字）</button>";
@@ -944,7 +944,7 @@
               : "这台设备/浏览器用不了录音，或者页面不是 https。<b>不影响其它任何功能</b>,只少了「跟我读」。") +
             "</p>" +
             '<p class="parent-note">' + Icons.svg("lock") + '录音<b>只在这台设备上回放</b>:不上传、不保存，离开页面立刻释放麦克风。</p>' +
-            (rc.lastError ? '<p class="parent-note">上次失败的原因:' + esc(rc.lastError) + "</p>" : "") +
+            (rc.lastError ? '<p class="parent-note">上次失败的原因：' + esc(rc.lastError) + "</p>" : "") +
             "</div>";
         }
 
@@ -973,7 +973,7 @@
         var curVoice = window.Speech.voice;
         var curId = curVoice ? (curVoice.voiceURI || curVoice.name) : "";
         html += '<div class="panel"><h4>' + Icons.svg("speak") + '朗读声音</h4>' +
-          '<p class="parent-note">孩子听到的声音分两层:<b>内置音色</b>优先（音质一致、离线可用）,' +
+          '<p class="parent-note">孩子听到的声音分两层：<b>内置音色</b>优先（音质一致、离线可用）,' +
           '内置音频里还没有的条目才用<b>手机系统音色</b>兜底。</p>';
 
         if (builtin.length) {
@@ -1066,7 +1066,7 @@
           '<p class="parent-note" style="text-align:center;margin-top:2px">思问岛 v' + VER +
             (inApp ? " · 数据保存在本机" : " · 数据保存在本机浏览器") + " · " +
             /* App Store 5.1.1(i) 要求隐私政策**在 App 内也能方便地访问**;
-               而 target="_blank" 在 WKWebView 里行为不可靠 —— 原生环境改成原地跳转,
+               而 target="_blank" 在 WKWebView 里行为不可靠 —— 原生环境改成原地跳转，
                privacy.html 自带的「回到思问岛」正好能把人带回应用。 */
             (inApp
               ? '<a class="foot-link" href="privacy.html">隐私说明</a>'
@@ -1079,7 +1079,7 @@
         if (sel) {
           sel.addEventListener("change", function () {
             var picked = window.Speech.pick(sel.value);
-            if (picked) window.UI.toast("已切换:「" + picked.name + "」");
+            if (picked) window.UI.toast("已切换：「" + picked.name + "」");
             window.Speech.speak("小宝贝,我们一起来认字吧", 0.88);
           });
           v.querySelector("#voice-try").addEventListener("click", function () {
@@ -1163,8 +1163,8 @@
             if (window.SFX) SFX.click();
             var text;
             try { text = JSON.stringify(window.Store.exportData()); }
-            catch (e) { window.UI.toast("导出失败:" + e.message); return; }
-            /* 走平台桥接层:`<a download>` 在 App 内的 WKWebView 里**不被支持**,
+            catch (e) { window.UI.toast("导出失败：" + e.message); return; }
+            /* 走平台桥接层：`<a download>` 在 App 内的 WKWebView 里**不被支持**,
                点了会静默失败 —— 而存档是"换手机不丢进度"的唯一途径，不能没反应。 */
             window.PlatformIO.saveText({
               filename: window.Store.exportFileName(),
@@ -1173,7 +1173,7 @@
               if (res === "canceled") return;
               window.UI.toast(res === "shared" ? "已打开分享面板，可存到「文件」或发给家人" : "存档已导出，请保存好这个文件");
             }).catch(function (e) {
-              window.UI.toast("导出失败:" + ((e && e.message) || e));
+              window.UI.toast("导出失败：" + ((e && e.message) || e));
             });
           });
         }
@@ -1231,7 +1231,7 @@
         var undoBtn = v.querySelector("#btn-undo-import");
         if (undoBtn) {
           undoBtn.addEventListener("click", function () {
-            /* 同上:window.confirm 在 WKWebView 里不可用 */
+            /* 同上：window.confirm 在 WKWebView 里不可用 */
             window.UI.confirm({
               title: "恢复到导入之前的进度？", emoji: "↩️", okText: "恢复",
               onOk: function () {
@@ -1349,7 +1349,7 @@
                     "&body=" + encodeURIComponent("\n\n\n————\n应用版本：v" + VER + "\n(请描述遇到的问题或想法)");
           }
           if (fb.url) {
-            /* 外链走平台桥接层:WebView 里 window.open 需要交给系统浏览器才会动。
+            /* 外链走平台桥接层：WebView 里 window.open 需要交给系统浏览器才会动。
                ⚠️ 儿童类要求所有外链位于家长门之后 —— 这里已经在门后了。 */
             window.PlatformIO.openExternal(href, function () {
               fbSay("没能打开，请用下面的「复制联系方式」手动联系", false);
@@ -1435,7 +1435,7 @@
           motionBtn.addEventListener("click", function () {
             var on = document.documentElement.classList.toggle("reduce-motion");
             /* ⚠️ 这一个键**故意**不走 PlatformStorage:
-               index.html 的内联脚本要在渲染前**同步**读它来避免动画闪烁,
+               index.html 的内联脚本要在渲染前**同步**读它来避免动画闪烁，
                而原生 Preferences 是异步的，读不到就会闪一下。
                它只是可随时重设的 UI 偏好（不是学习进度）,丢了也无所谓，所以留在 localStorage。 */
             try { localStorage.setItem("hanziKids.reduceMotion", on ? "1" : "0"); } catch (e) { /* 隐私模式 */ }

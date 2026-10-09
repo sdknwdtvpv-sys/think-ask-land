@@ -1,5 +1,5 @@
 /* ============ 思问岛 · 学习记录仓库（平台存储 + 记忆曲线） ============
-   存储不再直接碰 localStorage,一律走 js/storage.js 的平台适配层:
+   存储不再直接碰 localStorage,一律走 js/storage.js 的平台适配层：
      - 浏览器：行为与从前逐字节相同（直通 localStorage）
      - 原生壳：落到 Capacitor Preferences(App 私有存储),
        不受"内嵌 WebView 存储在存储压力下被 LRU 淘汰"的影响
@@ -8,7 +8,7 @@
   "use strict";
 
   var KEY = "hanziKids.v1";
-  /* 多孩档案:
+  /* 多孩档案：
      - 第一个孩子（默认档案）的存档仍然存在 KEY 上 —— 老用户升级后数据原地不动，零迁移风险
      - 其它孩子存在 KEY + "." + <id>
      - KEY + ".profiles" 只放"有哪些孩子、当前是谁",不含学习数据 */
@@ -30,7 +30,7 @@
     { e: "🐬", n: "海豚" }, { e: "🍓", n: "草莓" }, { e: "🦋", n: "蝴蝶" }, { e: "🏆", n: "大奖杯" }
   ];
 
-  /* 勋章定义: cond(ctx) 返回 true 即解锁 */
+  /* 勋章定义： cond(ctx) 返回 true 即解锁 */
   var BADGES = [
     { id: "first",   e: "🌱", n: "起步小达人", d: "学会第 1 个字",            cond: function (c) { return c.learned >= 1; } },
     { id: "learn30", e: "📗", n: "识字新手",   d: "累计学习 30 个字",          cond: function (c) { return c.learned >= 30; } },
@@ -83,7 +83,7 @@
 
   function num(v, d) { return (typeof v === "number" && isFinite(v)) ? v : d; }
   function nonNeg(v, d) { return Math.max(0, num(v, d)); }
-  /* 严格校验日期键：格式对但日期不存在（如 2026-13-99）也要拒掉,
+  /* 严格校验日期键：格式对但日期不存在（如 2026-13-99）也要拒掉，
      否则它会按字典序排在"最近 60 天"里，把真实记录挤出去 */
   function isValidDay(d) {
     if (typeof d !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
@@ -109,7 +109,7 @@
 
   /* 把任意来源（旧版本结构 / 被外部工具改坏）的存档规整成当前结构。
      原则：宁可丢掉一条坏记录，也不能让一处脏数据把整个应用打不开。 */
-  /* 能力维度：家长端"能力地图"用它把正确率拆到不同能力上,
+  /* 能力维度：家长端"能力地图"用它把正确率拆到不同能力上，
      而不是只给一个笼统的总正确率 */
   var DIMS = ["listen", "pinyin", "shape", "meaning"];
   var DIM_NAME = { listen: "听音辨字", pinyin: "拼音拼读", shape: "字形结构", meaning: "看图识义" };
@@ -162,7 +162,7 @@
           bad: nonNeg(r.bad, 0),
           quizDone: !!r.quizDone,
           seen: nonNeg(r.seen, 0),
-          /* 描红质量：写了几遍 / 一共错几笔 / 错得最多的那一笔（0 起,-1 表示没记录） */
+          /* 描红质量：写了几遍 / 一共错几笔 / 错得最多的那一笔（0 起，-1 表示没记录） */
           strokeRuns: nonNeg(r.strokeRuns, 0),
           strokeMiss: nonNeg(r.strokeMiss, 0),
           worstStroke: Math.max(-1, Math.min(99, Math.round(num(r.worstStroke, -1)))),
@@ -297,7 +297,7 @@
     try {
       state = migrate(JSON.parse(raw));
     } catch (e) {
-      /* 存档损坏（半写入 / 被手动改过）:留一份原始副本便于排查，再用默认值继续,
+      /* 存档损坏（半写入 / 被手动改过）:留一份原始副本便于排查，再用默认值继续，
          保证应用一定能打开 —— 旧实现是静默重置，用户连"进度为什么没了"都无从查起 */
       try { PlatformStorage.set(stateKey(activeId) + ".broken", raw); } catch (e2) { /* 忽略 */ }
       try { console.warn("思问岛：学习存档解析失败，已保留副本 " + stateKey(activeId) + ".broken 并重置", e); } catch (e2) { /* 忽略 */ }
@@ -400,7 +400,7 @@
     return state.chars[ch];
   }
 
-  /* 标记"我会了" —— 返回 { first: 是否第一次, res: addStars结果 } */
+  /* 标记"我会了" —— 返回 { first: 是否第一次， res: addStars结果 } */
   function markLearned(ch) {
     touchDay();
     var r = charRec(ch);
@@ -416,7 +416,7 @@
     return { first: first, res: res };
   }
 
-  /* 复习结果:knew=true 记得 / false 忘了 */
+  /* 复习结果：knew=true 记得 / false 忘了 */
   function reviewResult(ch, knew) {
     touchDay();
     var r = charRec(ch);
@@ -496,7 +496,7 @@
   }
 
   /* ---------- 错因统计（家长端 / 能力地图 / 专项练习） ---------- */
-  /* 全库错因合计，按次数降序:[{k, name, n}] */
+  /* 全库错因合计，按次数降序：[{k, name, n}] */
   function errorSummary() {
     var tot = {};
     CAUSES.forEach(function (k) { tot[k] = 0; });
@@ -529,7 +529,7 @@
   }
 
   /* 描红结果入档。
-     info 可省略（老调用方式继续可用）,给了就记质量:
+     info 可省略（老调用方式继续可用）,给了就记质量：
        · strokeMiss / worstStroke → 家长端能指出"这个字的第 3 笔最容易错"
        · dims.shape 不再无条件记"对" —— 写错 5 笔还算全对，那个正确率就是假的。
          现在按"写对的笔数 vs 写错的笔数"计，家长看到的字形维度才有意义。 */
@@ -679,7 +679,7 @@
   function hasRead(id) { return !!(state.reads && state.reads[id]); }
 
   /* 读后理解题一次作答。
-     两个数字要分开，否则家长看到的正确率会骗人:
+     两个数字要分开，否则家长看到的正确率会骗人：
        · 正确率(count=true)只记**每道题的第一次作答** —— 错了再试对，不该洗白第一次
        · 星星(got)只在**第一次答对**时给 —— 之后重答是复习，不再加星
      correct 为真且还没拿到过星时给 1 颗，并弹贴纸/勋章。 */
@@ -705,7 +705,7 @@
   function readQuiz(id) { return (state.rq && state.rq[id]) || null; }
 
   /* ---------- 看图说话（口语表达） ----------
-     刻意**不记"对错"**,只记:
+     刻意**不记"对错"**,只记：
        · runs  说了几次（激励"敢说",不是"说对"）
        · full/word/clear  家长勾的三项（家长就是判分者，这是人工判断，不是机器打分）
      第一次说完给 2 颗星 —— 奖的是"开口",不是"说得好"。
@@ -927,7 +927,7 @@
   };
 
   /* 原生壳里落盘是**异步**的(Preferences),失败不会走上面 save() 的 try/catch。
-     这里把它接到同一套"只提示一次"的上报逻辑上 —— 写失败绝不能静默吞掉,
+     这里把它接到同一套"只提示一次"的上报逻辑上 —— 写失败绝不能静默吞掉，
      否则家长以为进度存上了，其实一关 App 就没了。 */
   if (window.PlatformStorage && window.PlatformStorage.onWriteError) {
     window.PlatformStorage.onWriteError(function (msg) {

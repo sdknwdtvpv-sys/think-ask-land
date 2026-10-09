@@ -18,7 +18,7 @@
       (`hanziKids.*`),就搬过去 —— 覆盖"早期版本把进度存在 WebView 里"的升级路径。
       ⚠️ 注意：浏览器版 → App 版的搬家**不走这里**(两者存储容器不同),
       那条路依赖家长中心已有的「导出存档 / 导入存档」。
-   5. **写失败必须能被上层看见**:配额满/落盘失败不能静默吞掉,
+   5. **写失败必须能被上层看见**:配额满/落盘失败不能静默吞掉，
       否则家长以为进度存上了，其实一关 App 就没了。用 `onWriteError` 上报。
 
    接口
@@ -68,11 +68,11 @@
   var isNative = !!nativePrefs;
 
   /* ---------- localStorage 直通（浏览器路径） ----------
-     ⚠️ 语义刻意与 localStorage 保持一致:
+     ⚠️ 语义刻意与 localStorage 保持一致：
        - get / remove **吞掉异常**并返回 null(比原生更防御，调用方也都有 try/catch)
        - set **照旧抛出**(配额满时 localStorage 会抛)—— 因为 store.js 的
          "裁掉老统计再试一次"的重试逻辑正是靠这个异常触发的，不能改成返回 false
-     这样浏览器版的行为与改造前逐字节相同,38 个套件的既有断言不受影响。 */
+     这样浏览器版的行为与改造前逐字节相同，38 个套件的既有断言不受影响。 */
   function lsGet(k) {
     try { return window.localStorage.getItem(k); } catch (e) { return null; }
   }
@@ -109,7 +109,7 @@
     if (hydrating) return hydrating;
     hydrating = nativePrefs.keys().then(function (res) {
       var keys = (res && res.keys) || [];
-      /* 逐个读:Preferences 没有批量 get,但存档只有个位数个键，开销可忽略 */
+      /* 逐个读：Preferences 没有批量 get,但存档只有个位数个键，开销可忽略 */
       return keys.reduce(function (chain, k) {
         return chain.then(function () {
           return nativePrefs.get({ key: k }).then(function (r) {

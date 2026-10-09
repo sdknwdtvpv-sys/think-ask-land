@@ -21,7 +21,7 @@
     var DB = window.CharDB;
     var idx = Py.syllableIndex();
     var learned = DB.learnedPool();
-    /* 整体认读音节**不能**当拼读目标:
+    /* 整体认读音节**不能**当拼读目标：
        把 zhi 教成「zh + ī」是错的 —— 这 16 个音节存在的意义就是"不要拼"。
        它们由拼音小课堂的「整体认读音节」面板单独教（见上）。 */
     var ztMap = {};
@@ -120,7 +120,7 @@
 
       /* ---------- 声母 ---------- */
       html += '<div class="panel"><h4>' + Icons.svg("speak") + '声母（23 个）</h4>' +
-        '<p class="parent-note">点字母听发音（读的是呼读音:b 读「bo」）。下面会列出<b>你已经学过的字</b>。</p>' +
+        '<p class="parent-note">点字母听发音（读的是呼读音：b 读「bo」）。下面会列出<b>你已经学过的字</b>。</p>' +
         '<div class="py-grid" id="py-initials">';
       Py.TEACH_INITIALS.forEach(function (x) {
         var ex = Py.examplesForInitial(x.l, 4);
@@ -205,7 +205,7 @@
           speak(info.read, 0.7);
           var ex = Py.examplesForInitial(ini, 8);
           if (!ex.length) { exBox.textContent = "这个声母的字还没学到，以后会见到~"; return; }
-          exBox.innerHTML = '<span class="py-ex-label">' + info.l + " 开头的字:</span>" +
+          exBox.innerHTML = '<span class="py-ex-label">' + info.l + " 开头的字：</span>" +
             ex.map(function (c) {
               return '<button class="py-ex-char' + (learnedSet[c.c] ? " learned" : "") + '" data-say="' + esc(c.c) + '">' +
                 '<span class="kai">' + esc(c.c) + "</span><small>" + esc(c.p) + "</small></button>";
@@ -293,7 +293,7 @@
                 if (x.textContent === q.answer) x.classList.add("correct");
               });
               if (window.SFX) SFX.wrong();
-              fb.textContent = "再听一次:" + q.initial + " + " + q.tonedFinal + " = " + q.answer;
+              fb.textContent = "再听一次：" + q.initial + " + " + q.tonedFinal + " = " + q.answer;
               fb.className = "feedback-line bad";
             }
             speak(q.target.c, 0.72);
@@ -311,7 +311,7 @@
 })();
 
 /* ============ 思问岛 · 读一读（分级短文 + 阅读中找字） ============
-   设计:
+   设计：
      - 每篇短文的用字全部来自 400 字字库（.build/read-test.js 逐字校验）,孩子能自己读下来
      - 点任意字可听读音;还没学过的字带虚线下划线，读的时候有心理准备
      - "找字"把"读"变成"用":在文里找出目标字，找全给星星
@@ -436,7 +436,7 @@
         }).join("") + "</div>" +
         "</div>";
 
-      /* 付费门控:L1~L2 免费,L3~L5 属于完整内容包（见 js/entitlements.js 的 readPro）。
+      /* 付费门控：L1~L2 免费，L3~L5 属于完整内容包（见 js/entitlements.js 的 readPro）。
          这里是"硬门":未解锁就不渲染这些卡片，而不是渲染了再拦点击。 */
       var paidUnlocked = window.Entitlements ? window.Entitlements.isUnlocked("readPro") : true;
       var PAID_LV = { L3: 1, L4: 1, L5: 1 };
@@ -488,7 +488,7 @@
       var story = passages().filter(function (x) { return x.id === id; })[0];
       if (!story) { App.navigate("#/read"); return; }
 
-      /* 付费门控:L3~L5 属于完整内容包。
+      /* 付费门控：L3~L5 属于完整内容包。
          直接改 URL 也要拦得住 —— 所以这里（而不只是列表页）再判一次。 */
       var PAID_LV = { L3: 1, L4: 1, L5: 1 };
       if (PAID_LV[story.lvl] && window.Entitlements && !window.Entitlements.isUnlocked("readPro")) {
@@ -611,7 +611,7 @@
       });
 
       /* ================= 读后理解题 =================
-         为什么放在"读完"之后而不是页面上来就显示:
+         为什么放在"读完"之后而不是页面上来就显示：
          理解题是检验，不是预习 —— 先读后问，答对才说明真读进去了。
          答错不扣星、给出证据句、允许重答;答对才记入"短文理解"维度。 */
       var quizBox = view.querySelector("#rd-quiz");
@@ -672,7 +672,7 @@
         } else {
           if (window.SFX) SFX.wrong();
           /* 答错不讲道理，直接把他带回那句话 —— 4 岁的孩子只需要再看一遍 */
-          quizState[quizSi].msg = "再想想~ 回去读这一句:「" + esc(story.s[q.e]) + "」";
+          quizState[quizSi].msg = "再想想~ 回去读这一句：「" + esc(story.s[q.e]) + "」";
         }
         renderQuiz();
         if (ok) {
@@ -691,7 +691,7 @@
       /* ================= 自读模式 =================
          为什么做：读短文原来必须家长陪着点字、判断读没读完。
          自读模式把"指读"这件事交给应用：一句一屏、手指光标逐字走、
-         忘了怎么读就点那个字听一遍。孩子自己就能读完一篇,
+         忘了怎么读就点那个字听一遍。孩子自己就能读完一篇，
          读完之后**自动记进度**,家长不必一直在旁边。 */
       var selfBox = view.querySelector("#rd-self");
       var srStage = view.querySelector("#sr-stage");

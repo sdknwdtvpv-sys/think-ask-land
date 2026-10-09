@@ -35,7 +35,7 @@ body.v4 #page-title {
 body.v4 .icon-btn {
   width: 44px; height: 44px; border-radius: var(--r-sm);
   background: var(--surface); border: 1px solid var(--line); color: var(--ink-2);
-  font-size: 20px; line-height: 1;
+  font-size: var(--fs-title); line-height: 1;
 }
 body.v4 .star-pill {
   background: var(--surface); border: 1px solid var(--line);
@@ -102,7 +102,7 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
   font-style: normal; font-size: var(--cz-hero); line-height: 1; color: var(--ink);
 }
 .home-v4 .v4-py {
-  text-align: center; font-size: 20px; font-weight: 700; color: var(--primary); letter-spacing: 1px;
+  text-align: center; font-size: var(--fs-title); font-weight: 700; color: var(--primary); letter-spacing: 1px;
 }
 .home-v4 .v4-go {
   display: flex; align-items: center; justify-content: center; gap: var(--s2);
@@ -217,7 +217,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
   letter-spacing: 1px; min-height: 42px; margin-bottom: var(--s2);
 }
 .card-v4 .py-big .mini-speak {
-  width: 36px; height: 36px; border-radius: var(--r-pill); font-size: 18px;
+  width: 36px; height: 36px; border-radius: var(--r-pill); font-size: var(--fs-h);
   background: var(--surface); border: 1px solid var(--line); color: var(--ink-2);
   display: flex; align-items: center; justify-content: center;
 }
@@ -399,13 +399,13 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 .practice-v4 .scope-ico .ico { width: 20px; height: 20px; }
 /* 岛序号:与地图一致,用品牌字 */
 .practice-v4 .scope-ico.scope-idx {
-  font-family: var(--font-display); font-size: 20px; line-height: 1;
+  font-family: var(--font-display); font-size: var(--fs-title); line-height: 1;
   background: var(--surface-2); color: var(--ink-2);
 }
 .practice-v4 .scope-card > span:nth-child(2) { flex: 1; min-width: 0; }
 .practice-v4 .scope-name { display: block; font-size: var(--fs-body); font-weight: 700; color: var(--ink); }
 .practice-v4 .scope-meta { display: block; font-size: var(--fs-sm); color: var(--ink-3); margin-top: 2px; }
-.practice-v4 .scope-go { color: var(--ink-3); font-size: 18px; }
+.practice-v4 .scope-go { color: var(--ink-3); font-size: var(--fs-h); }
 
 /* 答题 HUD */
 .run-v4 .run-hud { padding: 0 0 var(--s3); }

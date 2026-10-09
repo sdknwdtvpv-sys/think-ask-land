@@ -142,7 +142,7 @@
     var root = document.getElementById("modal-root");
     if (root) root.innerHTML = "";
   }
-  /* 弹窗无障碍:role=dialog + aria-label;打开时记住焦点，关闭后归还 */
+  /* 弹窗无障碍：role=dialog + aria-label;打开时记住焦点，关闭后归还 */
   function attr(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -231,7 +231,7 @@
   }
 
   /* 通用输入弹窗 —— 替代 window.prompt。
-     为什么必须换掉:window.prompt / window.confirm 在 App 内的 WKWebView 里
+     为什么必须换掉：window.prompt / window.confirm 在 App 内的 WKWebView 里
      **不被支持**,会静默返回 null/false,用户表现为"点了改名没反应""删档案点了不动"。
      按钮 id 刻意复用 cf-ok / cf-cancel,这样下面那个 Esc 关闭逻辑不用改就能生效。 */
   function promptModal(o) {
@@ -277,8 +277,8 @@
     }
   }
 
-  /* Esc 关闭弹窗（键盘可达性） —— 必须关「最上面」那一层:
-     旧的 querySelector 只取第一个匹配，多层弹窗时会关掉被遮住的那层,
+  /* Esc 关闭弹窗（键盘可达性） —— 必须关「最上面」那一层：
+     旧的 querySelector 只取第一个匹配，多层弹窗时会关掉被遮住的那层，
      反而把上面的弹窗留在屏幕上。 */
   document.addEventListener("keydown", function (ev) {
     if (ev.key !== "Escape") return;
@@ -297,7 +297,7 @@
     o = o || {};
     /* 这一屏由 4 个受限模块共用（拼音/读一读 L3~L5/说一说/打印）,
        所以它也必须走 v4 —— 否则受限模块的观感会突然退回旧版。
-       ⚠️ 合规红线：这里**不能**出现购买按钮。锁定态只做说明 + 指向家长门,
+       ⚠️ 合规红线：这里**不能**出现购买按钮。锁定态只做说明 + 指向家长门，
        购买入口只在家长验证之后（见 js/entitlements.js 的说明）。 */
     return '<div class="screen v4 lock-v4" data-screen="lock"><div class="panel lock-card">' +
         '<div class="lock-ico">' + (window.Icons ? Icons.svg("lock") : "") + "</div>" +

@@ -1,12 +1,12 @@
 /* ============ 思问岛 · 内购与内容解锁 ============
-   路线：真离线 + 内购解锁。所以这里有两条**硬约束**,改代码时不要破坏:
+   路线：真离线 + 内购解锁。所以这里有两条**硬约束**,改代码时不要破坏：
 
    ① **不设置 store.validator**(下面有显式注释)。
       cdv-purchase 的 validator 是可选的;一旦设置，它会把你购买凭证发到
-      第三方校验服务 —— 那会让 App 连接非 Apple 服务器,**同时击穿**:
+      第三方校验服务 —— 那会让 App 连接非 Apple 服务器，**同时击穿**:
         · 中国区"单机不联网免备案"的豁免（实测口径：只能连 Apple 服务器用系统服务）
         · Kids Category 对第三方 SDK 的禁令(1.3 / 5.1.4)
-      不设置时,store.js 在本地直接判定凭证有效，不发任何 HTTP。
+      不设置时，store.js 在本地直接判定凭证有效，不发任何 HTTP。
 
    ② **内容全部随包内置**,内购只是"解锁开关"。不发任何内容、不下载代码
       (下载可执行代码违反 2.5.2)。
@@ -46,7 +46,7 @@
     print:    { paid: true,  label: "线下物料打印（5 种）" }
   };
 
-  /* 门控在哪些环境生效:
+  /* 门控在哪些环境生效：
        "native-only"(当前):只有 App 里门控。网页版保持全解锁 ——
                             这样 39 个测试套件与已上线的网页版行为零变化。
        "always"           :网页版也按同一张表门控（将来要收网页版的钱再切）。
@@ -100,12 +100,12 @@
     var s = document.createElement("script");
     s.src = src;
     s.onload = function () { cb(); };
-    s.onerror = function () { fail(new Error("加载失败:" + src)); };
+    s.onerror = function () { fail(new Error("加载失败：" + src)); };
     document.head.appendChild(s);
   }
 
   function loadPlugin(cb) {
-    /* 两个都要:capacitor-plugin.js 只设一个标记,store.js 的
+    /* 两个都要：capacitor-plugin.js 只设一个标记，store.js 的
        CapacitorNativeBridge.isAvailable() 会读它 */
     loadScript("vendor/cdv-purchase/capacitor-plugin.js", function () {
       loadScript("vendor/cdv-purchase/store.js", function () {
@@ -148,7 +148,7 @@
         platform: Cdv.Platform.APPLE_APPSTORE
       }]);
 
-      /* 购买流程:approved → 本地验证 → finish。
+      /* 购买流程：approved → 本地验证 → finish。
          finish() 必须调用，否则未完成交易会在每次启动时被反复投递。 */
       store.when().approved(function (transaction) {
         lastEvent = "approved";
@@ -197,7 +197,7 @@
     PRODUCT_ID: PRODUCT_ID,
     FEATURES: FEATURES,
 
-    /* 启动时调用一次。**不阻塞渲染** —— 商店初始化失败或很慢时,
+    /* 启动时调用一次。**不阻塞渲染** —— 商店初始化失败或很慢时，
        应用照常可用（只是付费模块显示为未解锁）。 */
     init: function () {
       nativeEnv = nativeDetect();

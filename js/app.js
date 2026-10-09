@@ -24,7 +24,7 @@
 
     navigate: function (hash) {
       var cur = location.hash || "#/home";
-      if (cur === hash) { this.render(); return; } // 同地址兜底:hashchange 不会触发
+      if (cur === hash) { this.render(); return; } // 同地址兜底：hashchange 不会触发
       location.hash = hash;
       /* 双保险：个别内嵌 webview 里 hashchange 可能不触发 */
       var self = this;
@@ -90,7 +90,7 @@
       window.scrollTo(0, 0);
       try {
         def.render(r.params, view);
-        /* 迁移期开关:v4 是逐屏推进的。按"这一屏是否用了 .screen.v4"在 body 上
+        /* 迁移期开关：v4 是逐屏推进的。按"这一屏是否用了 .screen.v4"在 body 上
            切换主题类，新版底色与顶栏就只作用于**已迁移的屏**,不污染其余 14 屏。
            全部迁移完成后，把这个开关连同旧 CSS 一起删掉。 */
         var isV4 = !!view.querySelector(".screen.v4");
@@ -99,7 +99,7 @@
            所以要一并切换，否则边缘会露出旧版的天蓝底。 */
         document.documentElement.classList.toggle("v4", isV4);
       } catch (e) {
-        console.error("渲染出错:", r.name, e);
+        console.error("渲染出错：", r.name, e);
         view.innerHTML = '<div class="empty-tip"><span class="big">😵</span>哎呀，出了点小问题<br>返回首页重试吧</div>';
       }
       this.refreshStars();
@@ -113,7 +113,7 @@
         self.back();
       });
       /* 音频解锁：必须"在手势里"完成三件事（音效 / <audio> / TTS）。
-         不用 { once:true } —— iOS 从后台切回来时音频会话会重新挂起,
+         不用 { once:true } —— iOS 从后台切回来时音频会话会重新挂起，
          保留监听，每次点按都补一次解锁（已经解锁时是空操作，不产生额外开销）。 */
       var unlock = function () {
         if (window.Speech._warmed && window.AudioPack && window.AudioPack.isUnlocked()) return;
@@ -129,7 +129,7 @@
       });
       window.Store.on(function () { self.refreshStars(); });
       /* 只在「宽度」变化时重渲染（横竖屏切换等）。
-         手机地址栏收起/展开只改高度却同样触发 resize —— 若照样重渲染,
+         手机地址栏收起/展开只改高度却同样触发 resize —— 若照样重渲染，
          字卡页会被整个重建：描红进度丢失、进页面时的自动朗读重放。 */
       window.addEventListener("resize", (function () {
         var t = 0, lastW = window.innerWidth;
@@ -146,7 +146,7 @@
     },
 
     /* ---------- 主屏幕 APP 的"点一下开始"门 ----------
-       为什么需要：从主屏幕图标启动时,iOS 不允许页面自动出声（没有用户激活上下文）,
+       为什么需要：从主屏幕图标启动时，iOS 不允许页面自动出声（没有用户激活上下文）,
        孩子点字卡听到的会是"静默"。浏览器标签页里不存在这个问题，所以只在独立模式出现。
        这一下点击同时完成：解锁音频 + 打招呼（让孩子立刻听到声音，知道"有声音了"）。 */
     soundGate: function () {
@@ -188,7 +188,7 @@
         window.Store.save();
         window.UI.celebrate([{
           kind: "custom", e: "🌈", title: "欢迎来到思问岛！",
-          text: "点一点汉字，听一听读音,\n描一描笔顺，答对题目赚星星⭐\n集星星还能解锁贴纸和勋章哦！",
+          text: "点一点汉字，听一听读音，\n描一描笔顺，答对题目赚星星⭐\n集星星还能解锁贴纸和勋章哦！",
           okText: "开始冒险！"
         }]);
       }, 400);
@@ -250,7 +250,7 @@
       };
 
       /* ---------- v4 新版首页 ----------
-         三处结构变化:
+         三处结构变化：
            ① 「今天的字」升为整屏唯一主角 —— 学汉字不再是 8 个等权色块之一
            ② 颜色从整块卡片收进小图标 —— 旧版 8 块 8 色等于没有重点
            ③ 问候/统计/任务不再各自成段，信息更密、留白更敢 */
@@ -404,7 +404,7 @@
     var box = map.getBoundingClientRect();
     var pts = [];
     /* 取**圆环**的中心，不是整个卡片的中心。
-       卡片 = 圆环 + 名称 + “已学 x/y 字”,整卡的中心正好落在文字里,
+       卡片 = 圆环 + 名称 + “已学 x/y 字”,整卡的中心正好落在文字里，
        于是曲线端点扎进文字、白点直接压过「已学 0 / 44 字」(实测截图可见)。
        圆环中心才是这条小径真正要串起来的节点。 */
     Array.prototype.forEach.call(map.querySelectorAll(".isle-ring"), function (el) {
@@ -769,7 +769,7 @@
         var totalStrokes = inst.totalStrokes || window.Writing.strokeCount(ch.c);
 
         /* 笔顺步骤条：点某一笔就单独演那一笔。
-           孩子常见的情况是"第 3 笔看不清楚",让他能反复看第 3 笔,
+           孩子常见的情况是"第 3 笔看不清楚",让他能反复看第 3 笔，
            而不是每次都从头播一遍（从头播 6 遍会让他放弃）。 */
         function renderStrokeBar(cur) {
           if (!strokeBar || !totalStrokes) return;
@@ -908,7 +908,7 @@
      水合失败也必须能打开（ready 内部已兜底）,所以这里不做失败分支。 */
   document.addEventListener("DOMContentLoaded", function () {
     var go = function () {
-      try { window.Store.boot(); } catch (e) { /* 存档坏了也不能打不开,Store 内部已兜底 */ }
+      try { window.Store.boot(); } catch (e) { /* 存档坏了也不能打不开，Store 内部已兜底 */ }
 
       /* 内购初始化：异步、**绝不阻塞首屏**。
          商店加载慢、失败、或根本没装插件时，应用照常可用（付费模块只是显示未解锁）。
