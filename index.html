@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<!-- 静态就带上 v4 类：App.render 会在 JS 启动后才按屏切换它，
+     但**首帧**是 CSS 渲染的、那时 JS 还没跑 —— 于是在旧主题下先画一帧
+     （旧天蓝背景 + 紫灰文字），冷启动能看到一闪。
+     16 屏已全部迁到 v4，所以这里直接写死，首帧就是新主题。
+     （App.render 仍会按屏切换，行为不变。） -->
+<html lang="zh-CN" class="v4">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
