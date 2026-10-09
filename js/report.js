@@ -154,7 +154,7 @@
         text(ctx, ch ? ch.p : "", cx + chipW / 2, cy + chipW + 18, { size: 16, align: "center", color: MUTED, weight: 600 });
       });
     } else {
-      text(ctx, "这一周没有特别的易错字，学得很扎实!", 48, wY + 42, { size: 20, color: MUTED, weight: 600 });
+      text(ctx, "这一周没有特别的易错字，学得很扎实！", 48, wY + 42, { size: 20, color: MUTED, weight: 600 });
     }
 
     /* 一周柱状图（星星） */

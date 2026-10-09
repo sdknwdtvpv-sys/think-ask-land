@@ -170,15 +170,15 @@
     var root = document.getElementById("modal-root");
     var mask = document.createElement("div");
     mask.className = "modal-mask";
-    var title = it.kind === "sticker" ? "获得新贴纸!" : it.kind === "badge" ? "获得新勋章!" : it.title || "";
-    var text = it.kind === "sticker" ? "集满 " + window.Store.STICKER_EVERY + " 颗星星的奖励，继续加油哦!" : it.kind === "badge" ? it.d || "" : it.text || "";
+    var title = it.kind === "sticker" ? "获得新贴纸！" : it.kind === "badge" ? "获得新勋章！" : it.title || "";
+    var text = it.kind === "sticker" ? "集满 " + window.Store.STICKER_EVERY + " 颗星星的奖励，继续加油哦！" : it.kind === "badge" ? it.d || "" : it.text || "";
     var mood = (it.kind === "sticker" || it.kind === "badge") ? "cheer" : "happy";
     mask.innerHTML =
       '<div class="modal-card" role="dialog" aria-modal="true" aria-label="' + attr(title || "提示") + '">' +
         '<span class="modal-emoji">' + (it.e || "🎉") + "</span>" +
         '<div class="modal-title">' + title + "</div>" +
         '<div class="modal-text">' + text + "</div>" +
-        '<div class="modal-btns"><button class="btn btn-lg btn-mint" id="modal-ok">' + (it.okText || "收下啦!") + "</button></div>" +
+        '<div class="modal-btns"><button class="btn btn-lg btn-mint" id="modal-ok">' + (it.okText || "收下啦！") + "</button></div>" +
       "</div>";
     root.appendChild(mask);
     rememberFocus();

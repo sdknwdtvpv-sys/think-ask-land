@@ -285,7 +285,7 @@
               window.Store.addStars(1);
               if (window.SFX) SFX.correct();
               if (window.UI.flyStar) window.UI.flyStar(btn, 1);
-              fb.textContent = "拼对啦!" + q.initial + " + " + q.tonedFinal + " = " + q.answer + " ⭐+1";
+              fb.textContent = "拼对啦！" + q.initial + " + " + q.tonedFinal + " = " + q.answer + " ⭐+1";
               fb.className = "feedback-line good";
             } else {
               btn.classList.add("wrong");
@@ -574,7 +574,7 @@
         if (found >= totalTarget && totalTarget > 0) {
           findOn = false;
           var res = window.Store.markRead(story.id);
-          findHud.innerHTML += '<span class="find-done">🎉 全找到啦!' + (res.first ? " 读书 +3 ⭐" : "") + "</span>";
+          findHud.innerHTML += '<span class="find-done">🎉 全找到啦！' + (res.first ? " 读书 +3 ⭐" : "") + "</span>";
           if (window.SFX) SFX.correct();
           if (window.UI.burst) window.UI.burst(window.innerWidth / 2, window.innerHeight * 0.4, 26);
         }
@@ -604,7 +604,7 @@
       }
       view.querySelector("#rd-done").addEventListener("click", function () {
         var res = window.Store.markRead(story.id);
-        window.UI.toast(res.first ? "读完一篇，读书 +3 ⭐" : "又读了一遍，真棒!");
+        window.UI.toast(res.first ? "读完一篇，读书 +3 ⭐" : "又读了一遍，真棒！");
         if (window.SFX) SFX.correct();
         /* 读完不急着走：先问一句"读懂了没有"。没有题目的篇目照旧回列表。 */
         if (!revealQuiz()) App.after(700, function () { App.navigate("#/read"); });
@@ -632,7 +632,7 @@
         var st = quizState[quizSi] || {};
         var tip = q.t === "why" ? "为什么" : q.t === "where" ? "在哪里" : "谁 / 什么";
         quizBox.innerHTML =
-          '<div class="rq-head"><span class="rq-tag">' + tip + '</span>读懂了没有?' +
+          '<div class="rq-head"><span class="rq-tag">' + tip + '</span>读懂了没有？' +
             '<button class="rq-say" id="rq-say" aria-label="把题目读给我听">' + Icons.svg("speak") + '</button></div>' +
           '<div class="rq-q">' + esc(q.q) + "</div>" +
           '<div class="rq-opts">' + q.opts.map(function (o, i) {
@@ -759,7 +759,7 @@
         if (srFinished) return;
         srFinished = true;
         var res = window.Store.markRead(story.id);
-        srHint.innerHTML = "🎉 这一篇你自己读完啦!" + (res.first ? " 读书 +3 ⭐" : " 又读了一遍，真棒!");
+        srHint.innerHTML = "🎉 这一篇你自己读完啦！" + (res.first ? " 读书 +3 ⭐" : " 又读了一遍，真棒！");
         srAutoBtn.innerHTML = Icons.svg("refresh") + "再读一遍";   /* textContent → innerHTML：图标是 SVG */
         srAutoBtn.classList.remove("playing");
         if (window.SFX) SFX.correct();
@@ -819,7 +819,7 @@
         if (window.SFX) SFX.click();
         srStop();
         var res = window.Store.markRead(story.id);
-        window.UI.toast(res.first ? "读完一篇，读书 +3 ⭐" : "又读了一遍，真棒!");
+        window.UI.toast(res.first ? "读完一篇，读书 +3 ⭐" : "又读了一遍，真棒！");
         if (window.SFX) SFX.correct();
         App.after(700, function () { App.navigate("#/read"); });
       });

@@ -29,7 +29,7 @@
       var html =
         '<div class="screen v4 practice-v4" data-screen="practice">' +
           /* 去掉正文里的 emoji:它在句子里只是装饰，却会把整屏拉回"网页感" */
-          '<div class="practice-intro">每轮 10 道题：听词语选字、听写单字、看字选图、看字选拼音、看拼音选字、听音辨调。答对 1 题得 1 颗星，全对还有奖励!</div>' +
+          '<div class="practice-intro">每轮 10 道题：听词语选字、听写单字、看字选图、看字选拼音、看拼音选字、听音辨调。答对 1 题得 1 颗星，全对还有奖励！</div>' +
           '<div class="section-title">' + Icons.svg("book") + '学过多少练多少</div>' +
           '<div class="scope-list">' +
           '<button class="scope-card' + (learned.length < 4 ? " disabled" : "") + '" data-scope="learned">' +
@@ -74,7 +74,7 @@
       var scope = p.scope || "learned";
       var pool = poolOf(scope);
       if (pool.length < 4) {
-        window.UI.toast("字还不够 4 个，先去学几个字吧!");
+        window.UI.toast("字还不够 4 个，先去学几个字吧！");
         App.after(600, function () { App.navigate("#/practice"); });
         return;
       }
@@ -144,25 +144,25 @@
       var prompt = "";
       if (q.type === "listen") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听一听，是哪个字?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听一听，是哪个字？</div>' +
           '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button></div>';
       } else if (q.type === "dictation") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听写：听到的是哪个字?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("speak") + '听写：听到的是哪个字？</div>' +
           '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button>' +
           '<div class="prompt-hint">仔细听声调哦</div></div>';
       } else if (q.type === "tonePick") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("pinyin") + '听一听，声调对吗?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("pinyin") + '听一听，声调对吗？</div>' +
           '<div class="prompt-char-row"><div class="prompt-char kai">' + esc(q.target.c) + "</div>" +
           '<button class="speak-big small" id="sp-btn">' + Icons.svg("speak") + '</button></div></div>';
       } else if (q.type === "partJoin") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("parts") + '这些部件能拼成哪个字?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("parts") + '这些部件能拼成哪个字？</div>' +
           '<div class="part-tiles">' + q.parts.map(function (x) { return '<span class="part-tile kai">' + esc(x) + "</span>"; }).join('<span class="part-plus">+</span>') + "</div></div>";
       } else if (q.type === "partSplit") {
         prompt =
-          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("parts") + '它是由哪些部件组成的?</div>' +
+          '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("parts") + '它是由哪些部件组成的？</div>' +
           '<div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
       } else if (q.type === "wordDictation") {
         /* 整词听写：听一个词，选出听到的那个词 */
@@ -171,7 +171,7 @@
           '<button class="speak-big" id="sp-btn">' + Icons.svg("speak") + '</button>' +
           '<div class="prompt-hint">再听一遍就点喇叭</div></div>';
       } else if (q.type === "charEmoji") {
-        prompt = '<div class="prompt-area"><div class="prompt-label">这个字是哪幅图呢?</div><div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
+        prompt = '<div class="prompt-area"><div class="prompt-label">这个字是哪幅图呢？</div><div class="prompt-char kai">' + esc(q.target.c) + "</div></div>";
       } else if (q.type === "emojiChar") {
         prompt = '<div class="prompt-area"><div class="prompt-label">' + Icons.svg("eye") + '看图猜字</div><div class="prompt-emoji">' + q.target.e + "</div></div>";
       } else if (q.type === "charPinyin") {
@@ -238,7 +238,7 @@
         window.UI.flyStar(btn, 1);
         var r = btn.getBoundingClientRect();
         window.UI.burst(r.left + r.width / 2, r.top + r.height / 2, 26);
-        fb.textContent = ["太棒了!", "答对啦!", "真厉害!", "完全正确!", "好聪明!"][(Math.random() * 5) | 0] + " ⭐+1";
+        fb.textContent = ["太棒了！", "答对啦！", "真厉害！", "完全正确！", "好聪明！"][(Math.random() * 5) | 0] + " ⭐+1";
         fb.classList.add("good");
         /* 固定句而非"连对N个":动态拼接无法预置音频，而表扬声恰恰最不能在
            iOS 独立 APP 里静默。连对的数字继续显示在上方 HUD 里。 */
@@ -283,11 +283,11 @@
         window.Store.save();
       }
       var ratio = qs.length ? okCount / qs.length : 0;
-      var grade = ratio >= 1 ? { k: "S", t: "完美通关!", m: "cheer" }
-        : ratio >= 0.8 ? { k: "A", t: "很棒哦!", m: "cheer" }
-        : ratio >= 0.6 ? { k: "B", t: "不错，继续!", m: "happy" }
-        : { k: "C", t: "多练练更棒!", m: "think" };
-      var msg = okCount === qs.length ? "全部答对，你是识字小冠军!" : okCount >= qs.length * 0.7 ? "很棒！再练一轮就更好啦!" : "多多练习，你会更厉害!";
+      var grade = ratio >= 1 ? { k: "S", t: "完美通关！", m: "cheer" }
+        : ratio >= 0.8 ? { k: "A", t: "很棒哦！", m: "cheer" }
+        : ratio >= 0.6 ? { k: "B", t: "不错，继续！", m: "happy" }
+        : { k: "C", t: "多练练更棒！", m: "think" };
+      var msg = okCount === qs.length ? "全部答对，你是识字小冠军！" : okCount >= qs.length * 0.7 ? "很棒！再练一轮就更好啦！" : "多多练习，你会更厉害！";
       /* 星星逐颗跳出（超过 12 颗折叠显示） */
       var starRow = "";
       var showN = Math.min(earned, 12);
@@ -302,7 +302,7 @@
             '<span class="grade-word">' + grade.t + "</span>" +
           "</div>" +
           '<div class="score-big">答对 ' + okCount + "/" + qs.length + " 题</div>" +
-          '<div class="score-sub">' + msg + (perfect && qs.length >= 10 ? "<br>全对奖励 +3 颗星!" : "") + "</div>" +
+          '<div class="score-sub">' + msg + (perfect && qs.length >= 10 ? "<br>全对奖励 +3 颗星！" : "") + "</div>" +
           '<div class="end-star-row">' + starRow + "</div>" +
           '<div class="end-stars">本轮共获得 ' + earned + Icons.svg("starFill") + "</div>" +
           '<div class="end-btns">' +
@@ -340,7 +340,7 @@
       var learnedN = window.Store.counts().learned;
       view.innerHTML =
         '<div class="screen v4 review-v4" data-screen="review">' +
-          '<div class="review-info">' + Icons.svg("sparkle") + '<b>记忆小秘密:</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现，复习一次就记得更牢，连续答对 4 次就进入<b>长期记忆</b>啦!</div>' +
+          '<div class="review-info">' + Icons.svg("sparkle") + '<b>记忆小秘密:</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现，复习一次就记得更牢，连续答对 4 次就进入<b>长期记忆</b>啦！</div>' +
           (due.length === 0
             /* 原来写「今天没有要复习的字」，而同一屏顶部的说明卡写着
                「学过的字会在 10 分钟 → 1 天 → … 后悄悄出现」——按自己的规则
@@ -351,8 +351,8 @@
               '<button class="btn btn-lg btn-sky" id="go-learn">' + Icons.svg("book") + '去学新字</button>'
             : '<div style="text-align:center;margin:26px 0">' +
                 '<div style="font-size:74px">' + Icons.svg("mail") + '</div>' +
-                '<div style="font-size:22px;font-weight:900;margin:10px 0 4px">有 ' + due.length + " 个字想见你!</div>" +
-                '<div style="color:var(--ink-light);font-size:14px;font-weight:600">翻翻卡，想一想，你还认识它们吗?</div>' +
+                '<div style="font-size:22px;font-weight:900;margin:10px 0 4px">有 ' + due.length + " 个字想见你！</div>" +
+                '<div style="color:var(--ink-light);font-size:14px;font-weight:600">翻翻卡，想一想，你还认识它们吗？</div>' +
               "</div>" +
               '<button class="btn btn-lg btn-mint" id="go-review">' + Icons.svg("refresh") + '开始复习(' + Math.min(due.length, 20) + "张卡)</button>") +
         "</div>";
@@ -403,7 +403,7 @@
             "</div></div>" +
             '<div class="review-btns">' +
               '<button class="btn btn-lg btn-warm" id="btn-forgot">' + Icons.svg("refresh") + "有点忘了</button>" +
-              '<button class="btn btn-lg btn-mint" id="btn-knew">' + Icons.svg("check") + "认识!" + "</button>" +
+              '<button class="btn btn-lg btn-mint" id="btn-knew">' + Icons.svg("check") + "认识！" + "</button>" +
             "</div>" +
           "</div>";
         var ticks = view.querySelector("#hud-ticks");
@@ -439,7 +439,7 @@
             acc.badges = acc.badges.concat(res.badges);
             if (window.SFX) SFX.correct();
             window.UI.flyStar(view.querySelector("#btn-knew"), 1);
-            window.UI.wordFlash(["记得真牢!", "太棒了!", "厉害!"][(Math.random() * 3) | 0]);
+            window.UI.wordFlash(["记得真牢！", "太棒了！", "厉害！"][(Math.random() * 3) | 0]);
           } else {
             if (window.SFX) SFX.wrong();
             window.UI.toast("没关系，多看几遍就记住啦 💪");
@@ -453,7 +453,7 @@
         view.innerHTML =
           '<div class="screen v4 run-v4 run-end" data-screen="run-end">' +
             '<span class="end-emoji">🎈</span>' +
-            '<div class="score-big">复习完成!</div>' +
+            '<div class="score-big">复习完成！</div>' +
             '<div class="score-sub">共复习 ' + cards.length + " 个字，认识 " + knew + " 个<br>忘记的字一会儿还会再来找你哦</div>" +
             '<div class="end-stars">获得 ' + earned + " " + Icons.svg("starFill") + "</div>" +
             '<div class="end-btns">' +
@@ -493,7 +493,7 @@
         '<div class="screen v4 rewards-v4" data-screen="rewards">' +
           '<div class="reward-head">' +
             '<div class="reward-stars">' + Icons.svg("starFill") + st.stars + "</div>" +
-            '<div class="reward-next">' + (allGot ? "全部贴纸都集齐啦，太厉害了!" : "再得 " + need + " 颗星，解锁下一张贴纸!") + "</div>" +
+            '<div class="reward-next">' + (allGot ? "全部贴纸都集齐啦，太厉害了！" : "再得 " + need + " 颗星，解锁下一张贴纸！") + "</div>" +
             (allGot ? "" :
               '<div class="reward-track">' +
                 '<span class="rt-next">' + nextSticker.e + "</span>" +
@@ -777,7 +777,7 @@
           html += "</div><p class=\"parent-note\" style=\"margin-top:10px\">点字可听读音。这些字会在练习和复习中自动优先出现;" +
             Icons.svg("flame") + " 标记表示错得比较多。</p>";
         } else {
-          html += '<p class="parent-note">暂时没有容易错的字，学得很扎实!' + (due ? " 当前有 " + due + " 个字到期待复习。" : "") + "</p>";
+          html += '<p class="parent-note">暂时没有容易错的字，学得很扎实！' + (due ? " 当前有 " + due + " 个字到期待复习。" : "") + "</p>";
         }
         html += "</div>";
 
@@ -1120,7 +1120,7 @@
                 var p2 = window.Store.profiles().filter(function (x) { return x.id === id; })[0];
                 /* window.confirm 同上：在 WKWebView 里静默返回 false,删除会"点了没反应" */
                 window.UI.confirm({
-                  title: "删除「" + (p2 ? p2.name : "") + "」的档案?",
+                  title: "删除「" + (p2 ? p2.name : "") + "」的档案？",
                   text: "该孩子的识字进度、星星和贴纸会一起删除，无法撤销。",
                   emoji: "🗑️", danger: true, okText: "删除",
                   onOk: function () {
@@ -1233,7 +1233,7 @@
           undoBtn.addEventListener("click", function () {
             /* 同上:window.confirm 在 WKWebView 里不可用 */
             window.UI.confirm({
-              title: "恢复到导入之前的进度?", emoji: "↩️", okText: "恢复",
+              title: "恢复到导入之前的进度？", emoji: "↩️", okText: "恢复",
               onOk: function () {
                 var ur = window.Store.undoImport();
                 if (!ur.ok) { window.UI.toast(ur.err); return; }
@@ -1389,7 +1389,7 @@
                 return;
               }
               if (window.Entitlements.unlocked()) {
-                window.UI.toast("已解锁，谢谢你!");
+                window.UI.toast("已解锁，谢谢你！");
                 rerender();
               } else if (hint) {
                 hint.textContent = "购买已提交，正在等 App Store 确认…";
@@ -1453,13 +1453,13 @@
         });
         v.querySelector("#btn-reset").addEventListener("click", function () {
           window.UI.confirm({
-            emoji: "🗑️", title: "清空学习记录?", danger: true,
+            emoji: "🗑️", title: "清空学习记录？", danger: true,
             text: "将删除全部星星、贴纸、勋章和学习进度，且无法恢复。",
             okText: "确定清空", cancelText: "取消",
             onOk: function () {
               window.UI.confirm({
                 emoji: "❗", title: "最后确认", danger: true,
-                text: "真的要清空所有数据吗?", okText: "是的，清空", cancelText: "再想想",
+                text: "真的要清空所有数据吗？", okText: "是的，清空", cancelText: "再想想",
                 onOk: function () {
                   window.Store.reset();
                   window.UI.toast("已清空，重新开始吧");

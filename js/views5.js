@@ -9,7 +9,7 @@
      所以这个模块里**一个"对/错"都不会出现**。
 
    三段式脚手架（家长照着问就行，不用备课）:
-     有谁? → 在哪里? → 在做什么?
+     有谁? → 在哪里? → 在做什么？
      —— 这三问正好也是理解题的结构（谁/哪里）,孩子练熟了,
         读短文时自然会把同样的框架用上去。
 */
@@ -47,9 +47,9 @@
           '这里不打分，好听不好听，爸爸妈妈说了算。' +
           (done ? '已经说过 <b>' + done + "</b> 个场景。" : "") + "</div>" +
         '<div class="talk-scaffold"><span class="ts-label">照着问</span>' +
-          '<span class="ts-step">有谁?</span><span class="ts-arrow">→</span>' +
-          '<span class="ts-step">在哪里?</span><span class="ts-arrow">→</span>' +
-          '<span class="ts-step">在做什么?</span></div>' +
+          '<span class="ts-step">有谁？</span><span class="ts-arrow">→</span>' +
+          '<span class="ts-step">在哪里？</span><span class="ts-arrow">→</span>' +
+          '<span class="ts-step">在做什么？</span></div>' +
         '<div class="talk-grid">' + list.map(function (x) {
           var rec = window.Store.talk ? window.Store.talk(x.id) : null;
           return '<button class="talk-card' + (rec && rec.runs ? " done" : "") + '" data-id="' + x.id + '">' +
@@ -79,14 +79,14 @@
       '<div class="talk-scene-big" id="tk-pic">' + sc.emoji + "</div>" +
       '<button class="talk-sentence" id="tk-say">' + esc(sc.scene) + '<span class="tk-spk">' + Icons.svg("speak") + '</span></button>' +
       '<div class="talk-scaffold"><span class="ts-label">照着问</span>' +
-        '<span class="ts-step">有谁?</span><span class="ts-arrow">→</span>' +
-        '<span class="ts-step">在哪里?</span><span class="ts-arrow">→</span>' +
-        '<span class="ts-step">在做什么?</span></div>' +
+        '<span class="ts-step">有谁？</span><span class="ts-arrow">→</span>' +
+        '<span class="ts-step">在哪里？</span><span class="ts-arrow">→</span>' +
+        '<span class="ts-step">在做什么？</span></div>' +
       '<div class="talk-words">' + sc.words.map(function (w) {
         return '<button class="talk-word" data-say="' + esc(w) + '">' + esc(w) + "</button>";
       }).join("") + "</div>" +
       '<div class="talk-panel" id="tk-panel"></div>' +
-      '<div class="talk-more" id="tk-more"><span class="tm-label">还想说?</span>' + esc(sc.more) + "</div>" +
+      '<div class="talk-more" id="tk-more"><span class="tm-label">还想说？</span>' + esc(sc.more) + "</div>" +
       '<div class="card-nav" style="position:static;background:none">' +
         '<button class="btn btn-ghost" id="tk-back">‹ 换一张图</button></div>' +
       "</div>";

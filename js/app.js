@@ -187,9 +187,9 @@
         st.welcomed = true; // 弹窗真正出现时才落盘
         window.Store.save();
         window.UI.celebrate([{
-          kind: "custom", e: "🌈", title: "欢迎来到思问岛!",
-          text: "点一点汉字，听一听读音,\n描一描笔顺，答对题目赚星星⭐\n集星星还能解锁贴纸和勋章哦!",
-          okText: "开始冒险!"
+          kind: "custom", e: "🌈", title: "欢迎来到思问岛！",
+          text: "点一点汉字，听一听读音,\n描一描笔顺，答对题目赚星星⭐\n集星星还能解锁贴纸和勋章哦！",
+          okText: "开始冒险！"
         }]);
       }, 400);
     }
@@ -290,11 +290,11 @@
                 '<button class="v4-go" data-go="' + nxGo + '">开始学这个字 <span>→</span></button>' +
                 '<button class="v4-allchars" data-go="#/groups">看全部 ' + total + " 个字 ›</button>"
               : '<div class="v4-cap"><b>全部学完</b></div>' +
-                '<div class="v4-done">' + Icons.svg("trophy") + "761 个字都学完啦!</div>") +
+                '<div class="v4-done">' + Icons.svg("trophy") + "761 个字都学完啦！</div>") +
           "</div>" +
           /* 今日任务：一行信息 + 一条进度（旧版用"进度条 + 2/3 + 三个 chip"说了三遍） */
           '<button class="v4-task" data-task="today" data-go="' + taskGo + '">' +
-            '<span class="v4-th"><b>' + (allDone ? "今日任务全部完成!" : "今日任务") + "</b><span>" + doneN + " / 3</span></span>" +
+            '<span class="v4-th"><b>' + (allDone ? "今日任务全部完成！" : "今日任务") + "</b><span>" + doneN + " / 3</span></span>" +
             '<span class="v4-track"><i style="width:' + Math.round(doneN / 3 * 100) + '%"></i></span>' +
             '<span class="v4-tsub">学字 ' + tLearn + "/" + gLearn + " · 答题 " + tQuiz + "/" + gQuiz + " · 复习 " + tDue + "</span>" +
           "</button>" +
@@ -383,7 +383,7 @@
           "</button>";
       });
       html += "</div>" +
-        '<div class="map-foot">' + Icons.svg("star") + "学完一座岛，就能点亮下一座!" + "</div>" +
+        '<div class="map-foot">' + Icons.svg("star") + "学完一座岛，就能点亮下一座！" + "</div>" +
       "</div>";
       view.innerHTML = html;
       view.querySelectorAll(".group-card").forEach(function (b) {
@@ -651,7 +651,7 @@
           recHandle = h;
           var left = Math.round(h.ms / 1000);
           recMsg(
-            '<div class="rec-top rec-live"><span class="rec-dot"></span>正在录音… 读吧!</div>' +
+            '<div class="rec-top rec-live"><span class="rec-dot"></span>正在录音… 读吧！</div>' +
             '<div class="rec-sub">还可以读 <b id="rec-left">' + left + "</b> 秒</div>" +
             '<div class="rec-actions"><button class="btn btn-mint" id="rec-stop">读好了' + Icons.svg("check") + '</button></div>' +
             '<div class="rec-note">录音只在这台设备上回放，不会上传。</div>'
@@ -737,7 +737,7 @@
           view.querySelector("#act-quiz").innerHTML = Icons.svg("grid") + "描一描";
         }
         if (window.SFX) SFX.click();
-        tip.textContent = "看，它是一笔一笔写出来的!";
+        tip.textContent = "看，它是一笔一笔写出来的！";
         inst.play(function () { App.after(1200, function () { if (tip.isConnected) tip.textContent = ""; }); });
       });
 
@@ -762,7 +762,7 @@
         inst = window.Writing.create(target, ch.c, size, "quiz");
         App.writerInst = inst;
         if (!inst) return;
-        tip.textContent = "用手指按笔顺描一描吧!";
+        tip.textContent = "用手指按笔顺描一描吧！";
         var qtip = view.querySelector("#q-tip");
         var strokeBar = view.querySelector("#stroke-bar");
         var missByStroke = {};
@@ -796,7 +796,7 @@
         inst.quiz({
           onCorrect: function (n, total) {
             if (window.SFX) SFX.click();
-            tip.textContent = "第 " + n + "/" + total + " 笔，写得真棒!";
+            tip.textContent = "第 " + n + "/" + total + " 笔，写得真棒！";
             renderStrokeBar(n);
           },
           onMistake: function (idx) {
@@ -811,7 +811,7 @@
           },
           onDone: function (sum) {
             if (window.SFX) SFX.correct();
-            qtip.textContent = "✅ 描红完成!" + (sum.mistakes === 0 ? "一笔都没错，太厉害啦!" : "");
+            qtip.textContent = "✅ 描红完成！" + (sum.mistakes === 0 ? "一笔都没错，太厉害啦！" : "");
             if (strokeBar) strokeBar.hidden = true;
             var first = window.Store.noteStrokeQuiz(ch.c, {
               mistakes: sum.mistakes, total: sum.total, byStroke: missByStroke
@@ -832,7 +832,7 @@
                 });
               }
             } else {
-              window.UI.wordFlash("写得真棒!");
+              window.UI.wordFlash("写得真棒！");
             }
             tip.textContent = "";
           }
@@ -856,7 +856,7 @@
         var advance = function () {
           if (i + 1 < g.chars.length) go(i + 1);
           else {
-            window.UI.toast("🎉 这一组学完啦，太厉害了!");
+            window.UI.toast("🎉 这一组学完啦，太厉害了！");
             App.navigate("#/learn?g=" + gi);
           }
         };
@@ -875,7 +875,7 @@
             App.after(1000, advance);
           }
         } else {
-          window.UI.toast("「" + ch.c + "」早学会啦，真棒!");
+          window.UI.toast("「" + ch.c + "」早学会啦，真棒！");
           App.after(250, advance);
         }
       });
