@@ -1571,3 +1571,10 @@ html.v4 .trust-item {
   font-size: var(--fs-sm); font-weight: 700; color: var(--ink-2);
 }
 html.v4 .trust-item .ico { width: 16px; height: 16px; color: var(--ink-3); flex: 0 0 auto; }
+
+/* 首页主角字现在可点了 —— 给它一点"可点"的可读信号（按下时的反馈），
+   但不做成按钮外观（它首先是一个字，要给孩子看清字形）。 */
+html.v4 .home-v4 .v4-tian { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+html.v4 .home-v4 .v4-tian:active { transform: scale(.97); }
+html.v4 .home-v4 .v4-tian:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; border-radius: var(--r); }
+html.v4 .home-v4 .v4-go .ico { width: 20px; height: 20px; }

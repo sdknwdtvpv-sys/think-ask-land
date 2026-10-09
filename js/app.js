@@ -285,9 +285,18 @@
           '<div class="v4-today">' +
             (nx
               ? '<div class="v4-cap"><b>今天学这个</b><span>第 ' + (c.learned + 1) + " 个 · " + esc(window.CharDB.GROUPS[nxGi].name) + "</span></div>" +
-                '<div class="v4-tian"><i>' + esc(nx.c) + "</i></div>" +
+                /* 孩子找"能点的东西"靠**视觉显著性**：屏幕上最大、被田字格框住的
+                   就是这个字，他会去戳 —— 但原来它是个死 <div>，戳了没反应。
+                   而真正能点的两行中文他还读不出来（首页是全 App 最依赖阅读的一屏）。
+                   → 给这个字加 data-go（纯新增：点击委托会自动接上），
+                     并补 role/tabindex/aria-label 让键盘与读屏也能用。 */
+                '<div class="v4-tian" data-go="' + nxGo + '" role="button" tabindex="0" aria-label="' +
+                  esc("学这个字：" + nx.c) + '"><i>' + esc(nx.c) + "</i></div>" +
                 '<div class="v4-py">' + esc(nx.p) + "</div>" +
-                '<button class="v4-go" data-go="' + nxGo + '">开始学这个字 <span>→</span></button>' +
+                /* 主行动原来只有"文字 + 箭头"，而首页**一个喇叭都没有** ——
+                   对还不识字的孩子，图标才是可读的"这里能点"。 */
+                '<button class="v4-go" data-go="' + nxGo + '">' + Icons.svg("speak") +
+                  "开始学这个字 <span>→</span></button>" +
                 '<button class="v4-allchars" data-go="#/groups">看全部 ' + total + " 个字 ›</button>"
               : '<div class="v4-cap"><b>全部学完</b></div>' +
                 '<div class="v4-done">' + Icons.svg("trophy") + "761 个字都学完啦！</div>") +
@@ -318,10 +327,20 @@
             '<a class="foot-link" href="privacy.html" target="_blank" rel="noopener">隐私说明</a></div>' +
         "</div>";
       view.querySelectorAll("[data-go]").forEach(function (b) {
-        b.addEventListener("click", function () {
+        var go = function () {
           if (window.SFX) SFX.click();
           App.navigate(b.getAttribute("data-go"));
-        });
+        };
+        b.addEventListener("click", go);
+        /* 非 <button> 的 [data-go]（例如首页那个田字格里的字）
+           要自己处理键盘 —— <div role="button"> 不会自动响应 Enter/Space。 */
+        if (b.tagName !== "BUTTON" && b.tagName !== "A") {
+          b.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+              e.preventDefault(); go();
+            }
+          });
+        }
       });
       /* 首页的孩子标识：点了走家长验证，验证通过后落到家长中心的档案区 */
       var kc = view.querySelector("#kid-chip");
