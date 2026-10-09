@@ -299,19 +299,41 @@
        所以它也必须走 v4 —— 否则受限模块的观感会突然退回旧版。
        ⚠️ 合规红线：这里**不能**出现购买按钮。锁定态只做说明 + 指向家长门，
        购买入口只在家长验证之后（见 js/entitlements.js 的说明）。 */
+    /* 🐞 原版是给孩子看的一屏成人文案：
+         「这部分内容还没解锁 / 拼音进阶(整体认读音节 16 个)属于完整内容包… /
+          请家长到 家长中心 → 完整内容 里查看（那里有一道家长验证）。」
+       而 5 岁孩子读不懂这些，唯一那个橙色大按钮通向**他做不出的乘法门**：
+       点 → 乘法 → 退回 → 再点，是个死循环。整屏还有 60% 是空白。
+
+       改成：孩子侧只留"门还没开 + 回去学别的字"，
+       家长侧的信息收成一行小字 + 一个链接（放最下面，孩子不会误点）。
+
+       ⚠️ 合规红线不变：这里**只有**指向家长门的说明性链接，
+          没有任何购买/恢复按钮（购买入口只在家长验证之后，见 entitlements.js）。
+          这是三位设计师都确认过的：锁卡**不能**放购买按钮，Apple 审核 1.3。 */
     return '<div class="screen v4 lock-v4" data-screen="lock"><div class="panel lock-card">' +
         '<div class="lock-ico">' + (window.Icons ? Icons.svg("lock") : "") + "</div>" +
-        "<h3>这部分内容还没解锁</h3>" +
-        '<p class="parent-note">' + (o.what || "该内容") + "属于<b>完整内容包</b>，当前还没有解锁。</p>" +
-        '<p class="parent-note">请家长到 <b>家长中心 → 完整内容</b> 里查看（那里有一道家长验证）。</p>' +
-        '<button class="btn btn-lg" id="lock-go" data-role="primary">去家长中心</button>' +
+        "<h3>这里还没开门</h3>" +
+        '<p class="lock-sub">先去学别的字吧</p>' +
+        '<button class="btn btn-lg" id="lock-back" data-role="primary">' +
+          (window.Icons ? Icons.svg("book") : "") + "回去学字</button>" +
+        '<p class="lock-parent">' + (o.what || "这部分内容") + "属于<b>完整内容包</b>。" +
+          '<a href="#/parent" id="lock-go" class="lock-link">家长查看 ›</a></p>' +
       "</div></div>";
   }
   function wireLock(view, backHash) {
+    /* 主按钮：回首页（首页有「今天学这个」，是孩子真正能做事的地方） */
+    var back = view.querySelector("#lock-back");
+    if (back) back.addEventListener("click", function () {
+      try { if (window.SFX) window.SFX.click(); } catch (e) { /* 忽略 */ }
+      if (window.App && window.App.navigate) window.App.navigate("#/");
+    });
+    /* 次链接：家长门（说明性，不是购买入口） */
     var b = view.querySelector("#lock-go");
     if (!b) return;
-    b.addEventListener("click", function () {
-      try { if (window.SFX) window.SFX.click(); } catch (e) { /* 忽略 */ }
+    b.addEventListener("click", function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      try { if (window.SFX) window.SFX.click(); } catch (e2) { /* 忽略 */ }
       if (window.App && window.App.navigate) window.App.navigate("#/parent");
     });
     /* 顶栏返回仍然可用（为空的 backHash 只是显式一点） */

@@ -1578,3 +1578,16 @@ html.v4 .home-v4 .v4-tian { cursor: pointer; -webkit-tap-highlight-color: transp
 html.v4 .home-v4 .v4-tian:active { transform: scale(.97); }
 html.v4 .home-v4 .v4-tian:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; border-radius: var(--r); }
 html.v4 .home-v4 .v4-go .ico { width: 20px; height: 20px; }
+
+/* 锁卡：孩子侧只留"门还没开 + 回去学字"，
+   家长侧的信息收成一行小字 + 一个链接放在最下面（孩子不会误点）。 */
+html.v4 .lock-v4 .lock-sub {
+  font-size: var(--fs-h); font-weight: 700; color: var(--ink-2);
+  margin: var(--s2) 0 var(--s6);
+}
+html.v4 .lock-v4 .lock-parent {
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: var(--s1);
+  margin: var(--s6) 0 0; font-size: var(--fs-sm); color: var(--ink-3);
+}
+html.v4 .lock-v4 .lock-parent .ico { width: 15px; height: 15px; color: var(--ink-3); }
+html.v4 .lock-v4 .lock-link { color: var(--ink-2); text-decoration: underline; font-weight: 700; }
