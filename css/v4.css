@@ -1697,3 +1697,7 @@ html.v4 .play-v4 .v4-tile { padding: var(--s4) var(--s4) var(--s4) var(--s5); }
 body.v4.tab-root #btn-back { display: none; }
 /* 没有返回键时，标题要真的居中（原来左边留了一个 44pt 的占位） */
 body.v4.tab-root #page-title { margin-left: 0; }
+
+/* 顶栏家长入口：有孩子档案时它显示孩子的 emoji，
+   所以要把字体调大一点、并去掉 SVG 的尺寸假设。 */
+body.v4 #btn-parent { font-size: 19px; line-height: 1; }

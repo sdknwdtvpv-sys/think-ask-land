@@ -199,9 +199,30 @@
         document.documentElement.classList.toggle("v4", isV4);
       } catch (e) {
         console.error("渲染出错：", r.name, e);
-        view.innerHTML = '<div class="empty-tip"><span class="big">😵</span>哎呀，出了点小问题<br>返回首页重试吧</div>';
+        /* 原来这屏只有一句「返回首页重试吧」—— **是文字，不是按钮**，
+           而"返回首页"这个动作本身也可能失败（它同样要过 render）。
+           孩子和家长都会卡在这里。给两个真的出口：
+             ① 再试一次 —— 直接重跑这次渲染（多数失败是瞬时的）
+             ② 回首页 —— 兜底 */
+        view.innerHTML = '<div class="empty-tip"><span class="big">😵</span>' +
+          "哎呀，出了点小问题<br>" +
+          '<button class="btn btn-lg" id="err-retry" style="margin-top:16px">再试一次</button>' +
+          '<br><button class="btn btn-ghost" id="err-home">回首页</button></div>';
+        var er = view.querySelector("#err-retry");
+        if (er) er.addEventListener("click", function () { App.render(); });
+        var eh = view.querySelector("#err-home");
+        if (eh) eh.addEventListener("click", function () { App.navigate("#/home"); });
       }
       this.refreshStars();
+      /* 顶栏家长入口：有孩子档案时显示他的 emoji。
+         比通用人像更有归属感，也顺手表达了"当前是谁的进度"
+         （原来只有 ≥2 个孩子才在首页显示 kid-chip）。 */
+      var bpv = document.getElementById("btn-parent");
+      if (bpv) {
+        var prof = (window.Store && window.Store.activeProfile) ? window.Store.activeProfile() : null;
+        bpv.textContent = prof && prof.emoji ? prof.emoji : "";
+        bpv.setAttribute("aria-label", prof && prof.name ? "家长中心（当前：" + prof.name + "）" : "家长中心");
+      }
       /* 底部导航：按路由决定显示/隐藏与高亮（见上方 TABS） */
       try { renderTabs(r.name); } catch (e) { /* 导航渲染失败不该影响主屏 */ }
       /* 在家长区（含验证门）时收起顶栏那个家长入口 */
@@ -420,7 +441,12 @@
              首页现在只回答一个问题：**今天学什么**。
              （家长入口也移到顶栏了，见 index.html 的 #btn-parent。） */
 
-          '<div class="v4-foot">陪着孩子，一起把问题变成答案<br>适合 3~6 岁 · 每天 10 分钟 · ' +
+          /* 页脚原来写「陪着孩子，一起把问题变成答案 / 适合 3~6 岁 · 每天 10 分钟」——
+             这是**写给家长**的话，却出现在**孩子的首页**底部：
+             孩子读不懂，家长也未必滑到底。
+             首页只留合规要求必须存在的隐私链接（孩子不需要读它，但必须可点）；
+             那句写给家长的话移到家长中心（见 views2.js）。 */
+          '<div class="v4-foot">' +
             '<a class="foot-link" href="privacy.html" target="_blank" rel="noopener">隐私说明</a></div>' +
         "</div>";
       wireGo(view);
