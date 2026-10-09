@@ -1497,3 +1497,49 @@ html.v4 {
   --cz-xl:    56px;   /* 打印识字卡上的字（纸面要更大才看得清） */
   --cz-hero: 108px;   /* 首页田字格的主角字 */
 }
+
+/* ---- 全屏审计扫出来的最后两处旧色（之前的抽查只覆盖了几屏，漏了）----
+   ① 组内字表的"已学"绿勾:每个格子一枚,带 `box-shadow: 0 2px 0 rgba(63,58,82,.15)`
+      —— 旧紫硬阴影 × 48 个（一屏 24 格 × 两屏可见）。
+   ② 读一读每张短文卡的进度轨道:`background: rgba(63,58,82,.09)` 旧紫灰 × 56 个,
+      填充还是旧薄荷渐变 #9fd9a8→#43c99b。 */
+html.v4 .tile-check { box-shadow: none; }
+html.v4 .rc-bar { background: var(--paper-2); }
+html.v4 .rc-bar > i { background: var(--ok); }
+
+/* ---- 触控目标：全屏审计报出的三处（都是"差一点点"，但是真问题）----
+   ① 首页页脚的隐私链接 44×14 —— 只有 14pt 高，是全 App 最难点的东西，
+      而它恰恰是**合规要求可点**的那个链接。
+   ② 家长中心「改名」等 mini-btn 43×36。
+   ③ 「+ 添加一个孩子」的 <summary> 374×42。
+   都通过 padding 补到 44，视觉上只是稍微松一点。 */
+html.v4 .foot-link,
+html.v4 .home-foot a { display: inline-block; padding: var(--s3) var(--s2); margin: calc(var(--s3) * -1) 0; }
+html.v4 .mini-btn { min-height: 44px; display: inline-flex; align-items: center; }
+html.v4 .kid-add > summary { min-height: 44px; }
+
+/* ---- 最后一轮：家长中心的 ab-bar 旧色 + 三处差 1~2pt 的触控 ----
+   ① `ab-bar`（能力地图的进度条**轨道**）还是旧紫灰 ——
+      我早先只在"进度条填充"的清单里加了 `.ab-bar > i`，漏了轨道本身。
+   ② <summary> 不是 .kid-add 的直接子元素，上一条 min-height 没生效。
+   ③ 页脚链接与 mini-btn 的宽高各差 1~2pt。 */
+html.v4 .ab-bar { background: var(--paper-2); }
+html.v4 summary { min-height: 44px; }
+html.v4 .foot-link,
+html.v4 .home-foot a { padding: var(--s3) var(--s3); }
+html.v4 .mini-btn { min-width: 44px; justify-content: center; }
+
+/* 家长中心的音色选择卡 bi-voice：阴影还是旧紫灰（含 .on 选中态与内部的 <i>）。
+   另外把页脚链接用 min-height 硬保到 44 —— 它此前是 14pt，
+   而它恰恰是**合规要求必须可点**的隐私链接。 */
+html.v4 .bi-voice, html.v4 .bi-voice.on, html.v4 .bi-voice i { box-shadow: none; }
+html.v4 .bi-voice.on { border-color: var(--primary); background: var(--primary-bg); }
+html.v4 .foot-link, html.v4 .home-foot a { min-height: 44px; box-sizing: border-box; }
+
+/* 家长中心最后两处旧色：反馈输入框的描边、以及某个 <i> 的旧阴影。
+   都是旧材质层的遗留（rgba(63,58,82,…)）。 */
+html.v4 textarea, html.v4 .fb-input, html.v4 #fb-text {
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  border-radius: var(--r);
+}
+html.v4 .panel i, html.v4 .report-box i, html.v4 .feedback i { box-shadow: none; }
