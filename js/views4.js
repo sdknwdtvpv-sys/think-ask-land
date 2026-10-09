@@ -63,6 +63,18 @@
       var scope = p.scope || "learned";
       var title = "打印物料";
 
+      /* 🐞 修 bug（2026-10-09，看截图时发现）:
+         原来只有**未解锁**分支里调了 App.setTopbar,解锁后走的分支没调 ——
+         于是顶栏会留着**上一个路由的标题**（实测从"说一说"进打印,
+         顶栏一直显示"说一说"）。title 变量本来就算好了,这里提前设一次即可。 */
+      App.setTopbar(
+        type === "quests" ? "亲子任务卡" :
+        type === "pack"   ? "本周物料包" :
+        type === "cert"   ? "每周奖状"   :
+        type === "write"  ? "描红练习纸" : "识字卡",
+        true
+      );
+
       if (type === "quests") {
         var quests = window.QUESTS || [];
         title = "亲子任务卡";
