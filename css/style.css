@@ -6,7 +6,11 @@
   --radius: 24px;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html { background-color: #d9f0ff; } /* 不设 height:100%,让文档自然滚动 */
+/* ⚠️ 2026-10-09 真机发现:这里原是旧天空蓝 #d9f0ff。
+   JS 给 html 打上 .v4 类之前会先渲染一次,那一刻露出的就是这个颜色 ——
+   加上 capacitor.config.json 的 backgroundColor 与 index.html 的 theme-color,
+   三处一起造成"上下拖动时多出一节蓝色"。已全部改为暖纸色。 */
+html { background-color: #FBF8F1; } /* 不设 height:100%,让文档自然滚动 */
 body {
   font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   color: var(--ink);
