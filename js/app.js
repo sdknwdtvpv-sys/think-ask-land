@@ -424,8 +424,12 @@
                 /* 主行动原来只有"文字 + 箭头"，而首页**一个喇叭都没有** ——
                    对还不识字的孩子，图标才是可读的"这里能点"。 */
                 '<button class="v4-go" data-go="' + nxGo + '">' + Icons.svg("speak") +
-                  "开始学这个字 <span>→</span></button>" +
-                '<button class="v4-allchars" data-go="#/groups">看全部 ' + total + " 个字 ›</button>"
+                  "开始学这个字 <span>→</span></button>"
+              /* 原来这里还有一行「看全部 761 个字 ›」→ #/groups。
+                 底部有了「学字」tab 之后，那是**同一个目的地的第二个入口** ——
+                 和前面删掉的那 6 个卡片是同一类问题（重复入口让"今天该做什么"失焦）。
+                 去掉，首页这张卡只做一件事：开始学今天的字。
+                 ⚠️ 去掉时别忘了把前一行的 `+` 一起去掉，否则三元表达式会断。 */
               : '<div class="v4-cap"><b>全部学完</b></div>' +
                 '<div class="v4-done">' + Icons.svg("trophy") + "761 个字都学完啦！</div>") +
           "</div>" +
@@ -581,13 +585,16 @@
           "<b>" + label + "</b><i>" + sub + "</i></button>";
       };
       view.innerHTML = '<div class="screen v4 play-v4" data-screen="play">' +
-          '<div class="v4-hello"><h1>乐园</h1><p>读一读、说一说，玩着玩着就会了</p></div>' +
+          /* A3：这三件事**性质不同**，不是并列关系 ——
+             拼音是工具（不会拼音就读不了新字）、读一读是输入、说一说是输出。
+             原来三张等权卡片，孩子不知道先做哪个。标出建议顺序。 */
+          '<div class="v4-hello"><h1>乐园</h1><p>玩着玩着就会了 · 建议按 ① ② ③ 的顺序</p></div>' +
           '<div class="v4-grid">' +
-            tile("#/pinyin", "pinyin", "拼音小课堂",
+            tile("#/pinyin", "pinyin", "① 拼音小课堂",
                  "声母 23 · 韵母 24 · 整体认读 16", "rose") +
-            tile("#/read", "book", "读一读",
+            tile("#/read", "book", "② 读一读",
                  rd && rd.total ? "已读 " + rd.read + "/" + rd.total + " 篇 · 点字能听读音" : "短文按级别分好，点字能听读音", "sky") +
-            tile("#/talk", "speak", "说一说",
+            tile("#/talk", "speak", "③ 说一说",
                  "看一张图，说一段话（不打分）", "amber") +
           "</div>" +
           '<div class="v4-foot">这三个都在认字之外，把语言用起来<br>' +
