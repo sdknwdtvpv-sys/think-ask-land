@@ -1330,3 +1330,44 @@ html.v4 #kid-add-go { width: 100%; margin-top: var(--s3); }
 /* 家长验证卡原来背景与页面同色，而卡内输入框与按钮是纯白 ——
    子元素比父容器更亮，层级是反的。 */
 html.v4 .gate-box { background: var(--surface); }
+
+
+/* ============================================================
+   按设计师审查落地的第三批
+   ============================================================ */
+
+/* ① 故事页 5 个按钮等权、每个图标一种颜色 —— 孩子选不出"先做哪个"，
+   而且每个按钮各带一色反而**违反**了"颜色只给主行动"的纪律。
+   「读一遍」是这条路径上唯一的前进动作，给它实心强调色；其余中性。 */
+html.v4 #rd-play {
+  background: var(--primary); color: var(--on-primary);
+  border-color: var(--primary); box-shadow: var(--e2);
+}
+html.v4 #rd-play .ico { color: inherit; }
+html.v4 #rd-self-btn, html.v4 #rd-find, html.v4 #rd-done {
+  background: var(--surface); color: var(--ink); border-color: var(--line); box-shadow: none;
+}
+
+/* ② 奖励页一屏出现两个 142（顶栏星星胶囊 + 卡内大数字）。
+   这一屏的主角就是那个大数字，顶栏那颗是重复信息 → 隐掉。 */
+/* `#star-pill` 在顶栏里、`.rewards-v4` 在 #view 里，两者是兄弟关系，
+   普通选择器够不到 —— 用 :has() 表达"当页面上有奖励屏时隐藏顶栏那颗星"。
+   （:has() 在 iOS 15.4+ 的 WebKit 已可用；不支持时只是不隐藏，不影响功能。） */
+body.v4:has(.rewards-v4) #star-pill { display: none; }
+
+/* ③ 组内字表的"已学"标记只有 14px 的绿点 + 绿勾，孩子注意不到；
+   而"未学"是"什么都没有"，属于低对比的缺失态 —— 找那 3 个没学的得滚 51 张卡逐个数。
+   把勾放大，并给未学卡一条虚线边框主动"存在"（不是只靠没有绿点）。 */
+html.v4 .learn-v4 .tile-check .ico { width: 18px; height: 18px; }
+html.v4 .learn-v4 .char-tile:not(.learned) {
+  border-style: dashed; border-color: var(--line-2); background: var(--paper-2);
+}
+/* ④ 头像选择器：flex-wrap + 46px 按钮 + 8px 间距，在 440pt 屏上正好一行塞 7 个，
+   第 8 个（🐳）孤零零掉到第二行。改 4 列网格 → 规整的 2×2 两行。 */
+html.v4 .emoji-pick { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s2); }
+html.v4 .emoji-opt-btn { width: 100%; height: 46px; }
+
+/* ⑤ 7 天柱状图里 6 天是 0 星，`.wbar.zero` 用 --paper-2 几乎看不见 ——
+   看上去像图没加载。零值不该被"画成矮桩"，而应读作"基线"：给一条清晰的浅线。 */
+html.v4 .wbar.zero { background: var(--line-2); }
+html.v4 .wbar-col { position: relative; }

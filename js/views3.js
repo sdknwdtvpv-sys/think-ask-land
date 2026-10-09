@@ -417,8 +417,10 @@
       });
 
       var html = '<div class="screen v4 read-v4" data-screen="read">' +
+        /* 说明卡里原来还写了一遍"已读完 N/56 篇"，而紧接着的进度条又写一次 ——
+           同一屏重复同一份数据。这里只留"已学 N 字"（那是进度条不表达的）。 */
         '<div class="practice-intro">' + Icons.svg("book") + ' 短文按<b>级别</b>分好了。点字能听读音，读完了还能玩找字游戏。' +
-        '已读完 <b>' + window.Store.readCount() + "</b> / " + list.length + " 篇 · 已学 <b>" + learnedN + "</b> 字。</div>";
+        '这一屏已学 <b>' + learnedN + "</b> 字。</div>";
 
       /* 阅读进度条：一篇一篇地看得见（此前只有分组标题里的 x/y） */
       var pg = progress();
