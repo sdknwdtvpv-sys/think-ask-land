@@ -82,6 +82,12 @@
     }).join("");
     bar.hidden = false;
     document.body.classList.add("has-tabs");
+    /* tab 的**根屏**是导航的最外层，再给一个返回箭头语义上是模糊的
+       （按了回到上一个 tab，而用户以为自己会"退出"）。
+       iOS 原生 tab bar 的根屏也是不显示返回键的。
+       只在 tab 内**更深一层**的屏（组内字表、单篇短文、读一读列表）才显示。 */
+    var isRoot = TABS.some(function (t) { return t.hash === (location.hash || "#/home").split("?")[0]; });
+    document.body.classList.toggle("tab-root", isRoot);
     bar.querySelectorAll(".tab").forEach(function (b) {
       b.addEventListener("click", function () {
         var h = b.getAttribute("data-hash");

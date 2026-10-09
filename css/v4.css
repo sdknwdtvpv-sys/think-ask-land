@@ -1690,3 +1690,10 @@ body.v4.parent-open #btn-parent { display: none; }
    也给了较长的说明文字足够宽度。 */
 html.v4 .play-v4 .v4-grid { grid-template-columns: 1fr; }
 html.v4 .play-v4 .v4-tile { padding: var(--s4) var(--s4) var(--s4) var(--s5); }
+
+/* tab 根屏（今天/学字/练习/乐园/奖励 的落地屏）不显示返回键 ——
+   它是导航的最外层，返回箭头语义模糊（按了会回到上一个 tab，
+   而用户以为自己会"退出"）。iOS 原生 tab bar 的根屏同样不显示返回键。 */
+body.v4.tab-root #btn-back { display: none; }
+/* 没有返回键时，标题要真的居中（原来左边留了一个 44pt 的占位） */
+body.v4.tab-root #page-title { margin-left: 0; }
