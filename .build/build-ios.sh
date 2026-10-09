@@ -72,17 +72,49 @@ cd "$ROOT/ios/App"
 if [ "$MODE" = "device" ]; then
   [ -n "$TEAM" ] || { echo "❌ 没找到团队 ID。先跑一次 Xcode 或在命令行给 HZ_TEAM"; exit 1; }
   echo "▶ [3/3] xcodebuild（iphoneos · 团队 ${TEAM}）"
-  xcodebuild -project App.xcodeproj -scheme App -sdk iphoneos -configuration Debug \
-    -destination 'generic/platform=iOS' DEVELOPMENT_TEAM="$TEAM" -allowProvisioningUpdates build 2>&1 | tail -3
+  # ⚠️ 这里原来是 `xcodebuild … | tail -3`。管道让退出码变成 tail 的(恒为 0),
+  #    于是"构建失败"被静默吞掉 —— 而下面 `[ -d "$BUILT" ]` 又会通过,
+  #    因为 **上一次构建的残留产物永远存在**。
+  #    2026-10-08 就因此被骗过一次:脚本报"✅ 构建完成",
+  #    实际 xcodebuild 因"证书已吊销 + Xcode 未登录账号"失败,
+  #    装到手机上的其实是上一次的旧包,然后启动报 Launchd error 85。
+  #    所以这里做两件事:①记下真实退出码 ②校验产物是**本次**产生的。
+  STAMP="$(mktemp)"; LOG="$(mktemp)"
+  if ! xcodebuild -project App.xcodeproj -scheme App -sdk iphoneos -configuration Debug \
+      -destination 'generic/platform=iOS' DEVELOPMENT_TEAM="$TEAM" -allowProvisioningUpdates build \
+      >"$LOG" 2>&1; then
+    echo "❌ xcodebuild 失败。最后 20 行："
+    tail -20 "$LOG" | sed 's/^/     /'
+    echo ""
+    echo "   常见原因（按出现频率）："
+    echo "   · Signing certificate … revoked or expired → 证书被吊销，需在 Xcode 里重新登录 Apple ID"
+    echo "   · No Accounts: Add a new account…          → Xcode 设置 → Accounts 没登录"
+    echo "   · requires a development team              → 团队没取到（HZ_TEAM=… 显式给一个）"
+    rm -f "$STAMP" "$LOG"; exit 1
+  fi
+  tail -3 "$LOG"; rm -f "$LOG"
   BUILT="$HOME/Library/Developer/Xcode/DerivedData/App-buitmhvafkoxfzgxugwdtxdzqqvq/Build/Products/Debug-iphoneos/App.app"
 else
   echo "▶ [3/3] xcodebuild（iphonesimulator）"
-  xcodebuild -project App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug \
-    -destination 'generic/platform=iOS Simulator' build 2>&1 | tail -3
+  STAMP="$(mktemp)"; LOG="$(mktemp)"
+  if ! xcodebuild -project App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug \
+      -destination 'generic/platform=iOS Simulator' build >"$LOG" 2>&1; then
+    echo "❌ xcodebuild 失败。最后 20 行："
+    tail -20 "$LOG" | sed 's/^/     /'
+    rm -f "$STAMP" "$LOG"; exit 1
+  fi
+  tail -3 "$LOG"; rm -f "$LOG"
   BUILT="$HOME/Library/Developer/Xcode/DerivedData/App-buitmhvafkoxfzgxugwdtxdzqqvq/Build/Products/Debug-iphonesimulator/App.app"
 fi
 
-[ -d "$BUILT" ] || { echo "❌ 没找到构建产物:$BUILT"; exit 1; }
+[ -d "$BUILT" ] || { echo "❌ 没找到构建产物:$BUILT"; rm -f "${STAMP:-}"; exit 1; }
+# 产物必须是**本次**构建产生的。残留的旧 .app 会让"构建失败"看起来像成功。
+if [ -n "${STAMP:-}" ] && [ ! "$BUILT" -nt "$STAMP" ]; then
+  echo "❌ 产物比构建开始时间还旧 —— 这是上一次的残留，不是本次构建的结果。"
+  echo "   构建其实没有成功（往上翻 xcodebuild 的输出）。"
+  rm -f "$STAMP"; exit 1
+fi
+rm -f "${STAMP:-}"
 
 # 产物自检:绝不能把调试驱动打进去
 if ls "$BUILT/public"/__*.js >/dev/null 2>&1; then

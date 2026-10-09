@@ -102,7 +102,6 @@
           '<div class="pack-sec"><div class="pack-h">① 识字卡（这周学的 ' + wrec.length + ' 个字，剪开用）</div>' +
             '<div class="card-grid">' + wrec.map(function (c) {
               return '<div class="pcard">' +
-                '<div class="pc-emoji">' + (c.e || "　") + "</div>" +
                 '<div class="pc-char kai">' + esc(c.c) + "</div>" +
                 '<div class="pc-py">' + esc(c.p) + "</div>" +
                 '<div class="pc-word">' + esc((c.w || []).slice(0, 2).join(" · ")) + "</div></div>";
@@ -175,7 +174,6 @@
         var bodyC = '<div class="card-grid">' + list2.map(function (c) {
           var rec = window.CharDB.BY_CHAR[c.c];
           return '<div class="pcard">' +
-            '<div class="pc-emoji">' + (c.e || "　") + "</div>" +
             '<div class="pc-char kai">' + esc(c.c) + "</div>" +
             '<div class="pc-py">' + esc(c.p) + "</div>" +
             '<div class="pc-word">' + esc((c.w || []).slice(0, 2).join(" · ")) + "</div></div>";

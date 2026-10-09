@@ -1121,3 +1121,13 @@ html.v4 .rd-char {
   font-size: 34px; min-width: 44px; min-height: 48px; padding: 0 4px;
 }
 html.v4 .rd-punc { font-size: 30px; }
+
+/* 打印物料：识字卡去掉**记忆锚点 emoji**（产品决定 2026-10-08）
+   ------------------------------------------------------------
+   理由：屏幕上 emoji 是有效的记忆钩子，但**印在纸上**它是一排蓝色方块
+   （一→1️⃣ 二→2️⃣ 是 keycap emoji，自带蓝底）—— 整张纸上唯一的饱和色，
+   既费彩墨、又不属于品牌色。去掉后卡片更紧凑，同样页数能印更多字。
+   （任务卡 .qc-emoji 与奖状 .cert-emoji 是**活动插图/庆祝装饰**，
+     性质和"记忆锚点"不同，保留。） */
+html.v4 .pcard { gap: 4px; padding: 12px 6px; }
+html.v4 .pc-char { font-size: 56px; }
