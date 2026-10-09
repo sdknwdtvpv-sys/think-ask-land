@@ -107,16 +107,26 @@ const BENIGN = ["Not implemented: HTMLCanvasElement", "Not implemented: Window's
 
   /* ---------- 3) 首页接入 ---------- */
   await win.App.navigate("#/home"); await sleep(500);
-  t("首页显示已读篇数,读一读入口显示进度", () => {
+  t("首页统计行显示已读篇数", () => {
     const meta = doc.querySelector('[data-meta="home"]');
     if (!meta) return FAIL("没有首页统计行");
     const g = RD.progress();
     if (meta.textContent.indexOf("读完 " + g.read + " 篇") === -1) return FAIL("home-meta 没有阅读数:" + meta.textContent);
-    const sub = doc.querySelector('[data-screen="home"] [data-go="#/read"]');
-    if (!sub) return FAIL("找不到读一读入口");
-    if (sub.textContent.indexOf("已读 " + g.read + "/" + g.total) === -1) return FAIL("入口副标题无进度:" + sub.textContent);
     return PASS("首页口径一致:" + g.read + "/" + g.total);
   });
+
+  /* 读一读的入口从首页搬到了「乐园」tab（底部导航改造：首页只回答"今天学什么"，
+     读一读属于"在认字之外把语言用起来"）。**进度仍然要能读到**，
+     所以把这条断言跟着入口一起搬 —— 移位置，不减强度。 */
+  await win.App.navigate("#/play"); await sleep(500);
+  t("乐园的读一读入口显示进度", () => {
+    const sub = doc.querySelector('[data-screen="play"] [data-go="#/read"]');
+    if (!sub) return FAIL("乐园里找不到读一读入口");
+    const g = RD.progress();
+    if (sub.textContent.indexOf("已读 " + g.read + "/" + g.total) === -1) return FAIL("入口副标题无进度:" + sub.textContent);
+    return PASS("乐园口径一致:" + g.read + "/" + g.total);
+  });
+  await win.App.navigate("#/home"); await sleep(400);
 
   /* ---------- 4) 家长中心 ---------- */
   win.sessionStorage.setItem("hanziParentOk", "1"); /* 家长中心有算术验证门 */

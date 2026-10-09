@@ -55,20 +55,20 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
 .screen.v4 { background: var(--paper); min-height: 100dvh; padding: 0 0 var(--s6); }
 
 /* ---------------- 首页 ---------------- */
-.home-v4 .pad { padding-left: var(--s5); padding-right: var(--s5); }
+:is(.home-v4,.play-v4) .pad { padding-left: var(--s5); padding-right: var(--s5); }
 
 /* 问候区 */
-.home-v4 .v4-hello { padding: var(--s2) 0 var(--s4); }
-.home-v4 .v4-hello h1 { font-size: var(--fs-title); font-weight: 800; letter-spacing: .2px; }
-.home-v4 .v4-hello p { font-size: var(--fs-body); color: var(--ink-2); margin-top: var(--s1); }
-.home-v4 .v4-meta {
+:is(.home-v4,.play-v4) .v4-hello { padding: var(--s2) 0 var(--s4); }
+:is(.home-v4,.play-v4) .v4-hello h1 { font-size: var(--fs-title); font-weight: 800; letter-spacing: .2px; }
+:is(.home-v4,.play-v4) .v4-hello p { font-size: var(--fs-body); color: var(--ink-2); margin-top: var(--s1); }
+:is(.home-v4,.play-v4) .v4-meta {
   display: flex; gap: var(--s3); font-size: var(--fs-sm); color: var(--ink-3);
   padding: 0 0 var(--s5);
 }
-.home-v4 .v4-meta b { color: var(--ink-2); font-weight: 700; font-variant-numeric: tabular-nums; }
+:is(.home-v4,.play-v4) .v4-meta b { color: var(--ink-2); font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* 多孩子标识：只在有两个以上档案时出现 */
-.home-v4 .kid-chip {
+:is(.home-v4,.play-v4) .kid-chip {
   display: inline-flex; align-items: center; gap: var(--s1);
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-pill);
   padding: 4px var(--s3); font-size: var(--fs-sm); color: var(--ink-2); font-weight: 700;
@@ -76,53 +76,53 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
 }
 
 /* ---------------- 主角：今天的字 ---------------- */
-.home-v4 .v4-today {
+:is(.home-v4,.play-v4) .v4-today {
   margin: 0 0 var(--s5); background: var(--surface);
   border: 1px solid var(--line); border-radius: var(--r-xl);
   padding: var(--s5) 0 var(--s4); box-shadow: var(--e1);
 }
-.home-v4 .v4-cap { display: flex; align-items: baseline; justify-content: space-between; }
-.home-v4 .v4-cap b { font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
-.home-v4 .v4-cap span { font-size: var(--fs-xs); color: var(--ink-3); }
-.home-v4 .v4-tian {
+:is(.home-v4,.play-v4) .v4-cap { display: flex; align-items: baseline; justify-content: space-between; }
+:is(.home-v4,.play-v4) .v4-cap b { font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
+:is(.home-v4,.play-v4) .v4-cap span { font-size: var(--fs-xs); color: var(--ink-3); }
+:is(.home-v4,.play-v4) .v4-tian {
   width: 168px; height: 168px; margin: var(--s4) auto var(--s3); position: relative;
   border: 1px solid var(--line-2); border-radius: var(--r);
 }
-.home-v4 .v4-tian::before, .home-v4 .v4-tian::after {
+:is(.home-v4,.play-v4) .v4-tian::before, .home-v4 .v4-tian::after {
   content: ""; position: absolute;
   background: repeating-linear-gradient(90deg, var(--line) 0 5px, transparent 5px 11px);
 }
-.home-v4 .v4-tian::before { left: 50%; top: 12px; bottom: 12px; width: 1px; }
-.home-v4 .v4-tian::after {
+:is(.home-v4,.play-v4) .v4-tian::before { left: 50%; top: 12px; bottom: 12px; width: 1px; }
+:is(.home-v4,.play-v4) .v4-tian::after {
   top: 50%; left: 12px; right: 12px; height: 1px;
   background: repeating-linear-gradient(0deg, var(--line) 0 5px, transparent 5px 11px);
 }
-.home-v4 .v4-tian i {
+:is(.home-v4,.play-v4) .v4-tian i {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
   font-style: normal; font-size: var(--cz-hero); line-height: 1; color: var(--ink);
 }
-.home-v4 .v4-py {
+:is(.home-v4,.play-v4) .v4-py {
   text-align: center; font-size: var(--fs-title); font-weight: 700; color: var(--primary); letter-spacing: 1px;
 }
-.home-v4 .v4-go {
+:is(.home-v4,.play-v4) .v4-go {
   display: flex; align-items: center; justify-content: center; gap: var(--s2);
   width: 100%; margin-top: var(--s4); padding: var(--s3) var(--s4);
   background: var(--primary); color: var(--on-primary);
   border-radius: var(--r); font-size: var(--fs-body); font-weight: 800; letter-spacing: .5px;
 }
-.home-v4 .v4-go:active { transform: scale(.985); }
-.home-v4 .v4-allchars {
+:is(.home-v4,.play-v4) .v4-go:active { transform: scale(.985); }
+:is(.home-v4,.play-v4) .v4-allchars {
   display: block; width: 100%; margin-top: var(--s3);
   font-size: var(--fs-sm); color: var(--ink-3); text-align: center; padding: var(--s1);
 }
-.home-v4 .v4-done {
+:is(.home-v4,.play-v4) .v4-done {
   display: flex; align-items: center; justify-content: center; gap: var(--s2);
   padding: var(--s6) 0; font-size: var(--fs-h); font-weight: 800; color: var(--ink-2);
 }
-.home-v4 .v4-done .ico { width: 22px; height: 22px; color: var(--gold); }
+:is(.home-v4,.play-v4) .v4-done .ico { width: 22px; height: 22px; color: var(--gold); }
 
 /* ---------------- 今日任务 ---------------- */
-.home-v4 .v4-task {
+:is(.home-v4,.play-v4) .v4-task {
   /* width 原来是 calc(100% - var(--s5)*2) —— 那是旧设计里"首页自带 20px 留白"
      时的补偿。留白改由 main#view 统一提供后，这个减法会让卡片莫名短 40px。 */
   width: 100%;
@@ -130,35 +130,35 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
   margin: 0 0 var(--s5); background: var(--surface);
   border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s4);
 }
-.home-v4 .v4-th { display: flex; align-items: baseline; justify-content: space-between; }
-.home-v4 .v4-th b { font-size: var(--fs-h); font-weight: 800; }
-.home-v4 .v4-th span { font-size: var(--fs-sm); font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; }
-.home-v4 .v4-track {
+:is(.home-v4,.play-v4) .v4-th { display: flex; align-items: baseline; justify-content: space-between; }
+:is(.home-v4,.play-v4) .v4-th b { font-size: var(--fs-h); font-weight: 800; }
+:is(.home-v4,.play-v4) .v4-th span { font-size: var(--fs-sm); font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+:is(.home-v4,.play-v4) .v4-track {
   display: block; height: 6px; background: var(--paper-2); border-radius: var(--r-pill);
   margin: var(--s3) 0 var(--s2); overflow: hidden;
 }
-.home-v4 .v4-track i { display: block; height: 100%; background: var(--primary); border-radius: var(--r-pill); }
-.home-v4 .v4-tsub { display: block; font-size: var(--fs-sm); color: var(--ink-2); }
+:is(.home-v4,.play-v4) .v4-track i { display: block; height: 100%; background: var(--primary); border-radius: var(--r-pill); }
+:is(.home-v4,.play-v4) .v4-tsub { display: block; font-size: var(--fs-sm); color: var(--ink-2); }
 
 /* ---------------- 其他玩法：中性卡 + 彩色小图标 ---------------- */
-.home-v4 .v4-sec { padding: 0 0 var(--s3); font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
-.home-v4 .v4-grid {
+:is(.home-v4,.play-v4) .v4-sec { padding: 0 0 var(--s3); font-size: var(--fs-sm); font-weight: 800; color: var(--ink-3); letter-spacing: 1.2px; }
+:is(.home-v4,.play-v4) .v4-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3);
   padding: 0 0 var(--s5);
 }
-.home-v4 .v4-tile {
+:is(.home-v4,.play-v4) .v4-tile {
   display: flex; flex-direction: column; align-items: flex-start; gap: var(--s2);
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
   padding: var(--s4); text-align: left;
 }
-.home-v4 .v4-tile:active { transform: scale(.98); }
-.home-v4 .v4-tile b { font-size: var(--fs-body); font-weight: 700; color: var(--ink); }
-.home-v4 .v4-tile i { font-style: normal; font-size: var(--fs-sm); color: var(--ink-3); }
-.home-v4 .v4-ic {
+:is(.home-v4,.play-v4) .v4-tile:active { transform: scale(.98); }
+:is(.home-v4,.play-v4) .v4-tile b { font-size: var(--fs-body); font-weight: 700; color: var(--ink); }
+:is(.home-v4,.play-v4) .v4-tile i { font-style: normal; font-size: var(--fs-sm); color: var(--ink-3); }
+:is(.home-v4,.play-v4) .v4-ic {
   width: 34px; height: 34px; border-radius: var(--r-sm);
   display: flex; align-items: center; justify-content: center;
 }
-.home-v4 .v4-ic .ico { width: 20px; height: 20px; }
+:is(.home-v4,.play-v4) .v4-ic .ico { width: 20px; height: 20px; }
 /* 分类色:抽成**可复用**的色调类(首页小卡与练习屏的卡片共用),
    只落在小图标的底色与线条上 —— 卡片本身一律中性。
    作用域在 html.v4 下,不会与旧样式撞名。 */
@@ -171,7 +171,7 @@ html.v4 .t-rose  { background: #FBF0F3; color: var(--t-rose); }
 html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 
 /* 首页小卡需要 relative 定位（图标/文字的定位基准） */
-.home-v4 .v4-tile { position: relative; }
+:is(.home-v4,.play-v4) .v4-tile { position: relative; }
 /* 【已删除】.home-v4 .v4-due —— 这是我写首页时"设想"的待办角标，
    但 tile() 生成函数并没有 due 参数，也就没有对应节点，属于死规则。
    按"只做视觉层、不改 JS 行为"的纪律删除。
@@ -180,20 +180,20 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
    信息本身没有丢失。 */
 
 /* ---------------- 家长中心：整行、低调 ---------------- */
-.home-v4 .v4-parent {
+:is(.home-v4,.play-v4) .v4-parent {
   display: flex; align-items: center; gap: var(--s3);
   margin: 0 0 var(--s6); padding: var(--s4);
   background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r);
 }
-.home-v4 .v4-parent b { flex: 1; font-size: var(--fs-body); font-weight: 700; color: var(--ink-2); }
-.home-v4 .v4-parent i { font-style: normal; font-size: var(--fs-sm); color: var(--ink-3); }
+:is(.home-v4,.play-v4) .v4-parent b { flex: 1; font-size: var(--fs-body); font-weight: 700; color: var(--ink-2); }
+:is(.home-v4,.play-v4) .v4-parent i { font-style: normal; font-size: var(--fs-sm); color: var(--ink-3); }
 
 /* ---------------- 页脚 ---------------- */
-.home-v4 .v4-foot {
+:is(.home-v4,.play-v4) .v4-foot {
   text-align: center; font-size: var(--fs-xs); color: var(--ink-3);
   line-height: var(--lh-loose); padding: 0 0 var(--s8);
 }
-.home-v4 .v4-foot a { color: var(--ink-2); }
+:is(.home-v4,.play-v4) .v4-foot a { color: var(--ink-2); }
 
 /* ============================================================
    字卡（识字 App 的核心屏）
@@ -1102,8 +1102,8 @@ html.v4 .cert-title { color: var(--gold-ink); }
    44pt 是成人标准，儿童产品通常还要再宽一些。过小的目标表现为
    "点了没反应"，家长和孩子都归因不到"按钮太小"。
    ============================================================ */
-.home-v4 .v4-go { min-height: 50px; }
-.home-v4 .v4-allchars {
+:is(.home-v4,.play-v4) .v4-go { min-height: 50px; }
+:is(.home-v4,.play-v4) .v4-allchars {
   /* 文字本身只有 24pt 高，靠 padding 把**可点区域**撑到 44 以上 */
   padding: var(--s3) var(--s4); min-height: 44px;
   display: flex; align-items: center; justify-content: center;
@@ -1172,7 +1172,7 @@ html.v4, body.v4 { overscroll-behavior: none; }
   html.v4 #app { max-width: 760px; }
 
   /* 网格:多排几列来"吃掉"多出来的宽度 */
-  .home-v4 .v4-grid { grid-template-columns: repeat(4, 1fr); }
+  :is(.home-v4,.play-v4) .v4-grid { grid-template-columns: repeat(4, 1fr); }
   .learn-v4 .char-grid { grid-template-columns: repeat(6, 1fr); }
   html.v4 .talk-grid { grid-template-columns: repeat(3, 1fr); }
   html.v4 .card-grid { grid-template-columns: repeat(4, 1fr); }
@@ -1574,10 +1574,10 @@ html.v4 .trust-item .ico { width: 16px; height: 16px; color: var(--ink-3); flex:
 
 /* 首页主角字现在可点了 —— 给它一点"可点"的可读信号（按下时的反馈），
    但不做成按钮外观（它首先是一个字，要给孩子看清字形）。 */
-html.v4 .home-v4 .v4-tian { cursor: pointer; -webkit-tap-highlight-color: transparent; }
-html.v4 .home-v4 .v4-tian:active { transform: scale(.97); }
-html.v4 .home-v4 .v4-tian:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; border-radius: var(--r); }
-html.v4 .home-v4 .v4-go .ico { width: 20px; height: 20px; }
+html.v4 :is(.home-v4,.play-v4) .v4-tian { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+html.v4 :is(.home-v4,.play-v4) .v4-tian:active { transform: scale(.97); }
+html.v4 :is(.home-v4,.play-v4) .v4-tian:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; border-radius: var(--r); }
+html.v4 :is(.home-v4,.play-v4) .v4-go .ico { width: 20px; height: 20px; }
 
 /* 锁卡：孩子侧只留"门还没开 + 回去学字"，
    家长侧的信息收成一行小字 + 一个链接放在最下面（孩子不会误点）。 */
@@ -1616,3 +1616,77 @@ html.v4 .rewards-v4 .sticker.got .st-lock-mini { display: none; }
    换成暖色阴影令牌。 */
 html.v4 .opt,
 html.v4 .opt.py-opt { box-shadow: var(--e1); }
+
+/* ============================================================
+   底部主导航（玻璃材质）
+   ------------------------------------------------------------
+   「原生玻璃」在 WebView 里能拿到的最接近的东西是 `backdrop-filter`：
+   iOS WebKit 上它走的是**系统的实时模糊**（不是贴图），
+   所以下面是真·玻璃 —— 内容从它下面滚过去会被真的模糊掉。
+   （Capacitor 装的插件里没有原生 tab bar 组件；真·UIKit tab bar
+     需要改原生工程并重做导航层，且会与现有 hash 路由并存两套。）
+
+   为什么不透明度给到 .72：iOS 原生 tab bar 也不是全透明 —— 它要保证
+   图标在任何内容上都有足够对比度。太透会让图标在深色插画上读不清。
+   ============================================================ */
+html.v4 .tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+  display: flex; align-items: stretch;
+  padding: 0 0 env(safe-area-inset-bottom);
+  background: rgba(251, 248, 241, .72);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  border-top: 1px solid rgba(44, 39, 33, .07);
+  /* 玻璃下缘的一点柔和投影，制造"浮在内容之上"的层次 */
+  box-shadow: 0 -1px 0 rgba(255, 255, 255, .5) inset;
+}
+html.v4 .tabbar .tab {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; height: 54px;
+  background: none; border: 0; padding: 0; cursor: pointer;
+  color: var(--ink-3); font: inherit;
+  font-size: var(--fs-xs); font-weight: 700; letter-spacing: .2px;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .12s ease, color .12s ease;
+}
+html.v4 .tabbar .tab .ico { width: 23px; height: 23px; }
+html.v4 .tabbar .tab.on { color: var(--primary); font-weight: 800; }
+/* 选中态：图标实心感 + 一个极轻的底托（不抢内容的注意力） */
+html.v4 .tabbar .tab.on .tab-ico {
+  background: var(--primary-bg); border-radius: var(--r-pill);
+  padding: 3px 12px; margin-bottom: 1px;
+}
+html.v4 .tabbar .tab:active { transform: scale(.93); }
+html.v4 .tabbar .tab:focus-visible { outline: 2px solid var(--primary); outline-offset: -3px; border-radius: var(--r-sm); }
+
+/* 有 tab bar 时给内容留出底部空间，否则最后一行会被压住 */
+html.v4 body.has-tabs #view,
+body.v4.has-tabs #view {
+  padding-bottom: calc(54px + env(safe-area-inset-bottom));
+}
+html.v4 body.has-tabs .screen.v4,
+body.v4.has-tabs .screen.v4 {
+  min-height: calc(100dvh - 54px - env(safe-area-inset-bottom));
+}
+/* 打印时不该出现 */
+@media print { .tabbar { display: none !important; } }
+
+/* 顶栏的家长入口：和返回键同尺寸（44pt 命中区），但常态不抢视线 ——
+   它是一个"给家长看的"入口，孩子在主界面上不该优先注意到它。 */
+body.v4 #btn-parent {
+  width: 40px; height: 40px; margin-left: var(--s2);
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-pill);
+  color: var(--ink-3); padding: 0; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+body.v4 #btn-parent .ico, body.v4 #btn-parent svg { width: 20px; height: 20px; }
+body.v4 #btn-parent:active { transform: scale(.94); }
+/* 已经在家长中心（含验证门）时不显示自己 */
+body.v4.parent-open #btn-parent { display: none; }
+
+/* 乐园只有 3 张卡（不是 2×N 的网格），一列排下来比 2 列留个孤位好看，
+   也给了较长的说明文字足够宽度。 */
+html.v4 .play-v4 .v4-grid { grid-template-columns: 1fr; }
+html.v4 .play-v4 .v4-tile { padding: var(--s4) var(--s4) var(--s4) var(--s5); }

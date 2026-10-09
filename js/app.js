@@ -2,6 +2,99 @@
 (function () {
   "use strict";
 
+  /* ============================================================
+     底部主导航（5 个 tab）
+     ------------------------------------------------------------
+     为什么这么分：原来的首页是个"九宫格万能入口"——9 个入口、4 种视觉权重
+     混在一起，而**主线「学字」只是一行灰色小文字链**（"看全部 761 个字 ›"）。
+     孩子进 App 最该做的事，视觉权重最低。
+
+     现在把主线提到一级入口，并按"孩子想干什么"分成 5 件事：
+       今天  今天学什么（默认页）
+       学字  地图 → 字表 → 字卡      ← 主线，原来藏在最里面
+       练习  趣味练习 + 今日复习
+       乐园  读一读 / 说一说 / 拼音小课堂
+       奖励  贴纸册 + 勋章架
+     家长中心**不进 tab**：5 个 tab 全是给孩子的；
+     家长区走顶栏的孩子头像 → 家长验证（也符合 Apple 1.3 对家长区的要求）。
+
+     改 tab 只动下面这个数组。
+     ============================================================ */
+  var TABS = [
+    { id: "today",    label: "今天", icon: "home",    hash: "#/home",
+      match: ["home"] },
+    { id: "learn",    label: "学字", icon: "book",    hash: "#/groups",
+      match: ["groups", "learn"] },
+    { id: "practice", label: "练习", icon: "game",    hash: "#/practice",
+      match: ["practice", "review", "runcards", "run"] },
+    { id: "play",     label: "乐园", icon: "sparkle", hash: "#/play",
+      match: ["play", "read", "story", "talk", "pinyin"] },
+    { id: "rewards",  label: "奖励", icon: "trophy",  hash: "#/rewards",
+      match: ["rewards"] }
+  ];
+  /* 这些屏是"沉浸式"的（写字 / 答题 / 读故事），
+     底部导航会挡住内容或造成误触 —— 进这些屏时收起 tab bar。 */
+  var NO_TABBAR = { card: 1, run: 1, story: 1 };
+
+  /* [data-go] 的点击绑定。原来是首页内联的一段，乐园屏也需要同样的行为，
+     抽成共享函数（行为逐字一致，只是不再复制一份）。 */
+  function wireGo(view) {
+    view.querySelectorAll("[data-go]").forEach(function (b) {
+      var go = function () {
+        if (window.SFX) SFX.click();
+        App.navigate(b.getAttribute("data-go"));
+      };
+      b.addEventListener("click", go);
+      /* 非 <button> 的 [data-go]（例如首页那个田字格里的字）
+         要自己处理键盘 —— <div role="button"> 不会自动响应 Enter/Space。 */
+      if (b.tagName !== "BUTTON" && b.tagName !== "A") {
+        b.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+            e.preventDefault(); go();
+          }
+        });
+      }
+    });
+  }
+
+  function renderTabs(routeName) {
+    var bar = document.getElementById("tabbar");
+    if (!bar) return;
+    if (NO_TABBAR[routeName]) {
+      bar.hidden = true;
+      bar.innerHTML = "";
+      document.body.classList.remove("has-tabs");
+      return;
+    }
+    var active = null;
+    for (var i = 0; i < TABS.length; i++) {
+      if (TABS[i].match.indexOf(routeName) > -1) { active = TABS[i].id; break; }
+    }
+    /* 顶层的聚合屏（拼音/读一读/说一说）也算在"乐园"里；
+       其余的屏（家长中心等）不点亮任何 tab，但导航仍然可用。 */
+    bar.innerHTML = TABS.map(function (t) {
+      var on = t.id === active;
+      return '<button class="tab' + (on ? " on" : "") + '" data-hash="' + t.hash + '"' +
+        (on ? ' aria-current="page"' : "") + ">" +
+        '<span class="tab-ico">' + Icons.svg(t.icon) + "</span>" +
+        '<span class="tab-label">' + t.label + "</span>" +
+      "</button>";
+    }).join("");
+    bar.hidden = false;
+    document.body.classList.add("has-tabs");
+    bar.querySelectorAll(".tab").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var h = b.getAttribute("data-hash");
+        if (window.SFX) SFX.click();
+        /* 已经在这个 tab 里就回到它的根（和原生 tab bar 的行为一致） */
+        if (location.hash.split("?")[0] === h) App.render();
+        else App.navigate(h);
+      });
+    });
+  }
+
+
+
   var App = {
     routes: {},
     timers: [],
@@ -103,6 +196,10 @@
         view.innerHTML = '<div class="empty-tip"><span class="big">😵</span>哎呀，出了点小问题<br>返回首页重试吧</div>';
       }
       this.refreshStars();
+      /* 底部导航：按路由决定显示/隐藏与高亮（见上方 TABS） */
+      try { renderTabs(r.name); } catch (e) { /* 导航渲染失败不该影响主屏 */ }
+      /* 在家长区（含验证门）时收起顶栏那个家长入口 */
+      document.body.classList.toggle("parent-open", r.name === "parent");
     },
 
     start: function () {
@@ -111,6 +208,15 @@
       document.getElementById("btn-back").addEventListener("click", function () {
         if (window.SFX) SFX.click();
         self.back();
+      });
+      /* 家长入口在顶栏（不在 tab bar 里）—— 5 个 tab 全是给孩子的，
+         家长区独立成一个明确的入口，符合 Apple 1.3 对儿童 App 的要求：
+         购买/家长功能不能混在儿童内容的主导航里。
+         点进去仍然要过家长验证（见 views2.js 的 parent 路由）。 */
+      var bp = document.getElementById("btn-parent");
+      if (bp) bp.addEventListener("click", function () {
+        if (window.SFX) SFX.click();
+        self.navigate("#/parent");
       });
       /* 音频解锁：必须"在手势里"完成三件事（音效 / <audio> / TTS）。
          不用 { once:true } —— iOS 从后台切回来时音频会话会重新挂起，
@@ -263,11 +369,6 @@
         return false;
       });
       var nxGo = "#/card?g=" + nxGi + "&i=" + nxIdx;
-      var tile = function (go, icon, label, sub, tone) {
-        return '<button class="v4-tile" data-go="' + go + '">' +
-          '<span class="v4-ic t-' + tone + '">' + Icons.svg(icon) + "</span>" +
-          "<b>" + label + "</b><i>" + sub + "</i></button>";
-      };
 
       view.innerHTML =
         '<div class="screen v4 home-v4" data-screen="home">' +
@@ -307,41 +408,16 @@
             '<span class="v4-track"><i style="width:' + Math.round(doneN / 3 * 100) + '%"></i></span>' +
             '<span class="v4-tsub">学字 ' + tLearn + "/" + gLearn + " · 答题 " + tQuiz + "/" + gQuiz + " · 复习 " + tDue + "</span>" +
           "</button>" +
-          '<div class="v4-sec">其他玩法</div>' +
-          '<div class="v4-grid">' +
-            tile("#/practice", "game", "趣味练习", "闯关答题赚星星", "amber") +
-            tile("#/review", "refresh", "今日复习", due > 0 ? due + " 个字等着" : "暂时没有待复习", "mint") +
-            tile("#/rewards", "trophy", "我的奖励", "贴纸 · 勋章墙", "gold") +
-            tile("#/read", "book", "读一读",
-              rd ? (rd.read ? "已读 " + rd.read + "/" + rd.total + " 篇" : "短故事 · 找字") : "短故事 · 找字", "sky") +
-            tile("#/talk", "speak", "说一说",
-              (window.Store.talkCount && window.Store.talkCount())
-                ? "说过 " + window.Store.talkCount() + " 个场景" : "看图说话 · 录下来听听", "plum") +
-            tile("#/pinyin", "pinyin", "拼音小课堂", "声母 · 韵母 · 声调", "rose") +
-          "</div>" +
-          '<div class="v4-parent" data-go="#/parent">' +
-            '<span class="v4-ic t-slate">' + Icons.svg("parent") + "</span>" +
-            "<b>家长中心</b><i>学习报告 · 设置 ›</i>" +
-          "</div>" +
+          /* 「其他玩法」那 6 个卡片**全部搬进了底部 tab**（练习 / 乐园 / 奖励），
+             首页不再重复列一遍 —— 重复入口会让"今天该做什么"失焦，
+             而且同一件事有两个入口时，孩子会点那个更熟悉的、绕过主线。
+             首页现在只回答一个问题：**今天学什么**。
+             （家长入口也移到顶栏了，见 index.html 的 #btn-parent。） */
+
           '<div class="v4-foot">陪着孩子，一起把问题变成答案<br>适合 3~6 岁 · 每天 10 分钟 · ' +
             '<a class="foot-link" href="privacy.html" target="_blank" rel="noopener">隐私说明</a></div>' +
         "</div>";
-      view.querySelectorAll("[data-go]").forEach(function (b) {
-        var go = function () {
-          if (window.SFX) SFX.click();
-          App.navigate(b.getAttribute("data-go"));
-        };
-        b.addEventListener("click", go);
-        /* 非 <button> 的 [data-go]（例如首页那个田字格里的字）
-           要自己处理键盘 —— <div role="button"> 不会自动响应 Enter/Space。 */
-        if (b.tagName !== "BUTTON" && b.tagName !== "A") {
-          b.addEventListener("keydown", function (e) {
-            if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
-              e.preventDefault(); go();
-            }
-          });
-        }
-      });
+      wireGo(view);
       /* 首页的孩子标识：点了走家长验证，验证通过后落到家长中心的档案区 */
       var kc = view.querySelector("#kid-chip");
       if (kc) {
@@ -450,6 +526,41 @@
   }
 
   /* ================= 组内字表 ================= */
+  /* ============================================================
+     乐园（tab 4）
+     ------------------------------------------------------------
+     拼音 / 读一读 / 说一说 原来都是首页"其他玩法"里的散装入口，
+     和"趣味练习""我的奖励"混在一起、彼此没有关系。
+     它们其实是同一件事：**在认字之外，把语言用起来**
+     （拼音是工具、读一读是输入、说一说是输出）。
+     收进一个 tab，孩子知道"想玩点别的"该去哪。
+     ============================================================ */
+  App.register("play", {
+    render: function (p, view) {
+      var rd = (window.ReadDrill && window.ReadDrill.progress) ? window.ReadDrill.progress() : null;
+      var tile = function (go, icon, label, sub, tone) {
+        return '<button class="v4-tile" data-go="' + go + '">' +
+          '<span class="v4-ic t-' + tone + '">' + Icons.svg(icon) + "</span>" +
+          "<b>" + label + "</b><i>" + sub + "</i></button>";
+      };
+      view.innerHTML = '<div class="screen v4 play-v4" data-screen="play">' +
+          '<div class="v4-hello"><h1>乐园</h1><p>读一读、说一说，玩着玩着就会了</p></div>' +
+          '<div class="v4-grid">' +
+            tile("#/pinyin", "pinyin", "拼音小课堂",
+                 "声母 23 · 韵母 24 · 整体认读 16", "rose") +
+            tile("#/read", "book", "读一读",
+                 rd && rd.total ? "已读 " + rd.read + "/" + rd.total + " 篇 · 点字能听读音" : "短文按级别分好，点字能听读音", "sky") +
+            tile("#/talk", "speak", "说一说",
+                 "看一张图，说一段话（不打分）", "amber") +
+          "</div>" +
+          '<div class="v4-foot">这三个都在认字之外，把语言用起来<br>' +
+            "拼音是工具 · 读一读是输入 · 说一说是输出</div>" +
+        "</div>";
+      wireGo(view);
+      if (window.App.setTopbar) App.setTopbar("", false);
+    }
+  });
+
   App.register("learn", {
     render: function (p, view) {
       var gi = parseInt(p.g || "0", 10);

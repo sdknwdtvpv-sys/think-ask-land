@@ -42,9 +42,14 @@ try{if(localStorage.getItem("hanziKids.reduceMotion")==="1")document.documentEle
   <header id="topbar">
     <button id="btn-back" class="icon-btn" aria-label="返回">‹</button>
     <div id="page-title">思问岛</div>
+    <button id="btn-parent" class="icon-btn topbar-parent" aria-label="家长中心" title="家长中心">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M4 20c0-3.3 3.6-5.5 8-5.5s8 2.2 8 5.5"/></svg>
+    </button>
     <div id="star-pill" class="star-pill"><span class="star-icon"><svg viewBox="0 0 24 24" fill="#D9A227" stroke="#C08A1E" stroke-width="1.2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.9l2.9 5.9 6.5 1-4.7 4.5 1.1 6.5L12 17.7l-5.8 3.1 1.1-6.5L2.6 9.8l6.5-1z"/></svg></span><span id="star-count">0</span></div>
   </header>
   <main id="view"></main>
+  <!-- 底部主导航。由 js/app.js 的 TABS 渲染（数据驱动，改 tab 只动那一个数组）。 -->
+  <nav id="tabbar" class="tabbar" hidden aria-label="主导航"></nav>
 </div>
 
 <canvas id="confetti"></canvas>
