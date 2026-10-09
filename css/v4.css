@@ -99,7 +99,7 @@ body.v4 .star-pill #star-count { font-variant-numeric: tabular-nums; }
 }
 .home-v4 .v4-tian i {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-style: normal; font-size: 108px; line-height: 1; color: var(--ink);
+  font-style: normal; font-size: var(--cz-hero); line-height: 1; color: var(--ink);
 }
 .home-v4 .v4-py {
   text-align: center; font-size: 20px; font-weight: 700; color: var(--primary); letter-spacing: 1px;
@@ -213,7 +213,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 /* 拼音:现在它是"读音"这一信息的载体,用强调色点出来 */
 .card-v4 .py-big {
   display: flex; align-items: center; justify-content: center; gap: var(--s2);
-  font-size: 30px; font-weight: 800; color: var(--primary);
+  font-size: var(--cz-s); font-weight: 800; color: var(--primary);
   letter-spacing: 1px; min-height: 42px; margin-bottom: var(--s2);
 }
 .card-v4 .py-big .mini-speak {
@@ -233,7 +233,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
    但去掉浮动动画与投影,收成角落里一个安静的小图。 */
 .card-v4 .card-emoji {
   position: absolute; top: var(--s2); right: var(--s3);
-  font-size: 26px; animation: none; filter: none; opacity: .85;
+  font-size: var(--cz-emoji); animation: none; filter: none; opacity: .85;
 }
 .card-v4 .writer-tip { color: var(--ink-3); font-weight: 700; }
 /* 判分提示平时是空串,旧版留了 18px 高的占位 + 6px 外边距 ——
@@ -341,7 +341,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
 }
 .map-v4 .isle-body::after { display: none; }
 .map-v4 .isle-num {
-  font-family: var(--font-display); font-size: 34px; line-height: 1;
+  font-family: var(--font-display); font-size: var(--cz-m); line-height: 1;
   color: var(--ink); position: relative; z-index: 1;
 }
 .map-v4 .island.started .isle-num { color: var(--primary); }
@@ -506,7 +506,7 @@ html.v4 .t-slate { background: #EFEAE0; color: var(--t-slate); }
   display: flex; align-items: center; gap: var(--s3); margin-top: var(--s4);
   background: var(--surface-2); border-radius: var(--r); padding: var(--s3);
 }
-.rewards-v4 .rt-next { font-size: 26px; line-height: 1; }
+.rewards-v4 .rt-next { font-size: var(--cz-emoji); line-height: 1; }
 .rewards-v4 .rt-bar {
   flex: 1; height: 8px; background: var(--paper-2);
   border-radius: var(--r-pill); overflow: hidden;
@@ -627,7 +627,7 @@ html.v4 .lock-card .btn { margin-top: var(--s4); width: 100%; min-height: 52px; 
 .learn-v4 .ring-fg { fill: none; stroke: var(--primary); stroke-width: 6; stroke-linecap: round; }
 .learn-v4 .learn-ring-num {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-size: 28px; color: var(--primary);
+  font-family: var(--font-num); font-size: var(--cz-num); color: var(--primary);
 }
 .learn-v4 .learn-title { font-size: var(--fs-h); font-weight: 800; color: var(--ink); }
 .learn-v4 .learn-sub { font-size: var(--fs-sm); color: var(--ink-3); margin-top: 2px; }
@@ -641,7 +641,7 @@ html.v4 .lock-card .btn { margin-top: var(--s4); width: 100%; min-height: 52px; 
 .learn-v4 .char-tile:active { transform: scale(.97); }
 .learn-v4 .char-tile.learned { background: var(--primary-bg); border-color: #EFD9C6; }
 .learn-v4 .tile-p { display: block; font-size: var(--fs-xs); color: var(--ink-3); }
-.learn-v4 .tile-c { display: block; font-size: 30px; line-height: 1.2; color: var(--ink); }
+.learn-v4 .tile-c { display: block; font-size: var(--cz-s); line-height: 1.2; color: var(--ink); }
 .learn-v4 .char-tile.learned .tile-c { color: var(--primary); }
 .learn-v4 .tile-check { position: absolute; top: 4px; right: 4px; color: var(--ok); }
 .learn-v4 .tile-check .ico { width: 14px; height: 14px; }
@@ -724,7 +724,7 @@ html.v4 .empty-tip {
   box-shadow: none; background: var(--surface);
   border: 1px solid var(--line); border-radius: var(--r-lg);
 }
-html.v4 .empty-tip .big { font-size: 44px; }
+html.v4 .empty-tip .big { font-size: var(--cz-l); }
 
 /* ---------------- 读一读 ----------------
    旧版把级别徽章做成亮蓝实心(var(--sky-deep))、进度条做成薄荷绿,
@@ -778,7 +778,7 @@ html.v4 .kid-row {
   padding: var(--s3); gap: var(--s3);
 }
 html.v4 .kid-row.active { border-color: var(--primary); background: var(--primary-bg); }
-html.v4 .kid-face { font-size: 26px; }
+html.v4 .kid-face { font-size: var(--cz-emoji); }
 html.v4 .kid-name { font-size: var(--fs-body); font-weight: 700; color: var(--ink); }
 html.v4 .kid-info small { font-size: var(--fs-sm); color: var(--ink-3); }
 html.v4 .mini-btn {
@@ -1127,9 +1127,9 @@ html.v4 .cert-title { color: var(--gold-ink); }
    既把命中区补到 44，也让儿童读物正文更好读（原本 27px 偏小）。
    一行放不下就换行 —— 旧版本来就会换行。 */
 html.v4 .rd-char {
-  font-size: 34px; min-width: 44px; min-height: 48px; padding: 0 4px;
+  font-size: var(--cz-m); min-width: 44px; min-height: 48px; padding: 0 4px;
 }
-html.v4 .rd-punc { font-size: 30px; }
+html.v4 .rd-punc { font-size: var(--cz-s); }
 
 /* 打印物料：识字卡去掉**记忆锚点 emoji**（产品决定 2026-10-08）
    ------------------------------------------------------------
@@ -1139,7 +1139,7 @@ html.v4 .rd-punc { font-size: 30px; }
    （任务卡 .qc-emoji 与奖状 .cert-emoji 是**活动插图/庆祝装饰**，
      性质和"记忆锚点"不同，保留。） */
 html.v4 .pcard { gap: 4px; padding: var(--s3) var(--s1); }
-html.v4 .pc-char { font-size: 56px; }
+html.v4 .pc-char { font-size: var(--cz-xl); }
 
 /* 原生滚动视图的弹性回弹：关掉。
    ------------------------------------------------------------
@@ -1438,7 +1438,7 @@ html.v4 .review-info { background: var(--paper-2); }
 /* ④ 结算页的成绩章: 58px 的字母 + 12.5px 的说明被塞进同一个圆，余量只剩约 6px。
    字母降到 44px、说明留在圆内但缩小，并给圆一点内边距。 */
 html.v4 .grade-stamp { padding: var(--s3); }
-html.v4 .grade-letter { font-size: 44px; line-height: 1; }
+html.v4 .grade-letter { font-size: var(--cz-l); line-height: 1; }
 html.v4 .grade-word { font-size: var(--fs-sm); }
 
 /* ⑤ 「错题重练」禁用时 `.scope-go`（那个 ›）还在 ——
@@ -1476,4 +1476,24 @@ html.v4 .rp-week { background: var(--surface-2); color: var(--ink-3); }
   }
   /* 字卡整屏也别太窄 —— 手机上是单列，iPad 上给它一个舒适的阅读宽度 */
   .card-v4 .card-wrap { max-width: 720px; margin: 0 auto; }
+}
+
+/* ============================================================
+   内容尺寸刻度（汉字 / emoji 的显示级）
+   ------------------------------------------------------------
+   这和 --fs-* 是**两套体系**：--fs-* 管 UI 文字（标题/正文/元信息），
+   而下面这些管**内容本身的大小** —— 汉字的字号在这里相当于图片尺寸，
+   由"这一屏要让孩子看清多大的字"决定，不该硬塞进 UI 那 6 档里。
+
+   按**角色**命名而不是按数值，这样将来调"首页主角字多大"时
+   知道该动哪一个，也不会牵动别的屏。
+   ============================================================ */
+html.v4 {
+  --cz-emoji: 26px;   /* 记忆锚点 / 贴纸 / 头像等 emoji */
+  --cz-num:   28px;   /* 进度环内的序号 */
+  --cz-s:     30px;   /* 字表格里的汉字、拼音大字、标点 */
+  --cz-m:     34px;   /* 故事正文的汉字、地图岛序号 */
+  --cz-l:     44px;   /* 成绩字母、空状态图形 */
+  --cz-xl:    56px;   /* 打印识字卡上的字（纸面要更大才看得清） */
+  --cz-hero: 108px;   /* 首页田字格的主角字 */
 }
