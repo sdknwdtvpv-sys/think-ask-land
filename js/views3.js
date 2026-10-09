@@ -465,7 +465,7 @@
             '<span class="rc-emoji">' + r.p.emoji + "</span>" +
             '<span class="rc-body"><span class="rc-title">' + esc(r.p.title) +
               (r.read ? '<span class="rc-badge">' + Icons.svg("check") + '读过</span>' : "") + "</span>" +
-              '<span class="rc-meta">' + r.total + " 个不同的字 · 已学 " + r.known + " 个</span>" +
+              '<span class="rc-meta">' + r.total + " 个不同的字 · 认识 " + r.known + " 个</span>" +
               '<span class="rc-bar"><i style="width:' + pct + '%"></i></span>' +
             "</span><span class=\"scope-go\">›</span></button>";
         });

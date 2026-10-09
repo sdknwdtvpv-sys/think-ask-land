@@ -350,7 +350,10 @@
       var html =
         '<div class="screen v4 map-v4" data-screen="groups">' +
           '<div class="map-head">' +
-            '<div class="section-title">' + Icons.svg("flag") + "已点亮 " + lit + " / " + window.CharDB.GROUPS.length + " 座岛</div>" +
+            '<div class="section-title">' + /* 原来写「已点亮 N / 16 座岛」，而同屏第 1 岛写着「已学 48 / 51 字」、
+   进度环已接近闭合 —— 同一屏自相矛盾（"学了 48 个字却一座岛都没点亮"）。
+   把"点亮"明确绑到"学完"这个动作上，语义就自洽了。 */
+            Icons.svg("flag") + "已学完 " + lit + " / " + window.CharDB.GROUPS.length + " 座岛</div>" +
             '<div class="map-sub">每学会一个字，小岛就亮一点 ' + Icons.svg("sparkle") + '</div>' +
           "</div>" +
           '<div class="island-map" id="island-map">' +

@@ -342,7 +342,12 @@
         '<div class="screen v4 review-v4" data-screen="review">' +
           '<div class="review-info">' + Icons.svg("sparkle") + '<b>记忆小秘密:</b>学过的字会在 <b>10分钟 → 1天 → 2天 → 4天 → 7天</b> 后悄悄出现，复习一次就记得更牢，连续答对 4 次就进入<b>长期记忆</b>啦!</div>' +
           (due.length === 0
-            ? '<div class="empty-tip"><span class="big">🎈</span>今天没有要复习的字' + (learnedN ? ",学得真棒!<br>明天再来看看，或者去学新字吧" : "<br>先去学几个新字吧") + "</div>" +
+            /* 原来写「今天没有要复习的字」，而同一屏顶部的说明卡写着
+               「学过的字会在 10 分钟 → 1 天 → … 后悄悄出现」——按自己的规则
+               10 分钟后就有字要复习，两句话直接打架，用户会怀疑机制没生效。 */
+            ? '<div class="empty-tip"><span class="big">🎈</span>现在没有要复习的字' +
+              (learnedN ? "（刚学的字大约 10 分钟后会回来找你）" : "") +
+              "<br>先去学几个新字吧</div>" +
               '<button class="btn btn-lg btn-sky" id="go-learn">' + Icons.svg("book") + '去学新字</button>'
             : '<div style="text-align:center;margin:26px 0">' +
                 '<div style="font-size:74px">' + Icons.svg("mail") + '</div>' +
