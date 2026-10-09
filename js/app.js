@@ -433,7 +433,12 @@
           '<button class="v4-task" data-task="today" data-go="' + taskGo + '">' +
             '<span class="v4-th"><b>' + (allDone ? "今日任务全部完成！" : "今日任务") + "</b><span>" + doneN + " / 3</span></span>" +
             '<span class="v4-track"><i style="width:' + Math.round(doneN / 3 * 100) + '%"></i></span>' +
-            '<span class="v4-tsub">学字 ' + tLearn + "/" + gLearn + " · 答题 " + tQuiz + "/" + gQuiz + " · 复习 " + tDue + "</span>" +
+            /* 点这一行会跳到**别的 tab**（复习 / 学字 / 练习），
+               但原来没有任何预告 —— 用户会突然发现底部 tab 变了、不知道发生了什么。
+               在行的末尾标出去向。 */
+            '<span class="v4-tsub">学字 ' + tLearn + "/" + gLearn + " · 答题 " + tQuiz + "/" + gQuiz +
+              " · 复习 " + tDue +
+              '<b class="v4-tgo">' + (tDue > 0 ? "去复习" : (tLearn < gLearn ? "去学字" : "去练习")) + " ›</b></span>" +
           "</button>" +
           /* 「其他玩法」那 6 个卡片**全部搬进了底部 tab**（练习 / 乐园 / 奖励），
              首页不再重复列一遍 —— 重复入口会让"今天该做什么"失焦，

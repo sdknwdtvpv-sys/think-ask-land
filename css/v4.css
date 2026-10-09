@@ -1701,3 +1701,7 @@ body.v4.tab-root #page-title { margin-left: 0; }
 /* 顶栏家长入口：有孩子档案时它显示孩子的 emoji，
    所以要把字体调大一点、并去掉 SVG 的尺寸假设。 */
 body.v4 #btn-parent { font-size: 19px; line-height: 1; }
+
+/* 今日任务行末尾的"去向"标记：说明点它会跳到哪个 tab。
+   淡一点，是补充信息不是主行动。 */
+html.v4 .home-v4 .v4-tgo { color: var(--primary); font-weight: 800; margin-left: var(--s2); }
