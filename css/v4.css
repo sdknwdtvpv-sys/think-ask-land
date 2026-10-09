@@ -1608,3 +1608,11 @@ html.v4 .rewards-v4 .st-lock-mini {
 html.v4 .rewards-v4 .st-lock-mini .ico { width: 12px; height: 12px; color: var(--ink-3); }
 /* 全部解锁后不该再有角标（防御性：若标记残留） */
 html.v4 .rewards-v4 .sticker.got .st-lock-mini { display: none; }
+
+/* 选项按钮的旧紫硬阴影 `0 5px 0 rgba(74,68,88,.13)` ——
+   这是**共用规则**，所以影响所有带选项的屏（拼音、答题、听音辨调…）。
+   之前几次审计都没扫到，是因为合并审计的 10 屏清单里**没有拼音与答题屏** ——
+   把拼音屏加进清单后立刻现形（4 处）。
+   换成暖色阴影令牌。 */
+html.v4 .opt,
+html.v4 .opt.py-opt { box-shadow: var(--e1); }
