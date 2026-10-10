@@ -743,7 +743,12 @@
                 单独放上面的话，链接会被压在导航底下（实测两者重叠、看不见）。
                 所以把 sticky 提到这一层的 wrapper 上，让两者一起贴底。 */
           '<div class="card-bottom">' +
-          (window.CharDB.recentPool(8).length >= 4
+          /* 两个条件缺一不可：
+             · `isLearned` —— 这个字已经学会（没学会就提"练刚学的字"是错位的：
+               孩子正卡在这个字上，你让他去练别的）；
+             · 最近学过的字 ≥ 4 —— 少于 4 个凑不出有意义的 10 题
+               （门槛与"我学过的字"一致）。 */
+          (isLearned && window.CharDB.recentPool(8).length >= 4
             ? '<button class="card-practice" id="card-practice">' +
               Icons.svg("game") + "练一练刚学的字 ›</button>"
             : "") +
