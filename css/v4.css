@@ -1751,3 +1751,18 @@ html.v4 .card-v4 .card-bottom .card-nav::before { display: none; }
    （真正的 flex 容器是 #view）。所以要把 screen 也变成 flex 列。 */
 html.v4 :is(.home-v4, .play-v4) { display: flex; flex-direction: column; }
 html.v4 :is(.home-v4, .play-v4) .v4-foot { margin-top: auto; padding-top: var(--s6); }
+
+/* 家长中心首屏的快捷入口：这几块面板都在页面下方很远，
+   给一个"直接过去"的按钮。次级样式（描边 + 中性色），一排两个。 */
+html.v4 .quick-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); margin: var(--s4) 0 0; }
+html.v4 .quick-btn {
+  display: flex; align-items: center; justify-content: center; gap: var(--s2);
+  min-height: 46px; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--r);
+  font-size: var(--fs-sm); font-weight: 700; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+html.v4 .quick-btn .ico { width: 17px; height: 17px; color: var(--primary); }
+html.v4 .quick-btn:active { transform: scale(.98); }
+/* 跳过去之后短暂高亮目标面板，让人知道"到了" */
+html.v4 .panel.jump-flash { box-shadow: 0 0 0 2px var(--primary); transition: box-shadow .2s ease; }

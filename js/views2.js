@@ -805,6 +805,13 @@
                原来的「完全离线」面板写在页面很下方，16 张截图里**没有一张拍到它** ——
                等于在用户几乎已经决定买之后才回答。这里用中性色 + 小图标说清楚，
                不破坏"颜色只出现在小图标和主行动"的纪律。 */
+            /* 首屏的快捷入口：这几个面板都在下面很远的地方。
+               家长中心是一条很长的滚动流，而"打印物料"和"完整内容"
+               恰恰是最常被找的两件事。 */
+            '<div class="quick-row">' +
+              '<button class="quick-btn" data-jump="panel-print">' + Icons.svg("print") + '打印物料</button>' +
+              '<button class="quick-btn" data-jump="panel-entitle">' + Icons.svg("trophy") + '完整内容</button>' +
+            "</div>" +
             '<div class="trust-row">' +
               '<span class="trust-item">' + Icons.svg("shield") + "无账号 · 无订阅 · 无广告</span>" +
               '<span class="trust-item">' + Icons.svg("lock") + "全部内容存在本机，不上传</span>" +
@@ -972,7 +979,10 @@
 
         /* ---- 打印物料：第一行是"一次搞定"的整包/奖状，第二行才是单项 ---- */
         var wsq = window.Store.weekSummary ? window.Store.weekSummary() : { learned: 0 };
-        html += '<div class="panel"><h4>' + Icons.svg("book") + "打印物料</h4>" +
+        /* 给它一个 id：它在这一长串面板的第 5 位左右，家长要滑很久才看得到，
+           而"能打出来贴墙上"是买断制里最物有所值的功能之一。
+           首屏放一个快捷入口，点它滚到这里（见下方 quick-entry）。 */
+        html += '<div class="panel" id="panel-print"><h4>' + Icons.svg("book") + "打印物料</h4>" +
           '<p class="parent-note">屏幕上练，纸上也要练。<b>懒人做法</b>：直接打「本周物料包」——' +
             "它会按这周学过的字自动出识字卡 + 描红格 + 今日任务 + 记录表，一次打印贴冰箱。</p>" +
           '<div class="backup-btns">' +
@@ -1131,6 +1141,20 @@
           "</p>" +
         "</div>";
         v.innerHTML = html;
+
+        /* 快捷入口：滚动到对应面板并短暂高亮 —— 不做页面跳转，
+           因为这几块本来就在同一页，跳走反而让人失去上下文。 */
+        v.querySelectorAll("[data-jump]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            if (window.SFX) SFX.click();
+            var t = v.querySelector("#" + b.getAttribute("data-jump"));
+            if (!t) return;
+            try { t.scrollIntoView({ behavior: "smooth", block: "start" }); }
+            catch (e) { t.scrollIntoView(); }
+            t.classList.add("jump-flash");
+            setTimeout(function () { t.classList.remove("jump-flash"); }, 1200);
+          });
+        });
 
         var sel = v.querySelector("#voice-sel");
         if (sel) {
