@@ -1665,10 +1665,15 @@ html.v4 body.has-tabs #view,
 body.v4.has-tabs #view {
   padding-bottom: calc(54px + env(safe-area-inset-bottom));
 }
-html.v4 body.has-tabs .screen.v4,
-body.v4.has-tabs .screen.v4 {
-  min-height: calc(100dvh - 54px - env(safe-area-inset-bottom));
-}
+/* ⚠️ 原来这里是 `min-height: calc(100dvh - tab高)`，而且 .screen.v4 本身
+   还写死着 `min-height: 100dvh` —— 两个都不对：
+   `#view` 是 `#app`（min-height:100dvh 的 flex 列）里的 `flex: 1`，
+   **它的高度已经扣掉了顶栏**。再让 screen 取 100dvh 就等于比容器还高，
+   于是**每一屏都会多滚出一段纯空白**（实测今天页：内容到 791，屏底却在 1015）。
+   我还额外做了 tab 的高度补偿，等于双重扣减。
+   正确做法：让 screen 撑满它的容器（flex:1），内容真的超出时才滚动。 */
+html.v4 #view { display: flex; flex-direction: column; }
+html.v4 .screen.v4 { flex: 1 0 auto; min-height: 0; }
 /* 打印时不该出现 */
 @media print { .tabbar { display: none !important; } }
 
@@ -1736,3 +1741,13 @@ html.v4 .card-v4 .card-bottom .card-nav {
   position: static; z-index: auto; background: none; padding: 0;
 }
 html.v4 .card-v4 .card-bottom .card-nav::before { display: none; }
+
+/* 首页页脚贴底 —— 屏幕改成 flex:1 之后，内容不足时剩余空间留在下方，
+   而页脚会被"居中"在那片空白里，看起来像漂着。
+   `margin-top: auto` 把它推到底部（标准 footer 行为），
+   空白就集中到内容与页脚之间，读起来是"页面结束"而不是"页面没做完"。 */
+/* ⚠️ 光给 .v4-foot 写 margin-top:auto 不够 ——
+   它的父级 .home-v4 自己是**块级**容器，flex 的 auto margin 不生效
+   （真正的 flex 容器是 #view）。所以要把 screen 也变成 flex 列。 */
+html.v4 :is(.home-v4, .play-v4) { display: flex; flex-direction: column; }
+html.v4 :is(.home-v4, .play-v4) .v4-foot { margin-top: auto; padding-top: var(--s6); }
