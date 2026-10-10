@@ -1766,3 +1766,24 @@ html.v4 .quick-btn .ico { width: 17px; height: 17px; color: var(--primary); }
 html.v4 .quick-btn:active { transform: scale(.98); }
 /* 跳过去之后短暂高亮目标面板，让人知道"到了" */
 html.v4 .panel.jump-flash { box-shadow: 0 0 0 2px var(--primary); transition: box-shadow .2s ease; }
+
+/* 回顶按钮：浮在 tab bar 之上，右下角。
+   玻璃质感与 tab bar 一致（同一套材质语言）。 */
+html.v4 .to-top {
+  position: fixed; right: var(--s4); z-index: 55;
+  bottom: calc(54px + env(safe-area-inset-bottom) + var(--s3));
+  width: 44px; height: 44px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, .82); color: var(--ink-2);
+  border: 1px solid var(--line); border-radius: var(--r-pill);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  backdrop-filter: saturate(180%) blur(18px);
+  box-shadow: var(--e2); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity .18s ease, transform .18s ease;
+}
+html.v4 .to-top .ico, html.v4 .to-top svg { width: 20px; height: 20px; }
+html.v4 .to-top:active { transform: scale(.93); }
+/* 没有 tab bar 的屏（沉浸屏）时它不该出现 —— 由 JS 控制 hidden，
+   这里兜底：tab bar 收起时也不显示。 */
+html.v4 body:not(.has-tabs) .to-top { display: none; }

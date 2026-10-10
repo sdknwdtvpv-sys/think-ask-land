@@ -50,6 +50,11 @@ try{if(localStorage.getItem("hanziKids.reduceMotion")==="1")document.documentEle
   <main id="view"></main>
   <!-- 底部主导航。由 js/app.js 的 TABS 渲染（数据驱动，改 tab 只动那一个数组）。 -->
   <nav id="tabbar" class="tabbar" hidden aria-label="主导航"></nav>
+  <!-- 长页面（家长中心约 5 屏、地图 16 岛、字表 51 格）的回顶按钮。
+       只在滚过一屏后出现，且只在有 tab bar 的屏上出现（沉浸屏不打扰）。 -->
+  <button id="to-top" class="to-top" hidden aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+  </button>
 </div>
 
 <canvas id="confetti"></canvas>

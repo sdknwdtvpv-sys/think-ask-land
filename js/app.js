@@ -227,6 +227,8 @@
       try { renderTabs(r.name); } catch (e) { /* 导航渲染失败不该影响主屏 */ }
       /* 在家长区（含验证门）时收起顶栏那个家长入口 */
       document.body.classList.toggle("parent-open", r.name === "parent");
+      /* 切屏后重算回顶按钮（长页切到短页时它必须消失） */
+      if (App._syncToTop) requestAnimationFrame(function () { App._syncToTop(); });
     },
 
     start: function () {
@@ -240,6 +242,26 @@
          家长区独立成一个明确的入口，符合 Apple 1.3 对儿童 App 的要求：
          购买/家长功能不能混在儿童内容的主导航里。
          点进去仍然要过家长验证（见 views2.js 的 parent 路由）。 */
+      /* 回顶按钮：滚过一屏才出现；只在有 tab bar 的屏上出现
+         （沉浸屏已有自己的底部导航，再叠一个按钮会挤）。
+         `passive` 是因为滚动监听不该阻塞滚动。 */
+      var tt = document.getElementById("to-top");
+      if (tt) {
+        var syncTop = function () {
+          var show = window.scrollY > 600 && !document.body.classList.contains("tab-root-hidden-tabs");
+          tt.hidden = !show;
+        };
+        window.addEventListener("scroll", function () {
+          if (tt._raf) return;
+          tt._raf = requestAnimationFrame(function () { tt._raf = 0; syncTop(); });
+        }, { passive: true });
+        tt.addEventListener("click", function () {
+          if (window.SFX) SFX.click();
+          try { window.scrollTo({ top: 0, behavior: "smooth" }); }
+          catch (e) { window.scrollTo(0, 0); }
+        });
+        App._syncToTop = syncTop;
+      }
       var bp = document.getElementById("btn-parent");
       if (bp) bp.addEventListener("click", function () {
         if (window.SFX) SFX.click();
