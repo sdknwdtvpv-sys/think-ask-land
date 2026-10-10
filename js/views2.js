@@ -26,12 +26,28 @@
         '<span class="scope-ico t-rose">' + Icons.svg("target") + '</span><span><span class="scope-name">错题重练</span>' +
         '<span class="scope-meta">' + (wrongs.length < 4 ? "攒够 4 个错过的字就能专项突破（已有 " + wrongs.length + " 个）" : "共 " + wrongs.length + " 个字，按错因重点练") + "</span></span>" +
         '<span class="scope-go">›</span></button>';
+      /* 「刚学的字」范围：取最近学会的 8 个。
+         ⚠️ 门槛和"我学过的字"一致取 4 —— 少于 4 个字凑不出有意义的 10 题。
+         不与"我学过的字"重复展示：刚学满 4 个时两个池子内容接近，
+         但角度不同（一个按时间、一个按全部），孩子看名字能区分。 */
+      var recent = DB.recentPool(8);
+      var recentCard = recent.length >= 4
+        ? '<button class="scope-card" data-scope="recent">' +
+            '<span class="scope-ico t-amber">' + Icons.svg("game") + '</span>' +
+            '<span><span class="scope-name">刚学的字</span>' +
+            '<span class="scope-meta">最近学会的 ' + recent.length + ' 个字 · 趁热练一遍记得更牢</span></span>' +
+            '<span class="scope-go">›</span></button>'
+        : '';
       var html =
         '<div class="screen v4 practice-v4" data-screen="practice">' +
           /* 去掉正文里的 emoji:它在句子里只是装饰，却会把整屏拉回"网页感" */
           '<div class="practice-intro">每轮 10 道题：听词语选字、听写单字、看字选图、看字选拼音、看拼音选字、听音辨调。答对 1 题得 1 颗星，全对还有奖励！</div>' +
           '<div class="section-title">' + Icons.svg("book") + '学过多少练多少</div>' +
           '<div class="scope-list">' +
+          /* 「刚学的字」放在最前 —— 它比"我学过的字"更**及时**：
+             刚学的字遗忘曲线最陡，孩子刚学完就该练它。
+             （这也是主线"学字"与练习之间原本缺失的那一环。） */
+          recentCard +
           '<button class="scope-card' + (learned.length < 4 ? " disabled" : "") + '" data-scope="learned">' +
             '<span class="scope-ico t-mint">' + Icons.svg("star") + '</span><span><span class="scope-name">我学过的字</span>' +
             '<span class="scope-meta">' + (learned.length < 4 ? "至少学会 4 个字才能开始哦(还差 " + (4 - learned.length) + " 个)" : "共 " + learned.length + " 个字，优先复习薄弱字") + "</span></span>" +
@@ -60,6 +76,7 @@
 
   /* ================= 练习：答题 ================= */
   function poolOf(scope) {
+    if (scope === "recent") return DB.recentPool(8);
     if (scope === "learned") return DB.learnedPool();
     if (scope === "wrong") return DB.errorPool();
     var mc = /^c:(\w+)$/.exec(scope || "");

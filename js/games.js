@@ -424,6 +424,12 @@
       var learned = window.Store.learnedList();
       return learned.map(function (c) { return BY_CHAR[c]; }).filter(Boolean);
     },
+    /* 「刚学的字」字池 —— 学完一个字之后最该练的就是刚学的这几个。
+       和 learnedPool 的区别：它是**按时间取最近 N 个**，不是全部。 */
+    recentPool: function (n) {
+      var list = window.Store.recentLearned ? window.Store.recentLearned(n || 8) : [];
+      return list.map(function (c) { return BY_CHAR[c]; }).filter(Boolean);
+    },
     /* 专项练习字池：cause 省略 → 所有犯过错的字 */
     errorPool: function (cause) {
       var list = window.Store.charsByCause(cause);

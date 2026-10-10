@@ -1705,3 +1705,34 @@ body.v4 #btn-parent { font-size: 19px; line-height: 1; }
 /* 今日任务行末尾的"去向"标记：说明点它会跳到哪个 tab。
    淡一点，是补充信息不是主行动。 */
 html.v4 .home-v4 .v4-tgo { color: var(--primary); font-weight: 800; margin-left: var(--s2); }
+
+/* 【A2】字卡上的「练一练刚学的字」：
+   它是**可选**的下一步，不是主行动 —— 所以用次级样式（描边 + 中性色），
+   不和「学下一个」抢注意力。放在底部导航下面，不打断学习的纵向节奏。 */
+html.v4 .card-v4 .card-practice {
+  display: flex; align-items: center; justify-content: center; gap: var(--s2);
+  width: 100%; min-height: 46px; margin: var(--s3) 0 0;
+  background: var(--surface); color: var(--ink-2);
+  border: 1px solid var(--line); border-radius: var(--r);
+  font-size: var(--fs-body); font-weight: 700; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+html.v4 .card-v4 .card-practice .ico { width: 18px; height: 18px; color: var(--primary); }
+html.v4 .card-v4 .card-practice:active { transform: scale(.985); }
+
+/* A2 的「练一练刚学的字」和底部导航必须一起贴底。
+   原来 sticky 挂在 .card-nav 上（实测高 106px，钉在视口底部），
+   会把它上方的任何元素盖住 —— 我把链接放在它上面时两者重叠、链接不可见。
+   现在把 sticky 提到 wrapper 上，两者作为一个整体贴底。 */
+html.v4 .card-v4 .card-bottom {
+  position: sticky; bottom: 0; z-index: 6;
+  padding: var(--s4) 0 calc(8px + env(safe-area-inset-bottom, 0px));
+  /* 上方一段渐隐，让"浮在内容之上"读起来是刻意的，而不是压住了上一条内容。
+     不透明部分从 84% 起，给上面留出足够的淡出区。 */
+  background: linear-gradient(to top, var(--paper) 84%, rgba(251, 248, 241, 0));
+  margin-top: var(--s3);
+}
+html.v4 .card-v4 .card-bottom .card-nav {
+  position: static; z-index: auto; background: none; padding: 0;
+}
+html.v4 .card-v4 .card-bottom .card-nav::before { display: none; }

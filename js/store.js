@@ -603,6 +603,21 @@
     return out;
   }
 
+  /* 最近学会的几个字（按学会时间**倒序**）。
+     为什么需要：`learnedList()` 是"全部学会的字"，没有顺序 ——
+     而"我刚学的那几个字"才是孩子**现在最该练**的（遗忘曲线最陡的那一段）。
+     `learned` 字段存的是时间戳（见 markLearned 的 `r.learned = Date.now()`），
+     所以能排序。 */
+  function recentLearned(n) {
+    var out = [];
+    for (var c in state.chars) {
+      var r = state.chars[c];
+      if (r.learned) out.push({ c: c, at: r.learned });
+    }
+    out.sort(function (a, b) { return b.at - a.at; });
+    return out.slice(0, n || 8).map(function (x) { return x.c; });
+  }
+
   function weakChars(limit) {
     var arr = [];
     for (var c in state.chars) {
@@ -905,7 +920,7 @@
     addStars: addStars, counts: counts, stickerCount: stickerCount,
     markLearned: markLearned, reviewResult: reviewResult, quizResult: quizResult,
     noteStrokeQuiz: noteStrokeQuiz, strokeReport: strokeReport,
-    dueChars: dueChars, learnedList: learnedList,
+    dueChars: dueChars, learnedList: learnedList, recentLearned: recentLearned,
     weakChars: weakChars, weekActivity: weekActivity, reset: reset,
     CAUSES: CAUSES, CAUSE_NAME: CAUSE_NAME,
     errorSummary: errorSummary, topCause: topCause, charsByCause: charsByCause,

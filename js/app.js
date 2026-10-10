@@ -734,10 +734,24 @@
           ziliRow(ch) +
           '<div class="word-row" id="word-row"></div>' +
           '<button class="sent-card" id="sent-card"><span class="sent-ico">' + Icons.svg("book") + '</span><span>' + hl(ch.s, ch.c) + "</span></button>" +
+          /* 【A2】主线与练习之间原本缺的那一环：孩子学完一个字，
+             最自然的下一步是"练它"——原来这一步不存在，他得自己想到去
+             「练习」tab、再从 51 个字里猜哪个是刚学的。
+             ⚠️ 它和 `.card-nav` 必须包在**同一个 sticky 容器**里：
+                那条导航是 `position: sticky; bottom: 0`、实测高 106px，
+                会钉在视口底部并**盖住**它上方的任何东西。
+                单独放上面的话，链接会被压在导航底下（实测两者重叠、看不见）。
+                所以把 sticky 提到这一层的 wrapper 上，让两者一起贴底。 */
+          '<div class="card-bottom">' +
+          (window.CharDB.recentPool(8).length >= 4
+            ? '<button class="card-practice" id="card-practice">' +
+              Icons.svg("game") + "练一练刚学的字 ›</button>"
+            : "") +
           '<div class="card-nav">' +
             '<button class="nav-btn" id="nav-prev" aria-label="上一个字"' + (i === 0 ? " disabled" : "") + ">‹</button>" +
             '<button class="btn btn-mint know-btn" id="btn-know">' + (isLearned ? "学下一个 ▶" : "我会了 ✅") + "</button>" +
             '<button class="nav-btn" id="nav-next" aria-label="下一个字"' + (i === g.chars.length - 1 ? " disabled" : "") + ">›</button>" +
+          "</div>" +
           "</div>" +
         "</div>";
 
@@ -1021,6 +1035,13 @@
       };
       view.querySelector("#nav-prev").addEventListener("click", function () { go(i - 1); });
       view.querySelector("#nav-next").addEventListener("click", function () { go(i + 1); });
+      /* 【A2】「练一练刚学的字」—— 只在这个字**已经学会**时才显示
+         （没学会就练，等于把没记住的东西又错一遍）。 */
+      var cp = view.querySelector("#card-practice");
+      if (cp) cp.addEventListener("click", function () {
+        if (window.SFX) SFX.click();
+        App.navigate("#/run?scope=recent");
+      });
 
       /* 我会了 */
       view.querySelector("#btn-know").addEventListener("click", function () {
